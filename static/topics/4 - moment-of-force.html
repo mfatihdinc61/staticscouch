@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Moment of a Force — r × F</title>
+<style>
+  :root{
+    --blue-deep:#0b2e4f;
+    --blue-mid:#123b63;
+    --blue-line:#2c5f8f;
+    --paper:#eef3f7;
+    --paper-dim:#d7e2ea;
+    --ink:#0b2e4f;
+    --orange:#e8622c;
+    --orange-dim:#f4a07c;
+    --green:#3fa66a;
+    --mono:'IBM Plex Mono', 'Courier New', monospace;
+    --disp:'Space Grotesk', 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: var(--disp);
+    background:var(--blue-deep);
+    color:var(--paper);
+    min-height:100vh;
+  }
+  /* blueprint grid background */
+  .grid-bg{
+    background-image:
+      linear-gradient(var(--blue-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--blue-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-color: var(--blue-deep);
+    background-position: -1px -1px;
+    opacity:1;
+  }
+  header{
+    padding:38px 6vw 24px;
+    border-bottom:1px solid rgba(255,255,255,0.15);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--orange-dim);
+    margin:0 0 10px;
+  }
+  h1{
+    margin:0 0 8px;
+    font-size:clamp(28px,4vw,46px);
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  h1 .vec{color:var(--orange);}
+  .sub{
+    color:var(--paper-dim);
+    font-size:15px;
+    max-width:640px;
+    line-height:1.5;
+    margin:0;
+  }
+  .formula-strip{
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--orange-dim);
+    margin-top:18px;
+    letter-spacing:0.02em;
+  }
+
+  nav.tabs{
+    display:flex;
+    gap:2px;
+    padding:0 6vw;
+    margin-top:0;
+    border-bottom:1px solid rgba(255,255,255,0.15);
+    background:var(--blue-mid);
+  }
+  nav.tabs button{
+    font-family:var(--mono);
+    background:transparent;
+    border:none;
+    color:var(--paper-dim);
+    padding:16px 22px;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    transition:color .15s, border-color .15s;
+  }
+  nav.tabs button .n{color:var(--orange-dim); margin-right:8px;}
+  nav.tabs button:hover{color:#fff;}
+  nav.tabs button.active{
+    color:#fff;
+    border-bottom-color:var(--orange);
+  }
+  nav.tabs button:focus-visible{outline:2px solid var(--orange); outline-offset:2px;}
+
+  main{
+    padding:40px 6vw 80px;
+  }
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:6px;
+    padding:30px 32px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    margin-bottom:26px;
+  }
+  .card h2{
+    margin:0 0 16px;
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .card h2 .tag{
+    font-family:var(--mono);
+    font-size:11px;
+    background:var(--orange);
+    color:#fff;
+    padding:3px 8px;
+    border-radius:3px;
+    letter-spacing:0.06em;
+  }
+  .card p, .card li{
+    line-height:1.65;
+    font-size:15px;
+  }
+  .card ul{padding-left:22px;}
+  .two-col{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:28px;
+  }
+  @media (max-width:820px){ .two-col{grid-template-columns:1fr;} }
+
+  .eq{
+    font-family:var(--mono);
+    background:var(--blue-deep);
+    color:#fff;
+    padding:14px 18px;
+    border-radius:6px;
+    font-size:15px;
+    overflow-x:auto;
+    border-left:4px solid var(--orange);
+  }
+  .eq .lab{color:var(--orange-dim);}
+
+  .note{
+    background:#fff3ec;
+    border:1px solid var(--orange-dim);
+    border-left:4px solid var(--orange);
+    padding:12px 16px;
+    border-radius:4px;
+    font-size:14px;
+    margin-top:14px;
+  }
+
+  /* diagram svg */
+  .diagram-wrap{
+    background:var(--blue-deep);
+    border-radius:6px;
+    padding:14px;
+  }
+  svg{display:block; width:100%; height:auto;}
+  .ax-label{font-family:var(--mono); font-size:12px; fill:var(--paper-dim);}
+  .vec-label{font-family:var(--mono); font-size:13px; font-weight:600;}
+
+  /* practice controls */
+  .controls{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin-bottom:20px;
+  }
+  .vecgroup{
+    border:1px solid var(--paper-dim);
+    border-radius:6px;
+    padding:16px;
+  }
+  .vecgroup .label{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+    display:block;
+  }
+  .vecgroup.r .label{color:var(--blue-mid);}
+  .vecgroup.f .label{color:var(--orange);}
+  .triple{display:flex; gap:8px;}
+  .triple label{
+    font-family:var(--mono);
+    font-size:12px;
+    flex:1;
+  }
+  .triple input{
+    width:100%;
+    margin-top:4px;
+    padding:8px 6px;
+    border:1px solid var(--paper-dim);
+    border-radius:4px;
+    font-family:var(--mono);
+    font-size:14px;
+    background:#fff;
+  }
+  .btn{
+    font-family:var(--mono);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-size:13px;
+    background:var(--orange);
+    color:#fff;
+    border:none;
+    padding:11px 22px;
+    border-radius:5px;
+    cursor:pointer;
+    transition:transform .1s, background .15s;
+  }
+  .btn:hover{background:#cf531f;}
+  .btn:active{transform:scale(0.97);}
+  .btn.secondary{
+    background:transparent;
+    color:var(--blue-mid);
+    border:1px solid var(--blue-mid);
+  }
+  .btn.secondary:hover{background:rgba(18,59,99,0.08);}
+
+  .result{
+    margin-top:20px;
+    font-family:var(--mono);
+    font-size:14px;
+    background:var(--blue-deep);
+    color:#fff;
+    border-radius:6px;
+    padding:18px 20px;
+    display:none;
+  }
+  .result.show{display:block;}
+  .result .line{margin:4px 0;}
+  .result .hl{color:var(--orange-dim); font-weight:600;}
+  .steps{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,0.15);
+    color:var(--paper-dim);
+    font-size:13px;
+    line-height:1.7;
+  }
+
+  /* exam */
+  .qcard{
+    border:1px solid var(--paper-dim);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .qcard .qnum{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--orange);
+    letter-spacing:0.08em;
+  }
+  .qcard p{margin-top:6px;}
+  .qcard input[type=text]{
+    font-family:var(--mono);
+    padding:9px 10px;
+    border:1px solid var(--paper-dim);
+    border-radius:4px;
+    font-size:14px;
+    width:160px;
+  }
+  .qcard .choices{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .qcard .choices label{
+    font-size:14px;
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    cursor:pointer;
+  }
+  .feedback{
+    margin-top:10px;
+    font-size:13px;
+    font-family:var(--mono);
+    padding:8px 10px;
+    border-radius:4px;
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.correct{background:#e7f6ed; color:#1f7a45; border:1px solid #9bd6b4;}
+  .feedback.wrong{background:#fdeae3; color:#b8431c; border:1px solid #f3b79c;}
+
+  .scorebar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--blue-deep);
+    color:#fff;
+    padding:16px 20px;
+    border-radius:6px;
+    font-family:var(--mono);
+    margin-bottom:22px;
+  }
+  .scorebar .big{font-size:20px; color:var(--orange-dim);}
+
+  footer{
+    text-align:center;
+    font-family:var(--mono);
+    font-size:11px;
+    color:rgba(255,255,255,0.4);
+    padding:24px;
+    letter-spacing:0.05em;
+  }
+
+  ::selection{background:var(--orange); color:#fff;}
+</style>
+</head>
+<body class="grid-bg">
+
+<header>
+  <p class="eyebrow">Statics · Rigid Body Mechanics</p>
+  <h1>Moment of a Force — the <span class="vec">r × F</span> cross product</h1>
+  <p class="sub">How a force applied away from a support twists it. One operation, the vector cross product, tells you the size and the sense of that twist.</p>
+  <p class="formula-strip">M<sub>O</sub> = r × F &nbsp;&nbsp;|&nbsp;&nbsp; |M<sub>O</sub>| = |r||F|sin θ &nbsp;&nbsp;|&nbsp;&nbsp; direction by the right-hand rule</p>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="learn"><span class="n">01</span>Learn</button>
+  <button data-tab="practice"><span class="n">02</span>Practice</button>
+  <button data-tab="exam"><span class="n">03</span>Exam</button>
+</nav>
+
+<main>
+
+  <!-- LEARN -->
+  <section class="panel active" id="learn">
+
+    <div class="card">
+      <h2>Why a cross product? <span class="tag">Concept</span></h2>
+      <div class="two-col">
+        <div>
+          <p>A force doesn't just push or pull — if it's applied away from a support or pivot, it also <strong>twists</strong> that point. That twisting effect is called the <strong>moment</strong> of the force about that point.</p>
+          <p>Two things decide how hard it twists:</p>
+          <ul>
+            <li>How big the force is, and how it's angled</li>
+            <li>How far away — and in what direction — it's applied, measured by the position vector <strong>r</strong> from the support to the point of application</li>
+          </ul>
+          <p>The cross product packages both of these into a single vector operation:</p>
+          <div class="eq"><span class="lab">moment about O =</span> M<sub>O</sub> = r × F</div>
+          <p style="margin-top:14px;">r and F are both vectors. Their cross product gives a <em>third</em> vector — the moment — that's perpendicular to both, with a magnitude and a direction that tell you exactly how the support is being twisted.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 300">
+              <line x1="40" y1="250" x2="340" y2="250" stroke="#5a87b0" stroke-width="1"/>
+              <line x1="40" y1="250" x2="40" y2="30" stroke="#5a87b0" stroke-width="1"/>
+              <text x="345" y="254" class="ax-label">x</text>
+              <text x="30" y="25" class="ax-label">y</text>
+
+              <circle cx="40" cy="250" r="4" fill="#fff"/>
+              <text x="20" y="270" class="ax-label">O (support)</text>
+
+              <line x1="40" y1="250" x2="220" y2="140" stroke="#7fb2dd" stroke-width="2.5" marker-end="url(#arrR)"/>
+              <text x="120" y="180" class="vec-label" fill="#7fb2dd">r</text>
+
+              <circle cx="220" cy="140" r="4" fill="#fff"/>
+
+              <line x1="220" y1="140" x2="300" y2="60" stroke="#e8622c" stroke-width="3" marker-end="url(#arrF)"/>
+              <text x="255" y="85" class="vec-label" fill="#e8622c">F</text>
+
+              <path d="M 60 240 A 30 30 0 0 1 88 222" fill="none" stroke="#3fa66a" stroke-width="2" marker-end="url(#arrM)"/>
+              <text x="70" y="210" class="vec-label" fill="#3fa66a">M_O</text>
+
+              <defs>
+                <marker id="arrR" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/>
+                </marker>
+                <marker id="arrF" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/>
+                </marker>
+                <marker id="arrM" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+          <p style="font-size:13px; color:#3a5d7a; margin-top:8px;">r runs from the support O to where F is applied. The moment M<sub>O</sub> curls around O, out of the page.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Computing it: the determinant method <span class="tag">Mechanics</span></h2>
+      <p>Write r = (r<sub>x</sub>, r<sub>y</sub>, r<sub>z</sub>) and F = (F<sub>x</sub>, F<sub>y</sub>, F<sub>z</sub>). The cross product is the determinant of this matrix:</p>
+      <div class="eq">
+| i &nbsp; j &nbsp; k |<br>
+| r<sub>x</sub> &nbsp; r<sub>y</sub> &nbsp; r<sub>z</sub> |<br>
+| F<sub>x</sub> &nbsp; F<sub>y</sub> &nbsp; F<sub>z</sub> |
+      </div>
+      <p>Expanding it gives three components:</p>
+      <div class="eq">
+M<sub>x</sub> = r<sub>y</sub>F<sub>z</sub> − r<sub>z</sub>F<sub>y</sub><br>
+M<sub>y</sub> = r<sub>z</sub>F<sub>x</sub> − r<sub>x</sub>F<sub>z</sub><br>
+M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> − r<sub>y</sub>F<sub>x</sub>
+      </div>
+      <p>For a purely planar problem — r and F both lying in the xy-plane, which is the usual beam/bracket case — the first two components vanish and only M<sub>z</sub> survives:</p>
+      <div class="eq">M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> − r<sub>y</sub>F<sub>x</sub></div>
+      <div class="note"><strong>Sign convention:</strong> a positive M<sub>z</sub> means counter-clockwise when viewed from the +z axis (standard right-hand rule). Negative means clockwise.</div>
+    </div>
+
+    <div class="card">
+      <h2>Worked example <span class="tag">Walkthrough</span></h2>
+      <p>A bracket is bolted to a wall at O. A cable pulls with force <strong>F = (40, −30, 0) N</strong> at a point located at <strong>r = (0.5, 0.2, 0) m</strong> from the bolt.</p>
+      <div class="eq">
+M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> − r<sub>y</sub>F<sub>x</sub><br>
+M<sub>z</sub> = (0.5)(−30) − (0.2)(40)<br>
+M<sub>z</sub> = −15 − 8 = <span class="hl" style="color:#e8622c;">−23 N·m</span>
+      </div>
+      <p>The negative sign means the bolt feels a <strong>clockwise</strong> moment of 23 N·m. That's the number an engineer checks against the bolt's rated torque capacity.</p>
+    </div>
+
+    <div class="card">
+      <h2>Worked example 2: cantilever beam <span class="tag">Walkthrough</span></h2>
+      <div class="two-col">
+        <div>
+          <p>A beam is welded into a wall at O and sticks straight out along x. A downward load is hung at its free end, <strong>2 m</strong> out from the wall.</p>
+          <div class="eq">
+r = (2, 0, 0) m<br>
+F = (0, −500, 0) N
+          </div>
+          <div class="eq">
+M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> − r<sub>y</sub>F<sub>x</sub><br>
+M<sub>z</sub> = (2)(−500) − (0)(0)<br>
+M<sub>z</sub> = <span class="hl" style="color:#e8622c;">−1000 N·m</span>
+          </div>
+          <p>Negative again: the weld feels a <strong>clockwise</strong> moment of 1000 N·m. This is exactly the bending moment you'd check against the weld's strength — the further out the load sits, the bigger r, the bigger the twist, even though the force never changed.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 220">
+              <!-- wall -->
+              <rect x="20" y="40" width="18" height="150" fill="#7fb2dd" opacity="0.4"/>
+              <line x1="20" y1="40" x2="20" y2="190" stroke="#7fb2dd" stroke-width="2"/>
+              <g stroke="#7fb2dd" stroke-width="2">
+                <line x1="20" y1="50" x2="10" y2="60"/>
+                <line x1="20" y1="75" x2="10" y2="85"/>
+                <line x1="20" y1="100" x2="10" y2="110"/>
+                <line x1="20" y1="125" x2="10" y2="135"/>
+                <line x1="20" y1="150" x2="10" y2="160"/>
+              </g>
+
+              <!-- beam -->
+              <rect x="38" y="108" width="260" height="14" fill="#cfe0ee"/>
+              <circle cx="40" cy="115" r="4" fill="#fff"/>
+              <text x="14" y="200" class="ax-label">O</text>
+
+              <!-- r vector -->
+              <line x1="40" y1="95" x2="298" y2="95" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrR2)"/>
+              <text x="150" y="85" class="vec-label" fill="#7fb2dd">r = 2 m</text>
+
+              <!-- F vector down at end -->
+              <line x1="298" y1="122" x2="298" y2="185" stroke="#e8622c" stroke-width="3" marker-end="url(#arrF2)"/>
+              <text x="306" y="170" class="vec-label" fill="#e8622c">F</text>
+              <circle cx="298" cy="115" r="4" fill="#fff"/>
+
+              <path d="M 30 130 A 22 22 0 0 0 50 150" fill="none" stroke="#3fa66a" stroke-width="2" marker-end="url(#arrM2)"/>
+              <text x="48" y="160" class="vec-label" fill="#3fa66a">M_O</text>
+
+              <defs>
+                <marker id="arrR2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+                <marker id="arrF2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+                <marker id="arrM2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p style="font-size:13px; color:#3a5d7a; margin-top:8px;">Fixed beam, load at the tip. The clockwise curl shows the beam wants to droop and twist the wall joint clockwise.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Worked example 3: pushing a door open <span class="tag">Walkthrough</span></h2>
+      <div class="two-col">
+        <div>
+          <p>A door hinge sits at O. You push perpendicular to the door, <strong>0.8 m</strong> from the hinge, with <strong>60 N</strong>, aimed to swing the door open.</p>
+          <div class="eq">
+r = (0, 0.8, 0) m<br>
+F = (60, 0, 0) N
+          </div>
+          <div class="eq">
+M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> − r<sub>y</sub>F<sub>x</sub><br>
+M<sub>z</sub> = (0)(0) − (0.8)(60)<br>
+M<sub>z</sub> = <span class="hl" style="color:#e8622c;">−48 N·m</span>
+          </div>
+          <p>The hinge takes a 48 N·m clockwise moment — that's the swing torque. Push at the same spot but angle your hand 45° off perpendicular, and only the perpendicular component of F still does the twisting; the part of F aimed straight at the hinge contributes nothing, because it's parallel to r.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 220">
+              <!-- hinge -->
+              <circle cx="60" cy="190" r="5" fill="#fff"/>
+              <text x="36" y="210" class="ax-label">O (hinge)</text>
+              <line x1="60" y1="190" x2="60" y2="40" stroke="#cfe0ee" stroke-width="2" stroke-dasharray="4 3"/>
+
+              <!-- door panel rotated slightly -->
+              <rect x="58" y="42" width="14" height="148" fill="#cfe0ee" transform="rotate(8 60 190)"/>
+
+              <!-- r vector along door to push point -->
+              <line x1="60" y1="190" x2="60" y2="62" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrR3)" transform="rotate(8 60 190)"/>
+              <text x="14" y="120" class="vec-label" fill="#7fb2dd">r = 0.8 m</text>
+
+              <!-- F vector perpendicular push -->
+              <g transform="rotate(8 60 190)">
+                <line x1="65" y1="62" x2="200" y2="62" stroke="#e8622c" stroke-width="3" marker-end="url(#arrF3)"/>
+              </g>
+              <text x="190" y="50" class="vec-label" fill="#e8622c">F = 60 N</text>
+
+              <path d="M 80 170 A 30 30 0 0 1 95 135" fill="none" stroke="#3fa66a" stroke-width="2" marker-end="url(#arrM3)"/>
+              <text x="95" y="155" class="vec-label" fill="#3fa66a">M_O</text>
+
+              <defs>
+                <marker id="arrR3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+                <marker id="arrF3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+                <marker id="arrM3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p style="font-size:13px; color:#3a5d7a; margin-top:8px;">Door swinging open about its hinge. r runs up the door to your hand; F is your push, perpendicular to the door for maximum effect.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="panel" id="practice">
+    <div class="card">
+      <h2>Build your own r × F <span class="tag">Interactive</span></h2>
+      <p>Enter a position vector r (in metres, from the support) and a force vector F (in newtons). We'll compute the full moment vector and walk through the determinant.</p>
+
+      <div class="controls">
+        <div class="vecgroup r">
+          <span class="label">Position vector r (m)</span>
+          <div class="triple">
+            <label>r<sub>x</sub><input type="number" id="rx" value="0.5" step="0.1"></label>
+            <label>r<sub>y</sub><input type="number" id="ry" value="0.2" step="0.1"></label>
+            <label>r<sub>z</sub><input type="number" id="rz" value="0" step="0.1"></label>
+          </div>
+        </div>
+        <div class="vecgroup f">
+          <span class="label">Force vector F (N)</span>
+          <div class="triple">
+            <label>F<sub>x</sub><input type="number" id="fx" value="40" step="1"></label>
+            <label>F<sub>y</sub><input type="number" id="fy" value="-30" step="1"></label>
+            <label>F<sub>z</sub><input type="number" id="fz" value="0" step="1"></label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="computeMoment()">Calculate moment</button>
+      <button class="btn secondary" onclick="randomizeVectors()">Random example</button>
+
+      <div class="result" id="practiceResult">
+        <div class="line">M<sub>x</sub> = r<sub>y</sub>F<sub>z</sub> − r<sub>z</sub>F<sub>y</sub> = <span id="mxVal" class="hl"></span></div>
+        <div class="line">M<sub>y</sub> = r<sub>z</sub>F<sub>x</sub> − r<sub>x</sub>F<sub>z</sub> = <span id="myVal" class="hl"></span></div>
+        <div class="line">M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> − r<sub>y</sub>F<sub>x</sub> = <span id="mzVal" class="hl"></span></div>
+        <div class="line" style="margin-top:10px;">|M<sub>O</sub>| = <span id="magVal" class="hl"></span></div>
+        <div class="steps" id="senseNote"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Quick checks <span class="tag">Self-test</span></h2>
+      <p>Five short ones. Three come with a picture of the actual object — work the vectors out from the diagram before you calculate.</p>
+
+      <div class="qcard">
+        <div class="qnum">Check 1</div>
+        <p>r = (0.3, 0, 0) m, F = (0, 50, 0) N. What is M<sub>z</sub>?</p>
+        <input type="text" id="qc1" placeholder="N·m">
+        <button class="btn" style="margin-left:10px;" onclick="checkQC(1, 15)">Check</button>
+        <div class="feedback" id="qcFeedback1"></div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 2 — torque wrench</div>
+        <div class="two-col">
+          <div>
+            <p>You pull straight up on a wrench handle, 0.2 m from the bolt, with 100 N applied perpendicular to the handle.</p>
+            <div class="eq">r = (0.2, 0, 0) m<br>F = (0, 100, 0) N</div>
+            <input type="text" id="qc2" placeholder="N·m">
+            <button class="btn" style="margin-left:10px;" onclick="checkQC(2, 20)">Check</button>
+            <div class="feedback" id="qcFeedback2"></div>
+          </div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 300 160">
+              <circle cx="40" cy="120" r="10" fill="#cfe0ee"/>
+              <text x="16" y="145" class="ax-label">bolt O</text>
+              <rect x="44" y="115" width="170" height="10" fill="#cfe0ee" rx="2"/>
+              <line x1="40" y1="120" x2="214" y2="120" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrQ2r)"/>
+              <text x="100" y="108" class="vec-label" fill="#7fb2dd">r = 0.2 m</text>
+              <line x1="214" y1="120" x2="214" y2="55" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ2f)"/>
+              <text x="222" y="80" class="vec-label" fill="#e8622c">F = 100 N</text>
+              <defs>
+                <marker id="arrQ2r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+                <marker id="arrQ2f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 3 — cantilever beam</div>
+        <div class="two-col">
+          <div>
+            <p>A beam is fixed into a wall at O and a load hangs straight down at its tip, 1.5 m out.</p>
+            <div class="eq">r = (1.5, 0, 0) m<br>F = (0, −200, 0) N</div>
+            <input type="text" id="qc3" placeholder="N·m">
+            <button class="btn" style="margin-left:10px;" onclick="checkQC(3, -300)">Check</button>
+            <div class="feedback" id="qcFeedback3"></div>
+          </div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 300 160">
+              <rect x="18" y="20" width="14" height="120" fill="#7fb2dd" opacity="0.4"/>
+              <rect x="32" y="78" width="200" height="10" fill="#cfe0ee"/>
+              <circle cx="34" cy="83" r="4" fill="#fff"/>
+              <text x="10" y="155" class="ax-label">O</text>
+              <line x1="34" y1="65" x2="230" y2="65" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrQ3r)"/>
+              <text x="110" y="55" class="vec-label" fill="#7fb2dd">r = 1.5 m</text>
+              <line x1="230" y1="88" x2="230" y2="140" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ3f)"/>
+              <text x="238" y="125" class="vec-label" fill="#e8622c">F = 200 N</text>
+              <defs>
+                <marker id="arrQ3r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+                <marker id="arrQ3f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 4 — pushing a door</div>
+        <div class="two-col">
+          <div>
+            <p>Hinge at O. You push perpendicular to the door, 0.9 m from the hinge, with 40 N.</p>
+            <div class="eq">r = (0, 0.9, 0) m<br>F = (40, 0, 0) N</div>
+            <input type="text" id="qc4" placeholder="N·m">
+            <button class="btn" style="margin-left:10px;" onclick="checkQC(4, -36)">Check</button>
+            <div class="feedback" id="qcFeedback4"></div>
+          </div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 300 160">
+              <circle cx="50" cy="140" r="5" fill="#fff"/>
+              <text x="26" y="156" class="ax-label">O (hinge)</text>
+              <rect x="48" y="20" width="12" height="118" fill="#cfe0ee" transform="rotate(8 50 140)"/>
+              <line x1="50" y1="140" x2="50" y2="32" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrQ4r)" transform="rotate(8 50 140)"/>
+              <text x="2" y="90" class="vec-label" fill="#7fb2dd">r = 0.9 m</text>
+              <g transform="rotate(8 50 140)">
+                <line x1="55" y1="32" x2="190" y2="32" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ4f)"/>
+              </g>
+              <text x="180" y="22" class="vec-label" fill="#e8622c">F = 40 N</text>
+              <defs>
+                <marker id="arrQ4r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+                <marker id="arrQ4f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 5</div>
+        <p>r = (0.6, −0.2, 0) m, F = (10, 30, 0) N. What is M<sub>z</sub>?</p>
+        <input type="text" id="qc5" placeholder="N·m">
+        <button class="btn" style="margin-left:10px;" onclick="checkQC(5, 20)">Check</button>
+        <div class="feedback" id="qcFeedback5"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAM -->
+  <section class="panel" id="exam">
+    <div class="scorebar">
+      <span>Score: <span class="big" id="examScore">0 / 12</span></span>
+      <button class="btn secondary" style="color:#fff; border-color:#fff;" onclick="resetExam()">Reset exam</button>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 1 — Concept</div>
+      <p>What does the magnitude of r × F physically represent?</p>
+      <div class="choices">
+        <label><input type="radio" name="q1" value="a">The total force acting on the body</label>
+        <label><input type="radio" name="q1" value="b">The twisting effect (moment) of the force about the chosen point</label>
+        <label><input type="radio" name="q1" value="c">The work done by the force</label>
+        <label><input type="radio" name="q1" value="d">The distance from the support to the load</label>
+      </div>
+      <button class="btn" onclick="grade(1,'b')">Submit</button>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 2 — Calculation</div>
+      <p>r = (0.4, 0, 0) m, F = (0, 25, 0) N, both in the xy-plane. Find M<sub>z</sub> in N·m.</p>
+      <input type="text" id="q2input" placeholder="N·m">
+      <button class="btn" onclick="gradeNum(2,'q2input',10)">Submit</button>
+      <div class="feedback" id="fb2"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 3 — Calculation</div>
+      <p>r = (0.2, 0.6, 0) m, F = (10, −20, 0) N. Find M<sub>z</sub> in N·m.</p>
+      <input type="text" id="q3input" placeholder="N·m">
+      <button class="btn" onclick="gradeNum(3,'q3input',-10)">Submit</button>
+      <div class="feedback" id="fb3"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 4 — Sign convention</div>
+      <p>A calculated M<sub>z</sub> comes out negative. What does that mean about the support?</p>
+      <div class="choices">
+        <label><input type="radio" name="q4" value="a">It is being twisted counter-clockwise</label>
+        <label><input type="radio" name="q4" value="b">It is being twisted clockwise</label>
+        <label><input type="radio" name="q4" value="c">The force is pointing into the support</label>
+        <label><input type="radio" name="q4" value="d">There is no net moment</label>
+      </div>
+      <button class="btn" onclick="grade(4,'b')">Submit</button>
+      <div class="feedback" id="fb4"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 5 — Calculation, cantilever beam</div>
+      <div class="two-col">
+        <div>
+          <p>A beam fixed at O carries a downward load at its tip, 3 m out.</p>
+          <div class="eq">r = (3, 0, 0) m<br>F = (0, −150, 0) N</div>
+          <p>Find M<sub>z</sub> in N·m.</p>
+          <input type="text" id="q5input" placeholder="N·m">
+          <button class="btn" onclick="gradeNum(5,'q5input',-450)">Submit</button>
+          <div class="feedback" id="fb5"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 160">
+            <rect x="18" y="20" width="14" height="120" fill="#7fb2dd" opacity="0.4"/>
+            <rect x="32" y="78" width="200" height="10" fill="#cfe0ee"/>
+            <circle cx="34" cy="83" r="4" fill="#fff"/>
+            <text x="10" y="155" class="ax-label">O</text>
+            <line x1="34" y1="65" x2="230" y2="65" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrQ5r)"/>
+            <text x="110" y="55" class="vec-label" fill="#7fb2dd">r = 3 m</text>
+            <line x1="230" y1="88" x2="230" y2="140" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ5f)"/>
+            <text x="238" y="125" class="vec-label" fill="#e8622c">F = 150 N</text>
+            <defs>
+              <marker id="arrQ5r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+              <marker id="arrQ5f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 6 — Sense of rotation, wrench</div>
+      <div class="two-col">
+        <div>
+          <p>You pull straight up on a wrench handle, 0.2 m from the bolt, with 100 N perpendicular to the handle (same setup as Practice, Check 2). Which way does the bolt get twisted?</p>
+          <div class="choices">
+            <label><input type="radio" name="q6" value="a">Counter-clockwise</label>
+            <label><input type="radio" name="q6" value="b">Clockwise</label>
+            <label><input type="radio" name="q6" value="c">No twist — force passes through the bolt</label>
+          </div>
+          <button class="btn" onclick="grade(6,'a')">Submit</button>
+          <div class="feedback" id="fb6"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 160">
+            <circle cx="40" cy="120" r="10" fill="#cfe0ee"/>
+            <text x="16" y="145" class="ax-label">bolt O</text>
+            <rect x="44" y="115" width="170" height="10" fill="#cfe0ee" rx="2"/>
+            <line x1="40" y1="120" x2="214" y2="120" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrQ6r)"/>
+            <text x="100" y="108" class="vec-label" fill="#7fb2dd">r = 0.2 m</text>
+            <line x1="214" y1="120" x2="214" y2="55" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ6f)"/>
+            <text x="222" y="80" class="vec-label" fill="#e8622c">F = 100 N</text>
+            <defs>
+              <marker id="arrQ6r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+              <marker id="arrQ6f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 7 — Concept, order of the cross product</div>
+      <p>How does F × r compare to r × F?</p>
+      <div class="choices">
+        <label><input type="radio" name="q7" value="a">Identical vector</label>
+        <label><input type="radio" name="q7" value="b">Same magnitude, opposite direction</label>
+        <label><input type="radio" name="q7" value="c">Perpendicular to r × F with a different magnitude</label>
+        <label><input type="radio" name="q7" value="d">Always zero</label>
+      </div>
+      <button class="btn" onclick="grade(7,'b')">Submit</button>
+      <div class="feedback" id="fb7"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 8 — Calculation</div>
+      <p>r = (1, 1, 0) m, F = (5, −5, 0) N. Find M<sub>z</sub> in N·m.</p>
+      <input type="text" id="q8input" placeholder="N·m">
+      <button class="btn" onclick="gradeNum(8,'q8input',-10)">Submit</button>
+      <div class="feedback" id="fb8"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 9 — Calculation, door</div>
+      <div class="two-col">
+        <div>
+          <p>Hinge at O. Push perpendicular to the door, 0.9 m out, with 40 N (same setup as Practice, Check 4).</p>
+          <div class="eq">r = (0, 0.9, 0) m<br>F = (40, 0, 0) N</div>
+          <p>Find M<sub>z</sub> in N·m.</p>
+          <input type="text" id="q9input" placeholder="N·m">
+          <button class="btn" onclick="gradeNum(9,'q9input',-36)">Submit</button>
+          <div class="feedback" id="fb9"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 160">
+            <circle cx="50" cy="140" r="5" fill="#fff"/>
+            <text x="26" y="156" class="ax-label">O (hinge)</text>
+            <rect x="48" y="20" width="12" height="118" fill="#cfe0ee" transform="rotate(8 50 140)"/>
+            <line x1="50" y1="140" x2="50" y2="32" stroke="#7fb2dd" stroke-width="2" marker-end="url(#arrQ9r)" transform="rotate(8 50 140)"/>
+            <text x="2" y="90" class="vec-label" fill="#7fb2dd">r = 0.9 m</text>
+            <g transform="rotate(8 50 140)">
+              <line x1="55" y1="32" x2="190" y2="32" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ9f)"/>
+            </g>
+            <text x="180" y="22" class="vec-label" fill="#e8622c">F = 40 N</text>
+            <defs>
+              <marker id="arrQ9r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+              <marker id="arrQ9f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 10 — Concept, line of action</div>
+      <p>The line of action of F passes directly through the support O. What is the moment about O?</p>
+      <div class="choices">
+        <label><input type="radio" name="q10" value="a">Zero — r and the line of F coincide, so there's no perpendicular component to twist with</label>
+        <label><input type="radio" name="q10" value="b">Maximum possible, since the force is closest to the support</label>
+        <label><input type="radio" name="q10" value="c">Undefined — the cross product cannot be computed</label>
+        <label><input type="radio" name="q10" value="d">Equal to |F| regardless of r</label>
+      </div>
+      <button class="btn" onclick="grade(10,'a')">Submit</button>
+      <div class="feedback" id="fb10"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 11 — Full 3D moment vector</div>
+      <div class="two-col">
+        <div>
+          <p>A signpost is bolted to the ground at O. Wind load hits the sign plate at a point offset in all three directions.</p>
+          <div class="eq">r = (0.5, 0.3, 0.2) m<br>F = (10, −20, 15) N</div>
+          <p>Find M<sub>x</sub>, M<sub>y</sub>, and M<sub>z</sub> in N·m.</p>
+          <div class="triple" style="max-width:340px;">
+            <label>M<sub>x</sub><input type="text" id="q11mx" placeholder="N·m"></label>
+            <label>M<sub>y</sub><input type="text" id="q11my" placeholder="N·m"></label>
+            <label>M<sub>z</sub><input type="text" id="q11mz" placeholder="N·m"></label>
+          </div>
+          <button class="btn" style="margin-top:12px;" onclick="grade3(11,8.5,-5.5,-13)">Submit</button>
+          <div class="feedback" id="fb11"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 200">
+            <line x1="40" y1="180" x2="220" y2="180" stroke="#5a87b0" stroke-width="1"/>
+            <line x1="40" y1="180" x2="40" y2="30" stroke="#5a87b0" stroke-width="1"/>
+            <line x1="40" y1="180" x2="120" y2="195" stroke="#5a87b0" stroke-width="1"/>
+            <text x="224" y="184" class="ax-label">x</text>
+            <text x="30" y="25" class="ax-label">y</text>
+            <text x="118" y="200" class="ax-label">z</text>
+            <circle cx="40" cy="180" r="4" fill="#fff"/>
+            <text x="14" y="195" class="ax-label">O</text>
+            <line x1="40" y1="180" x2="150" y2="95" stroke="#7fb2dd" stroke-width="2.5" marker-end="url(#arrQ11r)"/>
+            <text x="100" y="125" class="vec-label" fill="#7fb2dd">r</text>
+            <circle cx="150" cy="95" r="4" fill="#fff"/>
+            <line x1="150" y1="95" x2="225" y2="50" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ11f)"/>
+            <text x="195" y="65" class="vec-label" fill="#e8622c">F</text>
+            <defs>
+              <marker id="arrQ11r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+              <marker id="arrQ11f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+            </defs>
+          </svg>
+          <p style="font-size:12px; color:#cfe0ee; margin-top:8px;">r and F both have x, y, and z components — none of M_x, M_y, M_z drops out this time.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 12 — Full 3D moment vector</div>
+      <div class="two-col">
+        <div>
+          <p>An L-shaped bracket is fixed to a wall at O. It extends out along x then up along z, and carries a load there.</p>
+          <div class="eq">r = (1, 0, 0.5) m<br>F = (0, 40, −10) N</div>
+          <p>Find M<sub>x</sub>, M<sub>y</sub>, and M<sub>z</sub> in N·m.</p>
+          <div class="triple" style="max-width:340px;">
+            <label>M<sub>x</sub><input type="text" id="q12mx" placeholder="N·m"></label>
+            <label>M<sub>y</sub><input type="text" id="q12my" placeholder="N·m"></label>
+            <label>M<sub>z</sub><input type="text" id="q12mz" placeholder="N·m"></label>
+          </div>
+          <button class="btn" style="margin-top:12px;" onclick="grade3(12,-20,10,40)">Submit</button>
+          <div class="feedback" id="fb12"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 200">
+            <rect x="20" y="20" width="14" height="160" fill="#7fb2dd" opacity="0.4"/>
+            <circle cx="27" cy="170" r="4" fill="#fff"/>
+            <text x="4" y="190" class="ax-label">O</text>
+            <line x1="27" y1="170" x2="180" y2="170" stroke="#7fb2dd" stroke-width="2.5" marker-end="url(#arrQ12r1)"/>
+            <line x1="180" y1="170" x2="180" y2="80" stroke="#7fb2dd" stroke-width="2.5" marker-end="url(#arrQ12r2)"/>
+            <text x="80" y="160" class="vec-label" fill="#7fb2dd">1 m (x)</text>
+            <text x="188" y="125" class="vec-label" fill="#7fb2dd">0.5 m (z)</text>
+            <circle cx="180" cy="80" r="4" fill="#fff"/>
+            <line x1="180" y1="80" x2="180" y2="140" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ12fy)" opacity="0"/>
+            <line x1="180" y1="80" x2="240" y2="80" stroke="#e8622c" stroke-width="3" marker-end="url(#arrQ12f)"/>
+            <text x="190" y="65" class="vec-label" fill="#e8622c">F (in y &amp; z)</text>
+            <defs>
+              <marker id="arrQ12r1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+              <marker id="arrQ12r2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7fb2dd"/></marker>
+              <marker id="arrQ12f" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+              <marker id="arrQ12fy" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+            </defs>
+          </svg>
+          <p style="font-size:12px; color:#cfe0ee; margin-top:8px;">r bends through x and z; F sits in the y–z plane. Compute the determinant carefully, term by term.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>r × F — moment of a force · built for self-study, not a substitute for your course material</footer>
+
+<script>
+  // tab switching
+  document.querySelectorAll('nav.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  function computeMoment(){
+    const rx=parseFloat(document.getElementById('rx').value)||0;
+    const ry=parseFloat(document.getElementById('ry').value)||0;
+    const rz=parseFloat(document.getElementById('rz').value)||0;
+    const fx=parseFloat(document.getElementById('fx').value)||0;
+    const fy=parseFloat(document.getElementById('fy').value)||0;
+    const fz=parseFloat(document.getElementById('fz').value)||0;
+
+    const mx = ry*fz - rz*fy;
+    const my = rz*fx - rx*fz;
+    const mz = rx*fy - ry*fx;
+    const mag = Math.sqrt(mx*mx+my*my+mz*mz);
+
+    document.getElementById('mxVal').textContent = mx.toFixed(3)+' N·m';
+    document.getElementById('myVal').textContent = my.toFixed(3)+' N·m';
+    document.getElementById('mzVal').textContent = mz.toFixed(3)+' N·m';
+    document.getElementById('magVal').textContent = mag.toFixed(3)+' N·m';
+
+    let note = '';
+    if(mx===0 && my===0){
+      note = mz>0 ? 'Planar case: positive M_z → counter-clockwise twist about O.' :
+             (mz<0 ? 'Planar case: negative M_z → clockwise twist about O.' : 'Zero moment — r and F are parallel, or F passes through O.');
+    } else {
+      note = 'Out-of-plane components present — use the right-hand rule on the full vector (M_x, M_y, M_z) to find the rotation axis and sense.';
+    }
+    document.getElementById('senseNote').textContent = note;
+    document.getElementById('practiceResult').classList.add('show');
+  }
+
+  function randomizeVectors(){
+    const rnd = (min,max,dec)=> (Math.random()*(max-min)+min).toFixed(dec);
+    document.getElementById('rx').value = rnd(-1,1,2);
+    document.getElementById('ry').value = rnd(-1,1,2);
+    document.getElementById('rz').value = 0;
+    document.getElementById('fx').value = rnd(-50,50,0);
+    document.getElementById('fy').value = rnd(-50,50,0);
+    document.getElementById('fz').value = 0;
+    computeMoment();
+  }
+
+  function checkQC(n, correctVal){
+    const val = parseFloat(document.getElementById('qc'+n).value);
+    const fb = document.getElementById('qcFeedback'+n);
+    fb.classList.add('show');
+    if(Math.abs(val-correctVal)<0.5){
+      fb.textContent = 'Correct — M_z = '+correctVal+' N·m.';
+      fb.classList.remove('wrong'); fb.classList.add('correct');
+    } else {
+      fb.textContent = 'Not quite. Correct value is M_z = '+correctVal+' N·m. Recheck which component pairs with which in r_x F_y − r_y F_x.';
+      fb.classList.remove('correct'); fb.classList.add('wrong');
+    }
+  }
+
+  let score = 0;
+  const answered = {};
+  function updateScore(){
+    document.getElementById('examScore').textContent = score + ' / 10';
+  }
+  function grade(n, correctVal){
+    if(answered[n]) return;
+    const sel = document.querySelector('input[name="q'+n+'"]:checked');
+    const fb = document.getElementById('fb'+n);
+    fb.classList.add('show');
+    if(!sel){
+      fb.textContent = 'Pick an answer first.';
+      fb.classList.remove('correct'); fb.classList.add('wrong');
+      return;
+    }
+    answered[n]=true;
+    if(sel.value===correctVal){
+      score++; fb.textContent='Correct.'; fb.classList.add('correct'); fb.classList.remove('wrong');
+    } else {
+      fb.textContent='Not quite — review the Learn tab.'; fb.classList.add('wrong'); fb.classList.remove('correct');
+    }
+    updateScore();
+  }
+  function gradeNum(n, inputId, correctVal){
+    if(answered[n]) return;
+    const val = parseFloat(document.getElementById(inputId).value);
+    const fb = document.getElementById('fb'+n);
+    fb.classList.add('show');
+    answered[n]=true;
+    if(Math.abs(val-correctVal)<0.5){
+      score++; fb.textContent='Correct, M_z = '+correctVal+' N·m.'; fb.classList.add('correct'); fb.classList.remove('wrong');
+    } else {
+      fb.textContent='Not quite. Correct value is M_z = '+correctVal+' N·m.'; fb.classList.add('wrong'); fb.classList.remove('correct');
+    }
+    updateScore();
+  }
+  function grade3(n, mxC, myC, mzC){
+    if(answered[n]) return;
+    const mx = parseFloat(document.getElementById('q'+n+'mx').value);
+    const my = parseFloat(document.getElementById('q'+n+'my').value);
+    const mz = parseFloat(document.getElementById('q'+n+'mz').value);
+    const fb = document.getElementById('fb'+n);
+    fb.classList.add('show');
+    answered[n]=true;
+    const ok = Math.abs(mx-mxC)<0.5 && Math.abs(my-myC)<0.5 && Math.abs(mz-mzC)<0.5;
+    if(ok){
+      score++; fb.textContent='Correct — M = ('+mxC+', '+myC+', '+mzC+') N·m.'; fb.classList.add('correct'); fb.classList.remove('wrong');
+    } else {
+      fb.textContent='Not quite. Correct: M_x='+mxC+', M_y='+myC+', M_z='+mzC+' N·m. Recheck each row of the determinant.'; fb.classList.add('wrong'); fb.classList.remove('correct');
+    }
+    updateScore();
+  }
+  function resetExam(){
+    score=0; for(const k in answered) delete answered[k];
+    document.querySelectorAll('.qcard input[type=radio]').forEach(r=>r.checked=false);
+    document.querySelectorAll('.qcard input[type=text]').forEach(i=>i.value='');
+    document.querySelectorAll('.feedback').forEach(f=>{f.classList.remove('show','correct','wrong');});
+    updateScore();
+  }
+
+  computeMoment();
+</script>
+
+</body>
+</html>

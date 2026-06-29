@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Action-Reaction at Joints — Newton's Third Law in Structures</title>
+<style>
+  :root{
+    --blue-deep:#0b2e4f;
+    --blue-mid:#123b63;
+    --blue-line:#2c5f8f;
+    --paper:#eef3f7;
+    --paper-dim:#d7e2ea;
+    --ink:#0b2e4f;
+    --orange:#e8622c;
+    --orange-dim:#f4a07c;
+    --teal:#2f9e8f;
+    --teal-dim:#9fd9d0;
+    --green:#3fa66a;
+    --mono:'IBM Plex Mono', 'Courier New', monospace;
+    --disp:'Space Grotesk', 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: var(--disp);
+    background:var(--blue-deep);
+    color:var(--paper);
+    min-height:100vh;
+  }
+  .grid-bg{
+    background-image:
+      linear-gradient(var(--blue-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--blue-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-color: var(--blue-deep);
+    background-position: -1px -1px;
+  }
+  header{ padding:38px 6vw 24px; border-bottom:1px solid rgba(255,255,255,0.15); }
+  .eyebrow{
+    font-family:var(--mono); letter-spacing:0.18em; text-transform:uppercase;
+    font-size:12px; color:var(--teal-dim); margin:0 0 10px;
+  }
+  h1{ margin:0 0 8px; font-size:clamp(28px,4vw,46px); font-weight:700; letter-spacing:-0.01em; }
+  h1 .vec{color:var(--orange);}
+  .sub{ color:var(--paper-dim); font-size:15px; max-width:640px; line-height:1.5; margin:0; }
+  .formula-strip{ font-family:var(--mono); font-size:14px; color:var(--teal-dim); margin-top:18px; letter-spacing:0.02em; }
+
+  nav.tabs{ display:flex; gap:2px; padding:0 6vw; border-bottom:1px solid rgba(255,255,255,0.15); background:var(--blue-mid); }
+  nav.tabs button{
+    font-family:var(--mono); background:transparent; border:none; color:var(--paper-dim);
+    padding:16px 22px; font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+    cursor:pointer; border-bottom:3px solid transparent; transition:color .15s, border-color .15s;
+  }
+  nav.tabs button .n{color:var(--teal-dim); margin-right:8px;}
+  nav.tabs button:hover{color:#fff;}
+  nav.tabs button.active{ color:#fff; border-bottom-color:var(--orange); }
+  nav.tabs button:focus-visible{outline:2px solid var(--orange); outline-offset:2px;}
+
+  main{ padding:40px 6vw 80px; }
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--paper); color:var(--ink); border-radius:6px; padding:30px 32px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:26px;
+  }
+  .card h2{ margin:0 0 16px; font-size:22px; display:flex; align-items:center; gap:10px; }
+  .card h2 .tag{
+    font-family:var(--mono); font-size:11px; background:var(--teal); color:#fff;
+    padding:3px 8px; border-radius:3px; letter-spacing:0.06em;
+  }
+  .card p, .card li{ line-height:1.65; font-size:15px; }
+  .card ul{padding-left:22px;}
+  .two-col{ display:grid; grid-template-columns:1.1fr 1fr; gap:28px; }
+  @media (max-width:820px){ .two-col{grid-template-columns:1fr;} }
+
+  .eq{
+    font-family:var(--mono); background:var(--blue-deep); color:#fff; padding:14px 18px;
+    border-radius:6px; font-size:15px; overflow-x:auto; border-left:4px solid var(--teal);
+  }
+  .eq .lab{color:var(--teal-dim);}
+  .eq.orange{border-left-color:var(--orange);}
+
+  .note{
+    background:#e9f7f4; border:1px solid var(--teal-dim); border-left:4px solid var(--teal);
+    padding:12px 16px; border-radius:4px; font-size:14px; margin-top:14px;
+  }
+
+  .diagram-wrap{ background:var(--blue-deep); border-radius:6px; padding:14px; }
+  svg{display:block; width:100%; height:auto;}
+  .ax-label{font-family:var(--mono); font-size:12px; fill:var(--paper-dim);}
+  .vec-label{font-family:var(--mono); font-size:13px; font-weight:600;}
+  .cap{font-size:13px; color:#3a5d7a; margin-top:8px;}
+
+  .controls{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-bottom:20px; }
+  .vecgroup{ border:1px solid var(--paper-dim); border-radius:6px; padding:16px; }
+  .vecgroup .label{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:10px; display:block; }
+  .vecgroup.a .label{color:var(--blue-mid);}
+  .vecgroup.b .label{color:var(--orange);}
+  .triple{display:flex; gap:8px;}
+  .triple label{ font-family:var(--mono); font-size:12px; flex:1; }
+  .triple input{
+    width:100%; margin-top:4px; padding:8px 6px; border:1px solid var(--paper-dim);
+    border-radius:4px; font-family:var(--mono); font-size:14px; background:#fff;
+  }
+  .btn{
+    font-family:var(--mono); text-transform:uppercase; letter-spacing:0.06em; font-size:13px;
+    background:var(--orange); color:#fff; border:none; padding:11px 22px; border-radius:5px;
+    cursor:pointer; transition:transform .1s, background .15s;
+  }
+  .btn:hover{background:#cf531f;}
+  .btn:active{transform:scale(0.97);}
+  .btn.secondary{ background:transparent; color:var(--blue-mid); border:1px solid var(--blue-mid); }
+  .btn.secondary:hover{background:rgba(18,59,99,0.08);}
+
+  .result{
+    margin-top:20px; font-family:var(--mono); font-size:14px; background:var(--blue-deep);
+    color:#fff; border-radius:6px; padding:18px 20px; display:none;
+  }
+  .result.show{display:block;}
+  .result .line{margin:4px 0;}
+  .result .hl{color:var(--orange-dim); font-weight:600;}
+  .steps{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.15); color:var(--paper-dim); font-size:13px; line-height:1.7; }
+
+  .qcard{ border:1px solid var(--paper-dim); border-radius:6px; padding:20px 22px; margin-bottom:18px; }
+  .qcard .qnum{ font-family:var(--mono); font-size:12px; color:var(--orange); letter-spacing:0.08em; }
+  .qcard p{margin-top:6px;}
+  .qcard input[type=text]{
+    font-family:var(--mono); padding:9px 10px; border:1px solid var(--paper-dim);
+    border-radius:4px; font-size:14px; width:160px;
+  }
+  .qcard .choices{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .qcard .choices label{ font-size:14px; display:flex; gap:8px; align-items:flex-start; cursor:pointer; }
+
+  .feedback{ margin-top:10px; font-size:13px; font-family:var(--mono); padding:8px 10px; border-radius:4px; display:none; }
+  .feedback.show{display:block;}
+  .feedback.correct{background:#e7f6ed; color:#1f7a45; border:1px solid #9bd6b4;}
+  .feedback.wrong{background:#fdeae3; color:#b8431c; border:1px solid #f3b79c;}
+
+  .scorebar{
+    display:flex; align-items:center; justify-content:space-between; background:var(--blue-deep);
+    color:#fff; padding:16px 20px; border-radius:6px; font-family:var(--mono); margin-bottom:22px;
+  }
+  .scorebar .big{font-size:20px; color:var(--orange-dim);}
+
+  footer{ text-align:center; font-family:var(--mono); font-size:11px; color:rgba(255,255,255,0.4); padding:24px; letter-spacing:0.05em; }
+  ::selection{background:var(--orange); color:#fff;}
+</style>
+</head>
+<body class="grid-bg">
+
+<header>
+  <p class="eyebrow">Statics · Connections &amp; Free-Body Diagrams</p>
+  <h1>Action and reaction at a <span class="vec">joint</span></h1>
+  <p class="sub">Every pin, hinge, and contact point carries Newton's third law: whatever one member pushes onto the joint, the joint pushes straight back — same size, opposite direction.</p>
+  <p class="formula-strip">F<sub>A→B</sub> = − F<sub>B→A</sub> &nbsp;&nbsp;|&nbsp;&nbsp; same line of action &nbsp;&nbsp;|&nbsp;&nbsp; equal magnitude, opposite sense</p>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="learn"><span class="n">01</span>Learn</button>
+  <button data-tab="practice"><span class="n">02</span>Practice</button>
+  <button data-tab="exam"><span class="n">03</span>Exam</button>
+</nav>
+
+<main>
+
+  <!-- LEARN -->
+  <section class="panel active" id="learn">
+
+    <div class="card">
+      <h2>Why joints come in pairs <span class="tag">Concept</span></h2>
+      <div class="two-col">
+        <div>
+          <p>A joint is just the place where two (or more) members meet — a pin, a bolt, a hinge, a ball-and-socket, even a rope tied to a hook. Newton's third law says that whatever force one member exerts on the joint, the joint exerts the exact opposite back on that member.</p>
+          <p>That means every internal force in a structure shows up <strong>twice</strong>, once on each side of the connection:</p>
+          <ul>
+            <li>Member A pushes/pulls on the joint with force F</li>
+            <li>The joint pushes/pulls on member A with force −F</li>
+            <li>If a second member B is at the same joint, the same logic applies to it, independently</li>
+          </ul>
+          <div class="eq"><span class="lab">at any joint:</span> F<sub>on joint from A</sub> = − F<sub>on A from joint</sub></div>
+          <p style="margin-top:14px;">This is the whole reason free-body diagrams work: cut a structure at a joint, and you replace the missing material with the reaction force it was exerting — equal and opposite to what your isolated piece was exerting on it.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 240">
+              <line x1="40" y1="200" x2="160" y2="120" stroke="#cfe0ee" stroke-width="8" stroke-linecap="round"/>
+              <line x1="160" y1="120" x2="320" y2="200" stroke="#cfe0ee" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="160" cy="120" r="10" fill="#fff" stroke="#7fb2dd" stroke-width="3"/>
+              <text x="170" y="105" class="vec-label" fill="#fff">joint</text>
+
+              <line x1="160" y1="120" x2="90" y2="160" stroke="#e8622c" stroke-width="3" marker-end="url(#a1)"/>
+              <text x="40" y="155" class="vec-label" fill="#e8622c">F (A on joint)</text>
+
+              <line x1="160" y1="120" x2="230" y2="80" stroke="#3fa66a" stroke-width="3" marker-end="url(#a2)"/>
+              <text x="225" y="65" class="vec-label" fill="#3fa66a">−F (joint on A)</text>
+
+              <defs>
+                <marker id="a1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+                <marker id="a2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p class="cap">Two members pinned together. Whatever force member A exerts on the pin, the pin returns the exact opposite onto member A.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Worked example 1: two-bar pin joint <span class="tag">Walkthrough</span></h2>
+      <div class="two-col">
+        <div>
+          <p>Two truss bars meet at a pin. Bar 1 is in tension and pulls on the pin with <strong>F<sub>1</sub> = (60, 0) N</strong> (pulling the pin toward bar 1, i.e. to the left). By Newton's third law, the pin pulls back on bar 1 with the opposite force.</p>
+          <div class="eq orange">
+F<sub>pin on bar 1</sub> = − F<sub>1</sub> = (−60, 0) N
+          </div>
+          <p>This reaction is what keeps bar 1 in equilibrium — it's the force the rest of the truss exerts on that bar through the pin, exactly cancelling the bar's own pull in the free-body sense.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 200">
+              <circle cx="200" cy="100" r="9" fill="#fff" stroke="#7fb2dd" stroke-width="3"/>
+              <line x1="200" y1="100" x2="60" y2="100" stroke="#cfe0ee" stroke-width="8" stroke-linecap="round"/>
+              <text x="50" y="125" class="ax-label">bar 1</text>
+
+              <line x1="200" y1="100" x2="130" y2="100" stroke="#e8622c" stroke-width="3" marker-end="url(#b1)"/>
+              <text x="120" y="85" class="vec-label" fill="#e8622c">F₁ = 60 N (bar→pin)</text>
+
+              <line x1="200" y1="100" x2="270" y2="100" stroke="#3fa66a" stroke-width="3" marker-end="url(#b2)"/>
+              <text x="222" y="85" class="vec-label" fill="#3fa66a">−F₁ (pin→bar)</text>
+
+              <defs>
+                <marker id="b1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+                <marker id="b2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p class="cap">Bar 1 pulls the pin left (tension); the pin pulls bar 1 right with equal magnitude.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Worked example 2: hinge between beam and wall <span class="tag">Walkthrough</span></h2>
+      <div class="two-col">
+        <div>
+          <p>A beam is hinged to a wall at O. Under load, the beam pushes on the hinge with <strong>F<sub>beam</sub> = (−25, −40, 0) N</strong> (down and into the wall).</p>
+          <div class="eq">
+F<sub>beam on hinge</sub> = (−25, −40, 0) N
+          </div>
+          <div class="eq orange">
+F<sub>hinge on beam</sub> = −F<sub>beam on hinge</sub> = (25, 40, 0) N
+          </div>
+          <p>The wall doesn't know or care what's pushing on it — it simply supplies whatever reaction is needed at that hinge. The beam's free-body diagram shows this reaction as a separate, independent force at O, equal and opposite to what the beam itself transmits into the hinge.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 220">
+              <rect x="20" y="20" width="18" height="160" fill="#7fb2dd" opacity="0.4"/>
+              <g stroke="#7fb2dd" stroke-width="2">
+                <line x1="20" y1="35" x2="10" y2="45"/>
+                <line x1="20" y1="60" x2="10" y2="70"/>
+                <line x1="20" y1="85" x2="10" y2="95"/>
+                <line x1="20" y1="110" x2="10" y2="120"/>
+              </g>
+              <rect x="38" y="90" width="240" height="14" fill="#cfe0ee"/>
+              <circle cx="42" cy="97" r="6" fill="#fff" stroke="#7fb2dd" stroke-width="2"/>
+              <text x="14" y="200" class="ax-label">O (hinge)</text>
+
+              <line x1="42" y1="97" x2="20" y2="130" stroke="#e8622c" stroke-width="3" marker-end="url(#c1)"/>
+              <text x="6" y="150" class="vec-label" fill="#e8622c">F beam→hinge</text>
+
+              <line x1="42" y1="97" x2="64" y2="64" stroke="#3fa66a" stroke-width="3" marker-end="url(#c2)"/>
+              <text x="58" y="55" class="vec-label" fill="#3fa66a">F hinge→beam</text>
+
+              <defs>
+                <marker id="c1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+                <marker id="c2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p class="cap">The beam loads the hinge down-and-left; the hinge supplies an equal up-and-right reaction back into the beam.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Worked example 3: three members at one joint <span class="tag">Walkthrough</span></h2>
+      <div class="two-col">
+        <div>
+          <p>At a truss joint, three bars meet. Two of the forces the bars exert on the pin are known: <strong>F<sub>1</sub> = (30, 40, 0) N</strong> and <strong>F<sub>2</sub> = (−10, 20, 0) N</strong>. For the pin to be in equilibrium, the third bar's force on the pin must balance both of them.</p>
+          <div class="eq">
+F<sub>3 on pin</sub> = −(F<sub>1</sub> + F<sub>2</sub>)<br>
+F<sub>3 on pin</sub> = −[(30−10), (40+20), 0]<br>
+F<sub>3 on pin</sub> = <span class="hl" style="color:#e8622c;">(−20, −60, 0) N</span>
+          </div>
+          <p>And by the third law, the pin pushes back on bar 3 with the opposite of <em>that</em>: (20, 60, 0) N. Action-reaction applies pairwise to every single member at the joint, not just to the joint as a whole.</p>
+        </div>
+        <div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 360 240">
+              <circle cx="180" cy="130" r="9" fill="#fff" stroke="#7fb2dd" stroke-width="3"/>
+
+              <line x1="180" y1="130" x2="80" y2="60" stroke="#cfe0ee" stroke-width="6" stroke-linecap="round"/>
+              <line x1="180" y1="130" x2="290" y2="80" stroke="#cfe0ee" stroke-width="6" stroke-linecap="round"/>
+              <line x1="180" y1="130" x2="180" y2="220" stroke="#cfe0ee" stroke-width="6" stroke-linecap="round"/>
+
+              <line x1="180" y1="130" x2="120" y2="80" stroke="#e8622c" stroke-width="2.5" marker-end="url(#d1)"/>
+              <text x="50" y="80" class="vec-label" fill="#e8622c">F₁</text>
+
+              <line x1="180" y1="130" x2="230" y2="100" stroke="#3fa66a" stroke-width="2.5" marker-end="url(#d2)"/>
+              <text x="232" y="95" class="vec-label" fill="#3fa66a">F₂</text>
+
+              <line x1="180" y1="130" x2="150" y2="195" stroke="#9fd9d0" stroke-width="2.5" marker-end="url(#d3)"/>
+              <text x="100" y="200" class="vec-label" fill="#9fd9d0">F₃ (solve)</text>
+
+              <defs>
+                <marker id="d1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker>
+                <marker id="d2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3fa66a"/></marker>
+                <marker id="d3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#9fd9d0"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p class="cap">Three bars at one pin. The unknown bar force is whatever makes the vector sum at the pin zero.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="panel" id="practice">
+    <div class="card">
+      <h2>Build the reaction pair <span class="tag">Interactive</span></h2>
+      <p>Enter the force one member exerts on a joint (or the other member it touches). We'll give you the equal-and-opposite reaction.</p>
+
+      <div class="controls">
+        <div class="vecgroup a">
+          <span class="label">Force on joint (N)</span>
+          <div class="triple">
+            <label>F<sub>x</sub><input type="number" id="fax" value="30" step="1"></label>
+            <label>F<sub>y</sub><input type="number" id="fay" value="-45" step="1"></label>
+            <label>F<sub>z</sub><input type="number" id="faz" value="0" step="1"></label>
+          </div>
+        </div>
+        <div class="vecgroup b">
+          <span class="label">Reaction back on member (computed)</span>
+          <div class="triple">
+            <label>F<sub>x</sub><input type="text" id="fbx" disabled></label>
+            <label>F<sub>y</sub><input type="text" id="fby" disabled></label>
+            <label>F<sub>z</sub><input type="text" id="fbz" disabled></label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="computeReaction()">Compute reaction</button>
+      <button class="btn secondary" onclick="randomizeReaction()">Random example</button>
+
+      <div class="result" id="practiceResult">
+        <div class="line">F<sub>on joint</sub> = <span id="onJointVal" class="hl"></span></div>
+        <div class="line">F<sub>reaction on member</sub> = − F<sub>on joint</sub> = <span id="reactionVal" class="hl"></span></div>
+        <div class="steps">Same magnitude, same line of action, opposite sense — that's all the third law asks for. It never depends on what the member is made of or how big it is.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Quick checks <span class="tag">Self-test</span></h2>
+      <p>Five short ones. Two come with a diagram of the actual connection.</p>
+
+      <div class="qcard">
+        <div class="qnum">Check 1</div>
+        <p>A rope pulls on a hook with F = (0, −80, 0) N. What force does the hook exert on the rope?</p>
+        <div class="triple" style="max-width:300px;">
+          <label>x<input type="text" id="qc1x"></label>
+          <label>y<input type="text" id="qc1y"></label>
+        </div>
+        <button class="btn" style="margin-top:10px;" onclick="checkQC2(1, 0, 80)">Check</button>
+        <div class="feedback" id="qcFeedback1"></div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 2 — pinned bar</div>
+        <div class="two-col">
+          <div>
+            <p>Bar pulls on the pin (tension) with F = (45, 0) N. What does the pin exert on the bar?</p>
+            <div class="triple" style="max-width:300px;">
+              <label>x<input type="text" id="qc2x"></label>
+              <label>y<input type="text" id="qc2y"></label>
+            </div>
+            <button class="btn" style="margin-top:10px;" onclick="checkQC2(2, -45, 0)">Check</button>
+            <div class="feedback" id="qcFeedback2"></div>
+          </div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 300 140">
+              <circle cx="180" cy="70" r="8" fill="#fff" stroke="#7fb2dd" stroke-width="3"/>
+              <line x1="180" y1="70" x2="60" y2="70" stroke="#cfe0ee" stroke-width="7" stroke-linecap="round"/>
+              <line x1="180" y1="70" x2="120" y2="70" stroke="#e8622c" stroke-width="3" marker-end="url(#qc2a)"/>
+              <text x="108" y="55" class="vec-label" fill="#e8622c">45 N</text>
+              <defs><marker id="qc2a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker></defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 3 — hinge</div>
+        <div class="two-col">
+          <div>
+            <p>A beam pushes on its wall hinge with F = (−20, −35, 0) N. What does the hinge push back on the beam with?</p>
+            <div class="triple" style="max-width:300px;">
+              <label>x<input type="text" id="qc3x"></label>
+              <label>y<input type="text" id="qc3y"></label>
+            </div>
+            <button class="btn" style="margin-top:10px;" onclick="checkQC2(3, 20, 35)">Check</button>
+            <div class="feedback" id="qcFeedback3"></div>
+          </div>
+          <div class="diagram-wrap">
+            <svg viewBox="0 0 300 160">
+              <rect x="18" y="20" width="14" height="120" fill="#7fb2dd" opacity="0.4"/>
+              <rect x="32" y="78" width="180" height="10" fill="#cfe0ee"/>
+              <circle cx="36" cy="83" r="6" fill="#fff" stroke="#7fb2dd" stroke-width="2"/>
+              <line x1="36" y1="83" x2="20" y2="110" stroke="#e8622c" stroke-width="3" marker-end="url(#qc3a)"/>
+              <text x="2" y="128" class="vec-label" fill="#e8622c">beam→hinge</text>
+              <defs><marker id="qc3a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker></defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 4</div>
+        <p>A block rests on the ground; the ground pushes up on the block with N = (0, 90, 0) N. What force does the block exert on the ground?</p>
+        <div class="triple" style="max-width:300px;">
+          <label>x<input type="text" id="qc4x"></label>
+          <label>y<input type="text" id="qc4y"></label>
+        </div>
+        <button class="btn" style="margin-top:10px;" onclick="checkQC2(4, 0, -90)">Check</button>
+        <div class="feedback" id="qcFeedback4"></div>
+      </div>
+
+      <div class="qcard">
+        <div class="qnum">Check 5</div>
+        <p>Member A exerts F = (12, −18, 6) N on a ball-and-socket joint. Find the force the joint exerts on member A.</p>
+        <div class="triple" style="max-width:340px;">
+          <label>x<input type="text" id="qc5x"></label>
+          <label>y<input type="text" id="qc5y"></label>
+          <label>z<input type="text" id="qc5z"></label>
+        </div>
+        <button class="btn" style="margin-top:10px;" onclick="checkQC3(5, -12, 18, -6)">Check</button>
+        <div class="feedback" id="qcFeedback5"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAM -->
+  <section class="panel" id="exam">
+    <div class="scorebar">
+      <span>Score: <span class="big" id="examScore">0 / 10</span></span>
+      <button class="btn secondary" style="color:#fff; border-color:#fff;" onclick="resetExam()">Reset exam</button>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 1 — Concept</div>
+      <p>What does Newton's third law guarantee about the force pair at a joint?</p>
+      <div class="choices">
+        <label><input type="radio" name="q1" value="a">They have equal magnitude and act in opposite directions along the same line</label>
+        <label><input type="radio" name="q1" value="b">They are perpendicular to each other</label>
+        <label><input type="radio" name="q1" value="c">The larger member always exerts the larger force</label>
+        <label><input type="radio" name="q1" value="d">They cancel only if the joint is frictionless</label>
+      </div>
+      <button class="btn" onclick="grade(1,'a')">Submit</button>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 2 — Calculation</div>
+      <p>A cable pulls on an anchor with F = (0, −120, 0) N. What force does the anchor exert on the cable?</p>
+      <input type="text" id="q2input" placeholder="(x, y) N">
+      <button class="btn" onclick="gradeText(2,'q2input',['(0,120)','0,120'])">Submit</button>
+      <div class="feedback" id="fb2"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 3 — Calculation, pinned bar</div>
+      <div class="two-col">
+        <div>
+          <p>A bar in compression pushes on its pin with F = (−50, 0) N.</p>
+          <p>What force does the pin exert on the bar?</p>
+          <input type="text" id="q3input" placeholder="(x, y) N">
+          <button class="btn" onclick="gradeText(3,'q3input',['(50,0)','50,0'])">Submit</button>
+          <div class="feedback" id="fb3"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 140">
+            <circle cx="120" cy="70" r="8" fill="#fff" stroke="#7fb2dd" stroke-width="3"/>
+            <line x1="120" y1="70" x2="250" y2="70" stroke="#cfe0ee" stroke-width="7" stroke-linecap="round"/>
+            <line x1="120" y1="70" x2="170" y2="70" stroke="#e8622c" stroke-width="3" marker-end="url(#e1)"/>
+            <text x="125" y="55" class="vec-label" fill="#e8622c">50 N</text>
+            <defs><marker id="e1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker></defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 4 — Concept</div>
+      <p>Two bars and a roller support all meet at one joint. How many action-reaction <em>pairs</em> exist at that joint?</p>
+      <div class="choices">
+        <label><input type="radio" name="q4" value="a">One, shared by all three members</label>
+        <label><input type="radio" name="q4" value="b">Three — one pair per member, each independent of the others</label>
+        <label><input type="radio" name="q4" value="c">Zero — reactions only happen at supports, not internal joints</label>
+        <label><input type="radio" name="q4" value="d">It depends on which member is largest</label>
+      </div>
+      <button class="btn" onclick="grade(4,'b')">Submit</button>
+      <div class="feedback" id="fb4"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 5 — Calculation, hinge</div>
+      <div class="two-col">
+        <div>
+          <p>A beam pushes on its wall hinge with F = (−15, −28, 0) N.</p>
+          <p>Find the reaction the hinge exerts on the beam.</p>
+          <input type="text" id="q5input" placeholder="(x, y) N">
+          <button class="btn" onclick="gradeText(5,'q5input',['(15,28)','15,28'])">Submit</button>
+          <div class="feedback" id="fb5"></div>
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 300 160">
+            <rect x="18" y="20" width="14" height="120" fill="#7fb2dd" opacity="0.4"/>
+            <rect x="32" y="78" width="180" height="10" fill="#cfe0ee"/>
+            <circle cx="36" cy="83" r="6" fill="#fff" stroke="#7fb2dd" stroke-width="2"/>
+            <line x1="36" y1="83" x2="18" y2="115" stroke="#e8622c" stroke-width="3" marker-end="url(#e5)"/>
+            <text x="0" y="132" class="vec-label" fill="#e8622c">beam→hinge</text>
+            <defs><marker id="e5" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e8622c"/></marker></defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 6 — Concept</div>
+      <p>You isolate a single bar for a free-body diagram and replace the pin it was connected to with a force. What governs the size and direction of that replacement force?</p>
+      <div class="choices">
+        <label><input type="radio" name="q6" value="a">It is chosen arbitrarily to balance the diagram</label>
+        <label><input type="radio" name="q6" value="b">It must equal and oppose whatever force the bar itself was exerting on the pin</label>
+        <label><input type="radio" name="q6" value="c">It is always vertical, regardless of geometry</label>
+        <label><input type="radio" name="q6" value="d">It depends only on the bar's weight</label>
+      </div>
+      <button class="btn" onclick="grade(6,'b')">Submit</button>
+      <div class="feedback" id="fb6"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 7 — Calculation, three-member joint</div>
+      <p>Three bars meet at a pin. Bars 1 and 2 exert F<sub>1</sub> = (20, 10, 0) N and F<sub>2</sub> = (−5, 15, 0) N on the pin. For equilibrium, what force must bar 3 exert on the pin?</p>
+      <input type="text" id="q7input" placeholder="(x, y) N">
+      <button class="btn" onclick="gradeText(7,'q7input',['(-15,-25)','-15,-25'])">Submit</button>
+      <div class="feedback" id="fb7"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 8 — Concept</div>
+      <p>A block sits on the ground. The ground exerts a normal force N up on the block. What does the block exert on the ground?</p>
+      <div class="choices">
+        <label><input type="radio" name="q8" value="a">Nothing — the ground only acts on the block, not the reverse</label>
+        <label><input type="radio" name="q8" value="b">A force N directed downward, equal in magnitude</label>
+        <label><input type="radio" name="q8" value="c">A force larger than N, since the block has weight too</label>
+        <label><input type="radio" name="q8" value="d">A horizontal friction force only</label>
+      </div>
+      <button class="btn" onclick="grade(8,'b')">Submit</button>
+      <div class="feedback" id="fb8"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 9 — Calculation, 3D ball joint</div>
+      <p>Member A exerts F = (8, −22, 14) N on a ball-and-socket joint. Find the force the joint exerts on member A.</p>
+      <div class="triple" style="max-width:340px;">
+        <label>x<input type="text" id="q9x"></label>
+        <label>y<input type="text" id="q9y"></label>
+        <label>z<input type="text" id="q9z"></label>
+      </div>
+      <button class="btn" style="margin-top:12px;" onclick="grade3(9,-8,22,-14)">Submit</button>
+      <div class="feedback" id="fb9"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qnum">Question 10 — Concept, common mistake</div>
+      <p>A student says: "since the joint is in equilibrium, every force acting on it must be the same size." What's wrong with this statement?</p>
+      <div class="choices">
+        <label><input type="radio" name="q10" value="a">Nothing — it's correct</label>
+        <label><input type="radio" name="q10" value="b">Equilibrium means the vector <em>sum</em> of all forces at the joint is zero — individual forces can differ in size; action-reaction pairs are a separate, always-equal relationship between two specific forces on the same interface</label>
+        <label><input type="radio" name="q10" value="c">Equilibrium only applies to joints with two members</label>
+        <label><input type="radio" name="q10" value="d">Action-reaction pairs only apply to moving objects</label>
+      </div>
+      <button class="btn" onclick="grade(10,'b')">Submit</button>
+      <div class="feedback" id="fb10"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>action ↔ reaction at joints · built for self-study, not a substitute for your course material</footer>
+
+<script>
+  document.querySelectorAll('nav.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  function computeReaction(){
+    const fax=parseFloat(document.getElementById('fax').value)||0;
+    const fay=parseFloat(document.getElementById('fay').value)||0;
+    const faz=parseFloat(document.getElementById('faz').value)||0;
+    const fbx=-fax, fby=-fay, fbz=-faz;
+    document.getElementById('fbx').value = fbx.toFixed(2);
+    document.getElementById('fby').value = fby.toFixed(2);
+    document.getElementById('fbz').value = fbz.toFixed(2);
+    document.getElementById('onJointVal').textContent = `(${fax.toFixed(2)}, ${fay.toFixed(2)}, ${faz.toFixed(2)}) N`;
+    document.getElementById('reactionVal').textContent = `(${fbx.toFixed(2)}, ${fby.toFixed(2)}, ${fbz.toFixed(2)}) N`;
+    document.getElementById('practiceResult').classList.add('show');
+  }
+
+  function randomizeReaction(){
+    const rnd = (min,max)=> Math.round(Math.random()*(max-min)+min);
+    document.getElementById('fax').value = rnd(-80,80);
+    document.getElementById('fay').value = rnd(-80,80);
+    document.getElementById('faz').value = rnd(-20,20);
+    computeReaction();
+  }
+
+  function checkQC2(n, cx, cy){
+    const x = parseFloat(document.getElementById('qc'+n+'x').value);
+    const y = parseFloat(document.getElementById('qc'+n+'y').value);
+    const fb = document.getElementById('qcFeedback'+n);
+    fb.classList.add('show');
+    if(Math.abs(x-cx)<0.5 && Math.abs(y-cy)<0.5){
+      fb.textContent = `Correct — (${cx}, ${cy}) N.`;
+      fb.classList.remove('wrong'); fb.classList.add('correct');
+    } else {
+      fb.textContent = `Not quite. Correct answer: (${cx}, ${cy}) N — just flip the sign of every component.`;
+      fb.classList.remove('correct'); fb.classList.add('wrong');
+    }
+  }
+
+  function checkQC3(n, cx, cy, cz){
+    const x = parseFloat(document.getElementById('qc'+n+'x').value);
+    const y = parseFloat(document.getElementById('qc'+n+'y').value);
+    const z = parseFloat(document.getElementById('qc'+n+'z').value);
+    const fb = document.getElementById('qcFeedback'+n);
+    fb.classList.add('show');
+    if(Math.abs(x-cx)<0.5 && Math.abs(y-cy)<0.5 && Math.abs(z-cz)<0.5){
+      fb.textContent = `Correct — (${cx}, ${cy}, ${cz}) N.`;
+      fb.classList.remove('wrong'); fb.classList.add('correct');
+    } else {
+      fb.textContent = `Not quite. Correct answer: (${cx}, ${cy}, ${cz}) N — flip the sign of every component.`;
+      fb.classList.remove('correct'); fb.classList.add('wrong');
+    }
+  }
+
+  let score = 0;
+  const answered = {};
+  function updateScore(){
+    document.getElementById('examScore').textContent = score + ' / 10';
+  }
+  function grade(n, correctVal){
+    if(answered[n]) return;
+    const sel = document.querySelector('input[name="q'+n+'"]:checked');
+    const fb = document.getElementById('fb'+n);
+    fb.classList.add('show');
+    if(!sel){ fb.textContent='Pick an answer first.'; fb.classList.remove('correct'); fb.classList.add('wrong'); return; }
+    answered[n]=true;
+    if(sel.value===correctVal){ score++; fb.textContent='Correct.'; fb.classList.add('correct'); fb.classList.remove('wrong'); }
+    else { fb.textContent='Not quite — review the Learn tab.'; fb.classList.add('wrong'); fb.classList.remove('correct'); }
+    updateScore();
+  }
+  function gradeText(n, inputId, acceptableList){
+    if(answered[n]) return;
+    const raw = document.getElementById(inputId).value.replace(/\s/g,'');
+    const fb = document.getElementById('fb'+n);
+    fb.classList.add('show');
+    answered[n]=true;
+    const ok = acceptableList.some(a => raw === a);
+    if(ok){ score++; fb.textContent='Correct.'; fb.classList.add('correct'); fb.classList.remove('wrong'); }
+    else { fb.textContent='Not quite. Correct answer: '+acceptableList[0]+' N.'; fb.classList.add('wrong'); fb.classList.remove('correct'); }
+    updateScore();
+  }
+  function grade3(n, cx, cy, cz){
+    if(answered[n]) return;
+    const x = parseFloat(document.getElementById('q'+n+'x').value);
+    const y = parseFloat(document.getElementById('q'+n+'y').value);
+    const z = parseFloat(document.getElementById('q'+n+'z').value);
+    const fb = document.getElementById('fb'+n);
+    fb.classList.add('show');
+    answered[n]=true;
+    const ok = Math.abs(x-cx)<0.5 && Math.abs(y-cy)<0.5 && Math.abs(z-cz)<0.5;
+    if(ok){ score++; fb.textContent=`Correct — (${cx}, ${cy}, ${cz}) N.`; fb.classList.add('correct'); fb.classList.remove('wrong'); }
+    else { fb.textContent=`Not quite. Correct: (${cx}, ${cy}, ${cz}) N.`; fb.classList.add('wrong'); fb.classList.remove('correct'); }
+    updateScore();
+  }
+  function resetExam(){
+    score=0; for(const k in answered) delete answered[k];
+    document.querySelectorAll('.qcard input[type=radio]').forEach(r=>r.checked=false);
+    document.querySelectorAll('.qcard input[type=text]').forEach(i=>i.value='');
+    document.querySelectorAll('.feedback').forEach(f=>{f.classList.remove('show','correct','wrong');});
+    updateScore();
+  }
+
+  computeReaction();
+</script>
+
+</body>
+</html>

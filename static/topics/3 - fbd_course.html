@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Body Diagrams — Interactive Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --surface2: #EFEEE7;
+    --border: #E2E0D8;
+    --border2: #CCCAB8;
+    --text: #1A1917;
+    --text2: #5C5A54;
+    --text3: #8C8A84;
+    --accent: #2B5BE0;
+    --accent-light: #EEF2FD;
+    --accent2: #1A3DAA;
+    --green: #157A52;
+    --green-bg: #EBF6F0;
+    --green-border: #A8DDCA;
+    --red: #C0392B;
+    --red-bg: #FDECEA;
+    --red-border: #F5C6C2;
+    --amber: #A05C00;
+    --amber-bg: #FFF4E0;
+    --amber-border: #F5D89A;
+    --W: #E05A2B;
+    --N: #1D9E75;
+    --f: #3278D4;
+    --T: #B07020;
+    --F: #C2317A;
+    --R: #6B52CC;
+    --M: #1A8F8F;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+  }
+  .header-inner {
+    max-width: 980px; margin: 0 auto;
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 0;
+  }
+  .header-icon {
+    width: 36px; height: 36px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-icon svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .header-title { font-size: 16px; font-weight: 700; }
+  .header-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+  .tab-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .tab-bar-inner { max-width: 980px; margin: 0 auto; display: flex; }
+  .tab {
+    padding: 13px 20px; font-size: 14px; font-weight: 500;
+    border: none; background: transparent; color: var(--text3);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all .15s; display: flex; align-items: center; gap: 7px;
+  }
+  .tab:hover:not(.active) { color: var(--text2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .main { max-width: 980px; margin: 0 auto; padding: 28px 32px 56px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-title { font-size: 21px; font-weight: 700; margin-bottom: 6px; }
+  .section-sub { font-size: 14px; color: var(--text2); margin-bottom: 22px; line-height: 1.65; max-width: 720px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card p { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 0; }
+
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 10px; margin-bottom: 16px; }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; border-left: 3px solid var(--accent); box-shadow: var(--shadow); }
+  .concept-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .concept-card p { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .step-list li::before {
+    content: counter(steps); background: var(--accent); color: #fff;
+    border-radius: 50%; min-width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 2px;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 18px; height: 4px; border-radius: 2px; }
+
+  .practice-layout, .exam-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .scene-panel, .exam-scene-panel { flex: 0 0 280px; min-width: 240px; }
+  .canvas-panel, .exam-canvas-panel { flex: 1; min-width: 300px; }
+
+  .scene-nav { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .scene-counter { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; }
+
+  .force-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .force-btn {
+    padding: 5px 11px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border2); border-radius: 20px;
+    background: var(--surface); color: var(--text2);
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .force-btn .fb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .force-btn:hover:not(.active) { background: var(--surface2); }
+  .force-btn.active { color: #fff; border-color: transparent; }
+  .force-btn[data-force="weight"].active { background: var(--W); }
+  .force-btn[data-force="normal"].active { background: var(--N); }
+  .force-btn[data-force="friction"].active { background: var(--f); }
+  .force-btn[data-force="tension"].active { background: var(--T); }
+  .force-btn[data-force="applied"].active { background: var(--F); }
+  .force-btn[data-force="reaction"].active { background: var(--R); }
+  .force-btn[data-force="momentCW"].active, .force-btn[data-force="momentCCW"].active { background: var(--M); }
+
+  .canvas-wrap { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); overflow: hidden; }
+  canvas { display: block; cursor: crosshair; touch-action: none; width: 100%; }
+
+  .canvas-info { display: flex; align-items: center; justify-content: space-between; padding: 7px 11px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 11px; color: var(--text3); }
+  .arrow-count { font-variant-numeric: tabular-nums; }
+
+  .delete-hint { font-size: 12px; color: var(--text3); margin-top: 6px; min-height: 18px; }
+  .delete-hint b { color: var(--red); font-weight: 600; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .btn-primary {
+    padding: 9px 18px; font-size: 13px; font-weight: 600;
+    border: none; border-radius: var(--radius-sm);
+    background: var(--accent); color: #fff;
+    cursor: pointer; transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .87; }
+  .btn-secondary {
+    padding: 9px 14px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text2);
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-secondary:hover { background: var(--surface2); }
+  .btn-danger {
+    padding: 9px 14px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--red-border); border-radius: var(--radius-sm);
+    background: #FEF2F1; color: var(--red);
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-danger:hover { background: #FDE8E6; }
+  .btn-danger.active { background: var(--red); color: #fff; border-color: var(--red); }
+
+  .feedback { margin-top: 10px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; display: none; line-height: 1.5; }
+  .feedback.show { display: block; }
+  .feedback.ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .feedback.err { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .feedback.warn { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+
+  .exam-q-label { font-size: 12px; color: var(--text3); font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .02em; }
+  .exam-q-text { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.55; margin-bottom: 12px; }
+
+  .exam-progress { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .progress-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1.5px solid var(--border2); background: var(--surface); color: var(--text3);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .15s;
+  }
+  .progress-dot:hover { border-color: var(--accent); }
+  .progress-dot.current { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .progress-dot.answered { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .progress-dot.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .progress-dot.wrong { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; text-align: center; margin-top: 20px; display: none; box-shadow: var(--shadow); }
+  .score-card.show { display: block; }
+  .score-big { font-size: 52px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .score-denom { font-size: 20px; font-weight: 400; color: var(--text3); }
+  .score-pct { font-size: 14px; color: var(--text3); margin-top: 6px; font-weight: 500; }
+  .score-msg { font-size: 15px; font-weight: 500; margin-top: 14px; }
+
+  .exam-result-list { margin-top: 22px; text-align: left; }
+  .result-row { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; border: 1px solid var(--border); }
+  .result-row.ok { background: var(--green-bg); border-color: var(--green-border); }
+  .result-row.err { background: var(--red-bg); border-color: var(--red-border); }
+  .result-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .result-detail { color: var(--text2); font-size: 12px; margin-top: 3px; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+  @media (max-width: 640px) {
+    .app-header, .tab-bar { padding: 0 16px; }
+    .main { padding: 20px 16px 44px; }
+    .scene-panel, .exam-scene-panel { flex: 0 0 100%; }
+    .concept-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/><line x1="5" y1="7" x2="19" y2="7"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Free Body Diagrams</div>
+      <div class="header-sub">Interactive course for statics &amp; mechanics</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tab active" id="tab-learn" type="button">
+      <svg class="tab-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      Course Material
+    </button>
+    <button class="tab" id="tab-practice" type="button">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Practice
+    </button>
+    <button class="tab" id="tab-exam" type="button">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Exam
+    </button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ===== LEARN ===== -->
+<div id="panel-learn" class="panel active">
+  <div class="section-title">Free Body Diagram — Fundamentals</div>
+  <div class="section-sub">Learn to isolate any object and represent every force acting on it with labelled arrows.</div>
+
+  <div class="card">
+    <div class="card-title">What is a Free Body Diagram?</div>
+    <p>A Free Body Diagram (FBD) is a simplified sketch of a single object, isolated from all surroundings, showing every external force acting on it as a vector arrow. FBDs are the foundation of equilibrium analysis and Newton's second law problems.</p>
+  </div>
+
+  <div class="card-title" style="margin-bottom:10px">Seven fundamental force &amp; moment types</div>
+  <div class="concept-grid">
+    <div class="concept-card"><h4>Weight (W)</h4><p>Gravitational pull mg, always pointing straight downward through the centre of mass.</p></div>
+    <div class="concept-card"><h4>Normal (N)</h4><p>Contact force perpendicular to the support surface, preventing the object from passing through it.</p></div>
+    <div class="concept-card"><h4>Friction (f)</h4><p>Contact force parallel to the surface, opposing motion or tendency of motion.</p></div>
+    <div class="concept-card"><h4>Tension (T)</h4><p>Pull transmitted through a rope or cable, always directed away from the object along the cable.</p></div>
+    <div class="concept-card"><h4>Applied (F)</h4><p>A direct push or pull exerted on the object by a person or another body.</p></div>
+    <div class="concept-card"><h4>Reaction (R)</h4><p>Support force from a pin, roller, or wall that maintains structural equilibrium.</p></div>
+    <div class="concept-card"><h4>Reaction Moment (M)</h4><p>A rotational (turning) reaction supplied by a fixed/built-in support, drawn as a curved arrow instead of a straight one.</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Reaction moments — when do they appear?</div>
+    <p>Most supports (pins, rollers, smooth contacts) can only push or pull — they supply <strong>force</strong> reactions. A <strong>fixed support</strong> (also called a built-in, clamped, or cantilever support — for example a beam welded or bolted into a wall) is different: it also resists <em>rotation</em>. That rotational resistance is the <strong>reaction moment</strong>, drawn on an FBD as a curved arrow looping clockwise or counterclockwise around the support point, labelled M.</p>
+    <p style="margin-top:10px">A simple rule of thumb: count the directions a support restrains.</p>
+    <ul class="step-list" style="margin-top:6px">
+      <li><strong>Roller</strong> — restrains motion in one direction only → one force reaction, no moment.</li>
+      <li><strong>Pin</strong> — restrains motion in two directions but allows free rotation → two force reactions, no moment.</li>
+      <li><strong>Fixed support</strong> — restrains motion in two directions <em>and</em> rotation → two force reactions <em>plus</em> a reaction moment.</li>
+    </ul>
+    <svg viewBox="0 0 460 200" style="width:100%;max-width:460px;display:block;margin:14px auto 0">
+      <rect x="40" y="80" width="22" height="70" fill="#888"/>
+      <line x1="62" y1="100" x2="280" y2="100" stroke="#2B5BE0" stroke-width="4"/>
+      <defs>
+        <marker id="lmP" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#C2317A"/></marker>
+        <marker id="lmRx" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#6B52CC"/></marker>
+      </defs>
+      <line x1="270" y1="45" x2="270" y2="95" stroke="#C2317A" stroke-width="2.5" marker-end="url(#lmP)"/>
+      <text x="282" y="60" font-size="12" fill="#993556" font-weight="700">P</text>
+      <line x1="62" y1="100" x2="62" y2="58" stroke="#6B52CC" stroke-width="2.5" marker-end="url(#lmRx)"/>
+      <text x="70" y="56" font-size="12" fill="#4B3F99" font-weight="700">R</text>
+      <path d="M 40 112 A 24 24 0 1 1 58 86" stroke="#1A8F8F" stroke-width="2.5" fill="none"/>
+      <path d="M 58 86 L 49 83 L 51 95 Z" fill="#1A8F8F"/>
+      <text x="14" y="118" font-size="13" fill="#16706F" font-weight="700">M</text>
+      <text x="51" y="172" text-anchor="middle" font-size="10" fill="#888">fixed support</text>
+      <text x="270" y="172" text-anchor="middle" font-size="10" fill="#888">free end, load P</text>
+    </svg>
+    <div class="legend" style="justify-content:center;margin-top:8px">
+      <div class="legend-item"><div class="legend-dot" style="background:#C2317A"></div>Applied load (P)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6B52CC"></div>Reaction force (R)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1A8F8F"></div>Reaction moment (M)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Steps to draw an FBD</div>
+    <ol class="step-list">
+      <li>Identify the object of interest — this is the body you are "freeing".</li>
+      <li>Draw the object as a simple shape (box, circle, or dot) in isolation.</li>
+      <li>List every external agent that touches the object or acts at a distance.</li>
+      <li>Draw each force as an arrow at the correct point of application, in the correct direction.</li>
+      <li>Label every arrow with its symbol (W, N, f, T, F, R) and magnitude if known.</li>
+      <li>Check completeness: weight is always present; support forces must match constraints.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Example — Block pushed on a rough horizontal floor</div>
+    <svg viewBox="0 0 460 210" style="width:100%;max-width:500px;display:block;margin:0 auto">
+      <defs>
+        <marker id="lmN" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1D9E75"/></marker>
+        <marker id="lmW" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E05A2B"/></marker>
+        <marker id="lmf" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3278D4"/></marker>
+        <marker id="lmF" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#C2317A"/></marker>
+      </defs>
+      <rect x="160" y="80" width="130" height="80" rx="5" fill="#EEF2FD" stroke="#2B5BE0" stroke-width="1.5"/>
+      <text x="225" y="124" text-anchor="middle" font-size="13" fill="#1A3DAA" font-weight="700">Block</text>
+      <line x1="30" y1="160" x2="430" y2="160" stroke="#C8C6BC" stroke-width="1.5"/>
+      <line x1="38" y1="160" x2="48" y2="172" stroke="#C8C6BC"/><line x1="60" y1="160" x2="70" y2="172" stroke="#C8C6BC"/><line x1="82" y1="160" x2="92" y2="172" stroke="#C8C6BC"/><line x1="104" y1="160" x2="114" y2="172" stroke="#C8C6BC"/><line x1="126" y1="160" x2="136" y2="172" stroke="#C8C6BC"/><line x1="148" y1="160" x2="158" y2="172" stroke="#C8C6BC"/><line x1="170" y1="160" x2="180" y2="172" stroke="#C8C6BC"/><line x1="192" y1="160" x2="202" y2="172" stroke="#C8C6BC"/><line x1="214" y1="160" x2="224" y2="172" stroke="#C8C6BC"/><line x1="236" y1="160" x2="246" y2="172" stroke="#C8C6BC"/><line x1="258" y1="160" x2="268" y2="172" stroke="#C8C6BC"/><line x1="280" y1="160" x2="290" y2="172" stroke="#C8C6BC"/><line x1="302" y1="160" x2="312" y2="172" stroke="#C8C6BC"/><line x1="324" y1="160" x2="334" y2="172" stroke="#C8C6BC"/><line x1="346" y1="160" x2="356" y2="172" stroke="#C8C6BC"/><line x1="368" y1="160" x2="378" y2="172" stroke="#C8C6BC"/><line x1="390" y1="160" x2="400" y2="172" stroke="#C8C6BC"/><line x1="412" y1="160" x2="422" y2="172" stroke="#C8C6BC"/>
+      <line x1="225" y1="80" x2="225" y2="28" stroke="#1D9E75" stroke-width="2.5" marker-end="url(#lmN)"/>
+      <text x="237" y="50" font-size="12" fill="#1D9E75" font-weight="700">N</text>
+      <line x1="225" y1="120" x2="225" y2="163" stroke="#E05A2B" stroke-width="2.5" marker-end="url(#lmW)"/>
+      <text x="237" y="152" font-size="12" fill="#E05A2B" font-weight="700">W</text>
+      <line x1="160" y1="120" x2="96" y2="120" stroke="#3278D4" stroke-width="2.5" marker-end="url(#lmf)"/>
+      <text x="82" y="113" font-size="12" fill="#3278D4" font-weight="700">f</text>
+      <line x1="290" y1="120" x2="370" y2="120" stroke="#C2317A" stroke-width="2.5" marker-end="url(#lmF)"/>
+      <text x="376" y="113" font-size="12" fill="#C2317A" font-weight="700">F</text>
+    </svg>
+    <div class="legend" style="justify-content:center;margin-top:12px">
+      <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Normal (N) — upward</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E05A2B"></div>Weight (W) — downward</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3278D4"></div>Friction (f) — leftward</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#C2317A"></div>Applied (F) — rightward</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PRACTICE ===== -->
+<div id="panel-practice" class="panel">
+  <div class="section-title">Practice — Draw the FBD</div>
+  <div class="section-sub">Study the scenario on the left, then draw each force on the canvas. Select a force type and click-and-drag to draw an arrow — or select a Moment (CW/CCW) and just click once to place it. Use Delete Mode to remove a specific item.</div>
+
+  <div class="practice-layout">
+    <div class="scene-panel">
+      <div class="card" style="margin-bottom:10px">
+        <div class="exam-q-label" id="p-scene-label">Scenario 1 of 6</div>
+        <div class="exam-q-text" id="p-scene-desc"></div>
+        <svg id="p-scene-svg" viewBox="0 0 240 180" style="width:100%;max-width:260px;display:block;margin:0 auto;border-radius:6px"></svg>
+      </div>
+      <div class="scene-nav">
+        <button class="btn-secondary" id="p-prev" type="button">&larr; Prev</button>
+        <button class="btn-primary" id="p-next" type="button">Next &rarr;</button>
+        <span class="scene-counter" id="p-counter">1 / 6</span>
+      </div>
+    </div>
+
+    <div class="canvas-panel">
+      <div class="force-toolbar" id="p-toolbar">
+        <button class="force-btn active" data-force="weight" type="button"><span class="fb-dot" style="background:var(--W)"></span>Weight (W)</button>
+        <button class="force-btn" data-force="normal" type="button"><span class="fb-dot" style="background:var(--N)"></span>Normal (N)</button>
+        <button class="force-btn" data-force="friction" type="button"><span class="fb-dot" style="background:var(--f)"></span>Friction (f)</button>
+        <button class="force-btn" data-force="tension" type="button"><span class="fb-dot" style="background:var(--T)"></span>Tension (T)</button>
+        <button class="force-btn" data-force="applied" type="button"><span class="fb-dot" style="background:var(--F)"></span>Applied (F)</button>
+        <button class="force-btn" data-force="reaction" type="button"><span class="fb-dot" style="background:var(--R)"></span>Reaction (R)</button>
+        <button class="force-btn" data-force="momentCW" type="button"><span class="fb-dot" style="background:var(--M)"></span>Moment ↻ CW</button>
+        <button class="force-btn" data-force="momentCCW" type="button"><span class="fb-dot" style="background:var(--M)"></span>Moment ↺ CCW</button>
+      </div>
+
+      <div class="canvas-wrap">
+        <div class="canvas-info">
+          <span>Drag for forces · click for moments</span>
+          <span class="arrow-count" id="p-arrow-count">0 arrows</span>
+        </div>
+        <canvas id="p-canvas" height="240"></canvas>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="p-check" type="button">Check Answer</button>
+        <button class="btn-danger" id="p-delete-btn" type="button">Delete Mode</button>
+        <button class="btn-secondary" id="p-clear" type="button">Clear All</button>
+      </div>
+      <div class="delete-hint" id="p-delete-hint"></div>
+      <div class="feedback" id="p-feedback"></div>
+
+      <div class="legend" style="margin-top:10px">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--W)"></div>W</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--N)"></div>N</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--f)"></div>f</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--T)"></div>T</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--F)"></div>F</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--R)"></div>R</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--M)"></div>M (moment)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXAM ===== -->
+<div id="panel-exam" class="panel">
+  <div class="section-title">Exam — Draw the FBD</div>
+  <div class="section-sub">Draw the free body diagram for each of the 10 scenarios. Place arrows for every force and no extra ones. Answers are graded on correct forces and correct directions.</div>
+
+  <div class="exam-progress" id="exam-progress"></div>
+
+  <div class="exam-layout">
+    <div class="exam-scene-panel">
+      <div class="card" style="margin-bottom:10px">
+        <div class="exam-q-label" id="e-scene-label">Question 1 of 10</div>
+        <div class="exam-q-text" id="e-scene-desc"></div>
+        <svg id="e-scene-svg" viewBox="0 0 240 180" style="width:100%;max-width:260px;display:block;margin:0 auto"></svg>
+      </div>
+      <div class="scene-nav">
+        <button class="btn-secondary" id="e-prev" type="button">&larr; Prev</button>
+        <button class="btn-secondary" id="e-next" type="button">Next &rarr;</button>
+      </div>
+    </div>
+
+    <div class="exam-canvas-panel">
+      <div class="force-toolbar" id="e-toolbar">
+        <button class="force-btn active" data-force="weight" type="button"><span class="fb-dot" style="background:var(--W)"></span>Weight (W)</button>
+        <button class="force-btn" data-force="normal" type="button"><span class="fb-dot" style="background:var(--N)"></span>Normal (N)</button>
+        <button class="force-btn" data-force="friction" type="button"><span class="fb-dot" style="background:var(--f)"></span>Friction (f)</button>
+        <button class="force-btn" data-force="tension" type="button"><span class="fb-dot" style="background:var(--T)"></span>Tension (T)</button>
+        <button class="force-btn" data-force="applied" type="button"><span class="fb-dot" style="background:var(--F)"></span>Applied (F)</button>
+        <button class="force-btn" data-force="reaction" type="button"><span class="fb-dot" style="background:var(--R)"></span>Reaction (R)</button>
+        <button class="force-btn" data-force="momentCW" type="button"><span class="fb-dot" style="background:var(--M)"></span>Moment ↻ CW</button>
+        <button class="force-btn" data-force="momentCCW" type="button"><span class="fb-dot" style="background:var(--M)"></span>Moment ↺ CCW</button>
+      </div>
+      <div class="canvas-wrap">
+        <div class="canvas-info">
+          <span>Drag for forces · click for moments</span>
+          <span class="arrow-count" id="e-arrow-count">0 arrows</span>
+        </div>
+        <canvas id="e-canvas" height="240"></canvas>
+      </div>
+      <div class="btn-row">
+        <button class="btn-danger" id="e-delete-btn" type="button">Delete Mode</button>
+        <button class="btn-secondary" id="e-clear" type="button">Clear</button>
+      </div>
+      <div class="delete-hint" id="e-delete-hint"></div>
+      <div class="feedback" id="e-q-feedback"></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="btn-row">
+    <button class="btn-primary" id="exam-submit-btn" type="button">Submit Exam</button>
+  </div>
+
+  <div class="score-card" id="score-card">
+    <div>
+      <span class="score-big" id="score-num">0</span><span class="score-denom" id="score-denom"> / 10</span>
+    </div>
+    <div class="score-pct" id="score-pct"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="exam-result-list" id="exam-result-list"></div>
+    <div class="btn-row" style="justify-content:center;margin-top:16px">
+      <button class="btn-primary" id="exam-retake-btn" type="button">Retake Exam</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+(function(){
+"use strict";
+
+var COLORS = {weight:'#E05A2B',normal:'#1D9E75',friction:'#3278D4',tension:'#B07020',applied:'#C2317A',reaction:'#6B52CC',momentCW:'#1A8F8F',momentCCW:'#1A8F8F'};
+var LABELS = {weight:'W',normal:'N',friction:'f',tension:'T',applied:'F',reaction:'R',momentCW:'M',momentCCW:'M'};
+
+/* ---------- SVG helper drawings for scenario thumbnails ---------- */
+function groundSVG(){
+  var s = '<line x1="10" y1="125" x2="230" y2="125" stroke="#C8C6BC" stroke-width="1.5"/>';
+  for (var x = 18; x < 230; x += 22) s += '<line x1="'+x+'" y1="125" x2="'+(x-10)+'" y2="137" stroke="#C8C6BC" stroke-width="1"/>';
+  return s;
+}
+function ceilingSVG(){
+  var s = '<line x1="10" y1="14" x2="230" y2="14" stroke="#555" stroke-width="3"/>';
+  for (var x = 18; x < 230; x += 22) s += '<line x1="'+x+'" y1="14" x2="'+(x+10)+'" y2="2" stroke="#555" stroke-width="1"/>';
+  return s;
+}
+function wallSVG(){
+  var s = '<line x1="72" y1="10" x2="72" y2="175" stroke="#C8C6BC" stroke-width="1.5"/>';
+  for (var y = 20; y < 175; y += 20) s += '<line x1="72" y1="'+y+'" x2="60" y2="'+(y+12)+'" stroke="#C8C6BC" stroke-width="1"/>';
+  return s;
+}
+function rectSVG(x,y,w,h){ return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4" fill="#EEF2FD" stroke="#2B5BE0" stroke-width="1.5"/>'; }
+function textSVG(x,y,t){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="12" fill="#1A3DAA" font-weight="700">'+t+'</text>'; }
+function inclineSVG(angleDeg){
+  angleDeg = angleDeg || 30;
+  var baseY = 162, rightX = 225, rise = 100;
+  var rad = angleDeg * Math.PI/180;
+  var run = rise / Math.tan(rad);
+  var leftX = rightX - run;
+  var apexY = baseY - rise;
+
+  // Triangle: bottom-left -> bottom-right -> apex (top-right). Solid wedge sits below the hypotenuse.
+  var tri = '<polygon points="'+leftX.toFixed(1)+','+baseY+' '+rightX+','+baseY+' '+rightX+','+apexY+'" fill="#D8D6CE" stroke="#888" stroke-width="1.5"/>';
+
+  var hatch = '';
+  for (var x = leftX+8; x < rightX; x += 18) hatch += '<line x1="'+x.toFixed(1)+'" y1="'+baseY+'" x2="'+(x-10).toFixed(1)+'" y2="'+(baseY+12)+'" stroke="#C8C6BC" stroke-width="1"/>';
+
+  var angleLbl = '<text x="'+(leftX+8).toFixed(1)+'" y="'+(baseY-8)+'" font-size="10" fill="#666">'+angleDeg+'°</text>';
+
+  // Hypotenuse runs from bottom-left up to the apex (top-right) -- this is the slope surface.
+  var hx1 = leftX, hy1 = baseY, hx2 = rightX, hy2 = apexY;
+  var slopeLen = Math.sqrt(Math.pow(hx2-hx1,2)+Math.pow(hy2-hy1,2));
+  var ux = (hx2-hx1)/slopeLen, uy = (hy2-hy1)/slopeLen; // unit vector pointing up-slope
+
+  // Outward normal (away from the solid wedge) -- rotate up-slope vector by -90deg.
+  var nx = uy, ny = -ux;
+
+  // Block centered partway up the hypotenuse, lifted off the surface by half its thickness.
+  var f = 0.45;
+  var midX = hx1 + f*(hx2-hx1), midY = hy1 + f*(hy2-hy1);
+  var bw = 48, bh = 26;
+  var liftX = midX + nx*(bh/2), liftY = midY + ny*(bh/2);
+
+  // Rotate the block so its local +x axis aligns with the up-slope direction.
+  var cosA = ux, sinA = uy;
+  function rot(px,py){ return { x: liftX + px*cosA - py*sinA, y: liftY + px*sinA + py*cosA }; }
+  var corners = [rot(-bw/2,-bh/2), rot(bw/2,-bh/2), rot(bw/2,bh/2), rot(-bw/2,bh/2)];
+  var pts = corners.map(function(p){ return p.x.toFixed(1)+','+p.y.toFixed(1); }).join(' ');
+  var block = '<polygon points="'+pts+'" fill="#EEF2FD" stroke="#2B5BE0" stroke-width="1.5"/>';
+  var label = '<text x="'+liftX.toFixed(1)+'" y="'+(liftY+4).toFixed(1)+'" text-anchor="middle" font-size="10" fill="#1A3DAA" font-weight="700">Block</text>';
+
+  return tri + hatch + angleLbl + block + label;
+}
+function pulleySVG(){
+  // Wall-mounted bracket with pulley, rope going up-and-over to a hanging block
+  return '<line x1="20" y1="14" x2="20" y2="175" stroke="#C8C6BC" stroke-width="1.5"/>'
+    + '<line x1="20" y1="40" x2="60" y2="40" stroke="#888" stroke-width="3"/>'
+    + '<circle cx="68" cy="40" r="10" fill="#fff" stroke="#555" stroke-width="2"/>'
+    + '<line x1="68" y1="50" x2="68" y2="100" stroke="#B07020" stroke-width="2"/>'
+    + '<rect x="43" y="100" width="50" height="42" rx="4" fill="#EEF2FD" stroke="#2B5BE0" stroke-width="1.5"/>'
+    + '<text x="68" y="125" text-anchor="middle" font-size="10" fill="#1A3DAA" font-weight="700">Block A</text>'
+    + '<line x1="78" y1="40" x2="190" y2="40" stroke="#B07020" stroke-width="2"/>'
+    + '<text x="130" y="32" font-size="9" fill="#888">rope over pulley</text>';
+}
+function beamSVG(){
+  // Simply supported beam: pin support at left, roller support at right, point load in middle
+  return '<line x1="20" y1="90" x2="220" y2="90" stroke="#2B5BE0" stroke-width="4"/>'
+    + '<polygon points="20,90 10,108 30,108" fill="#888" stroke="#555" stroke-width="1"/>'
+    + '<line x1="2" y1="108" x2="38" y2="108" stroke="#555" stroke-width="1.5"/>'
+    + '<circle cx="220" cy="100" r="8" fill="#888" stroke="#555" stroke-width="1"/>'
+    + '<line x1="202" y1="110" x2="238" y2="110" stroke="#555" stroke-width="1.5"/>'
+    + '<text x="20" y="125" text-anchor="middle" font-size="9" fill="#666">pin</text>'
+    + '<text x="220" y="125" text-anchor="middle" font-size="9" fill="#666">roller</text>'
+    + '<defs><marker id="mbeam" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#C2317A"/></marker></defs>'
+    + '<line x1="120" y1="40" x2="120" y2="85" stroke="#C2317A" stroke-width="2.5" marker-end="url(#mbeam)"/>'
+    + '<text x="132" y="55" font-size="11" fill="#993556" font-weight="700">P</text>'
+    + '<text x="120" y="20" text-anchor="middle" font-size="9" fill="#888">downward load</text>';
+}
+
+/* Geometry helpers: directions are expressed relative to a surface/incline
+   tilted by `objAngle` degrees (the same angle the FBD canvas object is rotated by).
+   Angle convention matches atan2(dy,dx): 0=right, 90=down, -90=up, 180=left. */
+function surfaceNormalAngle(objAngle){ return -90 + objAngle; }   // perpendicular to surface, away from it
+function upSlopeAngle(objAngle){ return 0 + objAngle; }           // parallel to surface, "uphill"
+function downSlopeAngle(objAngle){ return 180 + objAngle; }       // parallel to surface, "downhill"
+
+/* ---------- Scenario data ---------- */
+var PRACTICE_SCENES = [
+  {
+    label: 'Scenario 1 of 6',
+    desc: 'A block rests on a rough horizontal floor. A horizontal push F is applied to the right. Draw all forces acting on the block.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',   angle: 90,  tol: 25},
+      {type:'normal',   angle: -90, tol: 25},
+      {type:'friction', angle: 180, tol: 25},
+      {type:'applied',  angle: 0,   tol: 25}
+    ],
+    draw: function(svg){
+      svg.innerHTML = groundSVG() + rectSVG(65,55,110,70) + textSVG(120,94,'Block')
+        + '<defs><marker id="ms1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#C2317A"/></marker></defs>'
+        + '<line x1="20" y1="90" x2="58" y2="90" stroke="#C2317A" stroke-width="2" marker-end="url(#ms1)"/>'
+        + '<text x="10" y="86" font-size="11" fill="#993556" font-weight="700">F</text>';
+    }
+  },
+  {
+    label: 'Scenario 2 of 6',
+    desc: 'A mass hangs at rest from a single rope attached to the ceiling. Draw all forces acting on the mass.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',  angle: 90,  tol: 25},
+      {type:'tension', angle: -90, tol: 25}
+    ],
+    draw: function(svg){
+      svg.innerHTML = ceilingSVG()
+        + '<line x1="120" y1="16" x2="120" y2="55" stroke="#B07020" stroke-width="2.5"/>'
+        + rectSVG(75,55,90,60) + textSVG(120,89,'Mass');
+    }
+  },
+  {
+    label: 'Scenario 3 of 6',
+    desc: 'A block is placed on a smooth (frictionless) inclined plane at 30° and is sliding down. Draw all forces acting on the block at this instant. Remember: the Normal force is perpendicular to the incline surface, not vertical.',
+    objAngle: -30,
+    expected: [
+      {type:'weight', angle: 90, tol: 25},
+      {type:'normal', angle: surfaceNormalAngle(-30), tol: 28}
+    ],
+    draw: function(svg){ svg.innerHTML = inclineSVG(30); }
+  },
+  {
+    label: 'Scenario 4 of 6',
+    desc: 'A block is pulled up a rough inclined plane (30°) by a rope parallel to the slope. Draw all forces on the block. The Normal force is perpendicular to the slope; friction and tension act along the slope.',
+    objAngle: -30,
+    expected: [
+      {type:'weight',   angle: 90, tol: 25},
+      {type:'normal',   angle: surfaceNormalAngle(-30), tol: 28},
+      {type:'friction', angle: downSlopeAngle(-30), tol: 28},
+      {type:'tension',  angle: upSlopeAngle(-30),   tol: 28}
+    ],
+    draw: function(svg){
+      svg.innerHTML = inclineSVG(30)
+        + '<defs><marker id="ms4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#B07020"/></marker></defs>'
+        + '<line x1="137.5" y1="82.5" x2="176.5" y2="60.0" stroke="#B07020" stroke-width="2" marker-end="url(#ms4)"/>'
+        + '<text x="180" y="56" font-size="10" fill="#B07020" font-weight="700">T</text>';
+    }
+  },
+  {
+    label: 'Scenario 5 of 6',
+    desc: 'A block is pressed against a vertical wall by a horizontal push F. The block does not slide. Draw all forces on the block.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',   angle: 90,  tol: 25},
+      {type:'normal',   angle: 0,   tol: 25},
+      {type:'friction', angle: -90, tol: 25},
+      {type:'applied',  angle: 180, tol: 25}
+    ],
+    draw: function(svg){
+      svg.innerHTML = wallSVG() + rectSVG(75,60,80,65) + textSVG(115,96,'Block')
+        + '<defs><marker id="ms5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#C2317A"/></marker></defs>'
+        + '<line x1="195" y1="93" x2="162" y2="93" stroke="#C2317A" stroke-width="2" marker-end="url(#ms5)"/>'
+        + '<text x="200" y="90" font-size="11" fill="#993556" font-weight="700">F</text>';
+    }
+  },
+  {
+    label: 'Scenario 6 of 6',
+    desc: 'A bracket is bolted (fixed) into a wall and carries a downward load at its free end. A fixed support resists both translation and rotation. Draw the force reaction, and place a reaction moment (click the Moment button, then click the support point) in the correct rotational sense.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',   angle: 90,  tol: 25},
+      {type:'reaction', angle: -90, tol: 30},
+      {type:'momentCCW'}
+    ],
+    draw: function(svg){
+      svg.innerHTML = '<rect x="15" y="60" width="22" height="70" fill="#888"/>'
+        + '<line x1="37" y1="82" x2="200" y2="82" stroke="#2B5BE0" stroke-width="4"/>'
+        + '<defs><marker id="ms6b" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#E05A2B"/></marker></defs>'
+        + '<line x1="190" y1="40" x2="190" y2="77" stroke="#E05A2B" stroke-width="2.5" marker-end="url(#ms6b)"/>'
+        + '<text x="198" y="55" font-size="11" fill="#993C1D" font-weight="700">W</text>'
+        + '<text x="26" y="148" font-size="9" fill="#666" text-anchor="middle">fixed</text>';
+    }
+  }
+];
+
+var EXAM_SCENES = [
+  {
+    label: 'Question 1 of 10',
+    desc: 'A book rests on a horizontal table with no applied force and no motion. Draw all forces acting on the book.',
+    objAngle: 0,
+    expected: [
+      {type:'weight', angle: 90,  tol: 25},
+      {type:'normal', angle: -90, tol: 25}
+    ],
+    draw: function(svg){ svg.innerHTML = groundSVG() + rectSVG(65,55,110,70) + textSVG(120,93,'Book'); }
+  },
+  {
+    label: 'Question 2 of 10',
+    desc: 'A ball is in free flight (no air resistance). Draw all forces acting on the ball.',
+    objAngle: 0,
+    expected: [ {type:'weight', angle: 90, tol: 25} ],
+    draw: function(svg){
+      svg.innerHTML = '<circle cx="120" cy="90" r="32" fill="#EEF2FD" stroke="#2B5BE0" stroke-width="1.5"/>'
+        + '<text x="120" y="95" text-anchor="middle" font-size="12" fill="#1A3DAA" font-weight="700">Ball</text>';
+    }
+  },
+  {
+    label: 'Question 3 of 10',
+    desc: 'A lamp hangs from two symmetric cables making equal angles with the ceiling. Draw all forces at the junction point.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',  angle: 90,   tol: 25},
+      {type:'tension', angle: -135, tol: 35},
+      {type:'tension', angle: -45,  tol: 35}
+    ],
+    draw: function(svg){
+      svg.innerHTML = ceilingSVG()
+        + '<line x1="60" y1="16" x2="120" y2="80" stroke="#B07020" stroke-width="2"/>'
+        + '<line x1="180" y1="16" x2="120" y2="80" stroke="#B07020" stroke-width="2"/>'
+        + '<circle cx="120" cy="80" r="6" fill="#B07020"/>'
+        + '<line x1="120" y1="80" x2="120" y2="120" stroke="#555" stroke-width="1.5"/>'
+        + '<ellipse cx="120" cy="130" rx="25" ry="15" fill="#EEF2FD" stroke="#2B5BE0" stroke-width="1.5"/>'
+        + '<text x="120" y="134" text-anchor="middle" font-size="10" fill="#1A3DAA">Lamp</text>';
+    }
+  },
+  {
+    label: 'Question 4 of 10',
+    desc: 'A simply supported beam carries a single downward point load at its centre. It rests on a pin support at the left end and a roller support at the right end. Draw the forces acting on the beam (the applied load, plus the support reactions).',
+    objAngle: 0,
+    expected: [
+      {type:'applied',  angle: 90,  tol: 20},
+      {type:'reaction', angle: -90, tol: 30},
+      {type:'reaction', angle: -90, tol: 30}
+    ],
+    draw: function(svg){ svg.innerHTML = beamSVG(); }
+  },
+  {
+    label: 'Question 5 of 10',
+    desc: 'A block is placed on a smooth (frictionless) 30° inclined plane and is sliding down. Draw all forces acting on the block at this instant — remember the Normal force is perpendicular to the incline.',
+    objAngle: -30,
+    expected: [
+      {type:'weight', angle: 90, tol: 25},
+      {type:'normal', angle: surfaceNormalAngle(-30), tol: 28}
+    ],
+    draw: function(svg){ svg.innerHTML = inclineSVG(30); }
+  },
+  {
+    label: 'Question 6 of 10',
+    desc: 'A crate sits on a rough floor. A rope pulls it at 30° above horizontal to the right. The crate does not move. Draw all forces acting on the crate.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',   angle: 90,  tol: 25},
+      {type:'normal',   angle: -90, tol: 25},
+      {type:'friction', angle: 180, tol: 30},
+      {type:'tension',  angle: -30, tol: 30}
+    ],
+    draw: function(svg){
+      svg.innerHTML = groundSVG() + rectSVG(65,55,110,70) + textSVG(120,93,'Crate')
+        + '<defs><marker id="ms6" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#B07020"/></marker></defs>'
+        + '<line x1="175" y1="90" x2="210" y2="60" stroke="#B07020" stroke-width="2" marker-end="url(#ms6)"/>'
+        + '<text x="214" y="57" font-size="10" fill="#B07020" font-weight="700">T</text>'
+        + '<text x="186" y="68" font-size="9" fill="#888">30°</text>';
+    }
+  },
+  {
+    label: 'Question 7 of 10',
+    desc: 'Block A hangs from a rope that passes over a frictionless pulley mounted on a wall. Draw all forces acting on Block A only.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',  angle: 90,  tol: 25},
+      {type:'tension', angle: -90, tol: 25}
+    ],
+    draw: function(svg){ svg.innerHTML = pulleySVG(); }
+  },
+  {
+    label: 'Question 8 of 10',
+    desc: 'A block rests on a rough 45° inclined plane and remains stationary (friction holds it in place). Draw all forces on the block — Normal is perpendicular to the slope, friction acts along the slope.',
+    objAngle: -45,
+    expected: [
+      {type:'weight',   angle: 90, tol: 25},
+      {type:'normal',   angle: surfaceNormalAngle(-45), tol: 28},
+      {type:'friction', angle: upSlopeAngle(-45), tol: 28}
+    ],
+    draw: function(svg){ svg.innerHTML = inclineSVG(45); }
+  },
+  {
+    label: 'Question 9 of 10',
+    desc: 'A cantilever beam is fixed (bolted) into a wall at its left end and carries a downward point load at its free right end. A fixed support resists both translation and rotation. Draw the forces and the reaction moment acting on the beam.',
+    objAngle: 0,
+    expected: [
+      {type:'applied',   angle: 90,  tol: 20},
+      {type:'reaction',  angle: -90, tol: 30},
+      {type:'momentCCW'}
+    ],
+    draw: function(svg){
+      svg.innerHTML = '<rect x="10" y="70" width="20" height="60" fill="#888"/>'
+        + '<line x1="30" y1="92" x2="220" y2="92" stroke="#2B5BE0" stroke-width="4"/>'
+        + '<defs><marker id="mcant" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#C2317A"/></marker></defs>'
+        + '<line x1="210" y1="40" x2="210" y2="87" stroke="#C2317A" stroke-width="2.5" marker-end="url(#mcant)"/>'
+        + '<text x="222" y="55" font-size="11" fill="#993556" font-weight="700">P</text>'
+        + '<text x="20" y="148" font-size="9" fill="#666" text-anchor="middle">fixed</text>';
+    }
+  },
+  {
+    label: 'Question 10 of 10',
+    desc: 'A wagon is pulled by a rope at 30° above horizontal to the right, on a rough horizontal road, and moves at constant velocity. Draw all forces acting on the wagon.',
+    objAngle: 0,
+    expected: [
+      {type:'weight',   angle: 90,  tol: 25},
+      {type:'normal',   angle: -90, tol: 25},
+      {type:'friction', angle: 180, tol: 28},
+      {type:'tension',  angle: -30, tol: 28}
+    ],
+    draw: function(svg){
+      svg.innerHTML = groundSVG() + rectSVG(60,60,120,60) + textSVG(120,93,'Wagon')
+        + '<circle cx="80" cy="122" r="10" fill="#555"/><circle cx="160" cy="122" r="10" fill="#555"/>'
+        + '<defs><marker id="ms10" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#B07020"/></marker></defs>'
+        + '<line x1="180" y1="90" x2="212" y2="62" stroke="#B07020" stroke-width="2" marker-end="url(#ms10)"/>'
+        + '<text x="216" y="58" font-size="10" fill="#B07020" font-weight="700">T</text>'
+        + '<text x="190" y="70" font-size="9" fill="#888">30°</text>';
+    }
+  }
+];
+
+/* ---------- Canvas drawing engine ---------- */
+function makeEngine(canvasId, countId){
+  var canvas = document.getElementById(canvasId);
+  var ctx = canvas.getContext('2d');
+  var arrows = [];
+  var activeForce = 'weight';
+  var deleteMode = false;
+  var drawing = false;
+  var sx, sy, cx, cy;
+  var objAngle = 0;
+
+  function resize(){
+    var w = (canvas.parentElement && canvas.parentElement.clientWidth) ? canvas.parentElement.clientWidth : 420;
+    canvas.width = w;
+    redraw();
+  }
+  window.addEventListener('resize', resize);
+
+  function getPos(e){
+    var r = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / r.width, scaleY = canvas.height / r.height;
+    var src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - r.left) * scaleX, y: (src.clientY - r.top) * scaleY };
+  }
+
+  function drawBase(){
+    var W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#EFEEE7';
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = 'rgba(0,0,0,0.07)';
+    for (var gx = 22; gx < W; gx += 28) for (var gy = 18; gy < H; gy += 28) { ctx.beginPath(); ctx.arc(gx,gy,1.4,0,Math.PI*2); ctx.fill(); }
+    ctx.save();
+    ctx.translate(W/2, H/2);
+    ctx.rotate(objAngle * Math.PI / 180);
+    var bw = 80, bh = 48;
+    ctx.fillStyle = '#EEF2FD';
+    ctx.strokeStyle = 'rgba(43,91,224,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.rect(-bw/2,-bh/2,bw,bh); ctx.fill(); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(43,91,224,0.6)';
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('object', 0, 0);
+    ctx.restore();
+  }
+
+  function drawArrow(x1,y1,x2,y2,color,label,alpha){
+    var dx = x2-x1, dy = y2-y1, len = Math.sqrt(dx*dx+dy*dy);
+    if (len < 4) return;
+    ctx.save();
+    ctx.globalAlpha = alpha || 1;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    var a = Math.atan2(dy,dx);
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2 - 14*Math.cos(a-0.42), y2 - 14*Math.sin(a-0.42));
+    ctx.lineTo(x2 - 14*Math.cos(a+0.42), y2 - 14*Math.sin(a+0.42));
+    ctx.closePath(); ctx.fill();
+    if (label) {
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, x2 + 18*Math.cos(a), y2 + 18*Math.sin(a));
+    }
+    ctx.restore();
+  }
+
+  function drawMoment(cx0, cy0, r, clockwise, color, alpha){
+    var startRad = -45 * Math.PI/180;
+    var sweepRad = 270 * Math.PI/180;
+    var endRad = clockwise ? startRad + sweepRad : startRad - sweepRad;
+    ctx.save();
+    ctx.globalAlpha = alpha || 1;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(cx0, cy0, r, startRad, endRad, !clockwise);
+    ctx.stroke();
+    var travelX, travelY;
+    if (clockwise) { travelX = -Math.sin(endRad); travelY = Math.cos(endRad); }
+    else { travelX = Math.sin(endRad); travelY = -Math.cos(endRad); }
+    var travelAngle = Math.atan2(travelY, travelX);
+    var ex = cx0 + r*Math.cos(endRad), ey = cy0 + r*Math.sin(endRad);
+    var ah = 12;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - ah*Math.cos(travelAngle-0.4), ey - ah*Math.sin(travelAngle-0.4));
+    ctx.lineTo(ex - ah*Math.cos(travelAngle+0.4), ey - ah*Math.sin(travelAngle+0.4));
+    ctx.closePath();
+    ctx.fill();
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('M', cx0, cy0 - r - 14);
+    ctx.restore();
+  }
+
+  function redraw(){
+    drawBase();
+    arrows.forEach(function(a){
+      if (a.type === 'momentCW' || a.type === 'momentCCW') {
+        drawMoment(a.x1, a.y1, a.r || 26, a.type === 'momentCW', COLORS[a.type], 1);
+      } else {
+        drawArrow(a.x1,a.y1,a.x2,a.y2,COLORS[a.type],LABELS[a.type],1);
+      }
+    });
+    var el = document.getElementById(countId);
+    if (el) el.textContent = arrows.length + (arrows.length === 1 ? ' arrow' : ' arrows');
+  }
+
+  function dist(){ var dx = cx-sx, dy = cy-sy; return Math.sqrt(dx*dx+dy*dy); }
+
+  function deleteNearest(px,py){
+    var best = -1, bestD = Infinity;
+    arrows.forEach(function(a,i){
+      var mx, my;
+      if (a.type === 'momentCW' || a.type === 'momentCCW') { mx = a.x1; my = a.y1; }
+      else { mx = (a.x1+a.x2)/2; my = (a.y1+a.y2)/2; }
+      var d = Math.sqrt((px-mx)*(px-mx)+(py-my)*(py-my));
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    if (best >= 0 && bestD < 70) { arrows.splice(best,1); redraw(); }
+  }
+
+  function isMomentType(t){ return t === 'momentCW' || t === 'momentCCW'; }
+
+  canvas.addEventListener('mousedown', function(e){
+    var p = getPos(e);
+    if (deleteMode) { deleteNearest(p.x,p.y); return; }
+    if (isMomentType(activeForce)) { arrows.push({x1:p.x,y1:p.y,type:activeForce}); redraw(); return; }
+    sx = p.x; sy = p.y; cx = p.x; cy = p.y; drawing = true;
+  });
+  canvas.addEventListener('mousemove', function(e){
+    if (!drawing) return;
+    var p = getPos(e); cx = p.x; cy = p.y;
+    redraw(); drawArrow(sx,sy,cx,cy,COLORS[activeForce],null,0.42);
+  });
+  canvas.addEventListener('mouseup', function(){
+    if (!drawing) return; drawing = false;
+    if (dist() > 18) arrows.push({x1:sx,y1:sy,x2:cx,y2:cy,type:activeForce});
+    redraw();
+  });
+  canvas.addEventListener('mouseleave', function(){ if (drawing) { drawing = false; redraw(); } });
+  canvas.addEventListener('touchstart', function(e){
+    e.preventDefault();
+    var p = getPos(e);
+    if (deleteMode) { deleteNearest(p.x,p.y); return; }
+    if (isMomentType(activeForce)) { arrows.push({x1:p.x,y1:p.y,type:activeForce}); redraw(); return; }
+    sx = p.x; sy = p.y; cx = p.x; cy = p.y; drawing = true;
+  }, {passive:false});
+  canvas.addEventListener('touchmove', function(e){
+    e.preventDefault();
+    if (!drawing) return;
+    var p = getPos(e); cx = p.x; cy = p.y;
+    redraw(); drawArrow(sx,sy,cx,cy,COLORS[activeForce],null,0.42);
+  }, {passive:false});
+  canvas.addEventListener('touchend', function(e){
+    e.preventDefault();
+    if (!drawing) return; drawing = false;
+    if (dist() > 18) arrows.push({x1:sx,y1:sy,x2:cx,y2:cy,type:activeForce});
+    redraw();
+  }, {passive:false});
+
+  resize();
+
+  return {
+    setForce: function(f){ activeForce = f; },
+    setDeleteMode: function(v){ deleteMode = v; canvas.style.cursor = v ? 'not-allowed' : 'crosshair'; },
+    isDeleteMode: function(){ return deleteMode; },
+    clear: function(){ arrows = []; redraw(); },
+    load: function(arr){ arrows = arr.map(function(a){ return {x1:a.x1,y1:a.y1,x2:a.x2,y2:a.y2,type:a.type,r:a.r}; }); redraw(); },
+    getArrows: function(){ return arrows.map(function(a){ return {x1:a.x1,y1:a.y1,x2:a.x2,y2:a.y2,type:a.type,r:a.r}; }); },
+    setObjectAngle: function(a){ objAngle = a; redraw(); },
+    redraw: redraw
+  };
+}
+
+/* ---------- Grading logic ---------- */
+function arrowAngleDeg(a){
+  return Math.atan2(a.y2-a.y1, a.x2-a.x1) * 180 / Math.PI;
+}
+function angularDiff(a,b){
+  var d = ((a-b+540) % 360) - 180;
+  return Math.abs(d);
+}
+function evaluateAnswer(arrows, expected){
+  var byType = {};
+  arrows.forEach(function(a){ (byType[a.type] = byType[a.type] || []).push(a); });
+
+  var result = { correct: true, missing: [], extra: [], wrongDir: [] };
+
+  var expByType = {};
+  expected.forEach(function(e){ (expByType[e.type] = expByType[e.type] || []).push(e); });
+
+  // extras: drawn types not expected at all
+  Object.keys(byType).forEach(function(t){
+    if (!expByType[t]) {
+      byType[t].forEach(function(){ result.extra.push(t); });
+    }
+  });
+
+  Object.keys(expByType).forEach(function(t){
+    var expArr = expByType[t];
+    var drawnArr = (byType[t] || []).slice();
+
+    if (drawnArr.length === 0) {
+      expArr.forEach(function(){ result.missing.push(t); });
+      return;
+    }
+
+    // match each expected force to closest-angle drawn arrow (greedy, no reuse)
+    // Every drawn arrow of this type is consumed here -- either it satisfies an
+    // expected slot (removed, no issue) or it's flagged wrongDir (removed, not extra).
+    // Only arrows left over after all expected slots are filled count as "extra".
+    // Moments (momentCW/momentCCW) carry their direction in the type itself, so any
+    // drawn arrow of the matching type satisfies the expected slot without angle checks.
+    expArr.forEach(function(exp){
+      if (t === 'momentCW' || t === 'momentCCW') {
+        if (drawnArr.length > 0) { drawnArr.splice(0,1); }
+        else { result.missing.push(t); }
+        return;
+      }
+      var bestIdx = -1, bestDiff = Infinity;
+      drawnArr.forEach(function(a,i){
+        var d = angularDiff(arrowAngleDeg(a), exp.angle);
+        if (d < bestDiff) { bestDiff = d; bestIdx = i; }
+      });
+      if (bestIdx === -1) {
+        result.missing.push(t);
+      } else if (bestDiff > exp.tol) {
+        result.wrongDir.push(t);
+        drawnArr.splice(bestIdx,1);
+      } else {
+        drawnArr.splice(bestIdx,1);
+      }
+    });
+
+    // leftover drawn arrows of this type beyond what's expected
+    drawnArr.forEach(function(){ result.extra.push(t); });
+  });
+
+  result.correct = result.missing.length === 0 && result.extra.length === 0 && result.wrongDir.length === 0;
+  return result;
+}
+function uniq(arr){ return arr.filter(function(v,i){ return arr.indexOf(v) === i; }); }
+function describeLabel(t){
+  if (t === 'momentCW') return 'M (clockwise)';
+  if (t === 'momentCCW') return 'M (counterclockwise)';
+  return LABELS[t];
+}
+function describeIssues(r){
+  var parts = [];
+  if (r.missing.length) parts.push('Missing: ' + uniq(r.missing).map(describeLabel).join(', '));
+  if (r.extra.length) parts.push('Unnecessary: ' + uniq(r.extra).map(describeLabel).join(', '));
+  if (r.wrongDir.length) parts.push('Wrong direction: ' + uniq(r.wrongDir).map(describeLabel).join(', '));
+  return parts.join('. ');
+}
+
+/* ---------- Tab switching ---------- */
+function showTab(id){
+  ['learn','practice','exam'].forEach(function(t){
+    document.getElementById('panel-'+t).classList.toggle('active', t === id);
+    document.getElementById('tab-'+t).classList.toggle('active', t === id);
+  });
+}
+document.getElementById('tab-learn').addEventListener('click', function(){ showTab('learn'); });
+document.getElementById('tab-practice').addEventListener('click', function(){ showTab('practice'); setTimeout(function(){ practiceEngine.redraw(); }, 0); });
+document.getElementById('tab-exam').addEventListener('click', function(){ showTab('exam'); setTimeout(function(){ examEngine.redraw(); }, 0); });
+
+/* ---------- Practice controller ---------- */
+var practiceEngine = makeEngine('p-canvas','p-arrow-count');
+var pIdx = 0;
+
+function renderPractice(){
+  var s = PRACTICE_SCENES[pIdx];
+  document.getElementById('p-scene-label').textContent = s.label;
+  document.getElementById('p-scene-desc').textContent = s.desc;
+  document.getElementById('p-counter').textContent = (pIdx+1) + ' / ' + PRACTICE_SCENES.length;
+  s.draw(document.getElementById('p-scene-svg'));
+  practiceEngine.setObjectAngle(s.objAngle);
+  practiceEngine.clear();
+  setPracticeDeleteMode(false);
+  document.getElementById('p-feedback').className = 'feedback';
+}
+
+function setPracticeDeleteMode(v){
+  practiceEngine.setDeleteMode(v);
+  document.getElementById('p-delete-btn').classList.toggle('active', v);
+  document.getElementById('p-delete-hint').innerHTML = v
+    ? '<b>Delete mode ON</b> — click near an arrow to remove it. Click the button again to exit.'
+    : '';
+}
+
+document.getElementById('p-next').addEventListener('click', function(){ pIdx = (pIdx+1) % PRACTICE_SCENES.length; renderPractice(); });
+document.getElementById('p-prev').addEventListener('click', function(){ pIdx = (pIdx-1+PRACTICE_SCENES.length) % PRACTICE_SCENES.length; renderPractice(); });
+
+document.querySelectorAll('#p-toolbar .force-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    practiceEngine.setForce(btn.getAttribute('data-force'));
+    document.querySelectorAll('#p-toolbar .force-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('p-delete-btn').addEventListener('click', function(){
+  setPracticeDeleteMode(!practiceEngine.isDeleteMode());
+});
+document.getElementById('p-clear').addEventListener('click', function(){
+  practiceEngine.clear();
+  document.getElementById('p-feedback').className = 'feedback';
+});
+document.getElementById('p-check').addEventListener('click', function(){
+  var arrows = practiceEngine.getArrows();
+  var fb = document.getElementById('p-feedback');
+  if (arrows.length === 0) { fb.textContent = 'Draw at least one force arrow before checking.'; fb.className = 'feedback show warn'; return; }
+  var res = evaluateAnswer(arrows, PRACTICE_SCENES[pIdx].expected);
+  if (res.correct) {
+    fb.textContent = 'Correct! All forces are placed with the right directions.';
+    fb.className = 'feedback show ok';
+  } else {
+    fb.textContent = describeIssues(res);
+    fb.className = 'feedback show err';
+  }
+});
+
+/* ---------- Exam controller ---------- */
+var examEngine = makeEngine('e-canvas','e-arrow-count');
+var eIdx = 0;
+var eSaved = {};
+var eSubmitted = false;
+var eResults = [];
+
+function buildExamProgress(){
+  var html = '';
+  EXAM_SCENES.forEach(function(s,i){
+    html += '<div class="progress-dot" id="pdot'+i+'" data-idx="'+i+'">'+(i+1)+'</div>';
+  });
+  document.getElementById('exam-progress').innerHTML = html;
+  document.querySelectorAll('#exam-progress .progress-dot').forEach(function(dot){
+    dot.addEventListener('click', function(){
+      saveCurrentExamArrows();
+      eIdx = parseInt(dot.getAttribute('data-idx'),10);
+      renderExam();
+    });
+  });
+}
+
+function updateExamProgress(){
+  EXAM_SCENES.forEach(function(s,i){
+    var dot = document.getElementById('pdot'+i);
+    if (!dot) return;
+    dot.className = 'progress-dot';
+    if (eSubmitted) {
+      dot.className += eResults[i] ? ' correct' : ' wrong';
+    } else {
+      if (i === eIdx) dot.className += ' current';
+      else if (eSaved[i] && eSaved[i].length > 0) dot.className += ' answered';
+    }
+  });
+}
+
+function saveCurrentExamArrows(){
+  eSaved[eIdx] = examEngine.getArrows();
+}
+
+function setExamDeleteMode(v){
+  examEngine.setDeleteMode(v);
+  document.getElementById('e-delete-btn').classList.toggle('active', v);
+  document.getElementById('e-delete-hint').innerHTML = v
+    ? '<b>Delete mode ON</b> — click near an arrow to remove it.'
+    : '';
+}
+
+function renderExam(){
+  var s = EXAM_SCENES[eIdx];
+  document.getElementById('e-scene-label').textContent = s.label;
+  document.getElementById('e-scene-desc').textContent = s.desc;
+  s.draw(document.getElementById('e-scene-svg'));
+  examEngine.setObjectAngle(s.objAngle);
+  examEngine.clear();
+  if (eSaved[eIdx] && eSaved[eIdx].length > 0) examEngine.load(eSaved[eIdx]);
+  document.getElementById('e-q-feedback').className = 'feedback';
+  setExamDeleteMode(false);
+  updateExamProgress();
+}
+
+document.getElementById('e-next').addEventListener('click', function(){
+  saveCurrentExamArrows();
+  eIdx = Math.min(eIdx+1, EXAM_SCENES.length-1);
+  renderExam();
+});
+document.getElementById('e-prev').addEventListener('click', function(){
+  saveCurrentExamArrows();
+  eIdx = Math.max(eIdx-1, 0);
+  renderExam();
+});
+
+document.querySelectorAll('#e-toolbar .force-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    examEngine.setForce(btn.getAttribute('data-force'));
+    document.querySelectorAll('#e-toolbar .force-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('e-delete-btn').addEventListener('click', function(){
+  setExamDeleteMode(!examEngine.isDeleteMode());
+});
+document.getElementById('e-clear').addEventListener('click', function(){
+  examEngine.clear();
+  eSaved[eIdx] = [];
+  document.getElementById('e-q-feedback').className = 'feedback';
+});
+
+document.getElementById('exam-submit-btn').addEventListener('click', function(){
+  if (eSubmitted) return;
+  saveCurrentExamArrows();
+  var empty = [];
+  EXAM_SCENES.forEach(function(s,i){ if (!eSaved[i] || eSaved[i].length === 0) empty.push(i+1); });
+  if (empty.length > 0) { alert('Please draw at least one force for question(s): ' + empty.join(', ')); return; }
+
+  eSubmitted = true;
+  eResults = [];
+  var score = 0;
+  var resultRowsHtml = '';
+  EXAM_SCENES.forEach(function(s,i){
+    var r = evaluateAnswer(eSaved[i] || [], s.expected);
+    eResults.push(r.correct);
+    if (r.correct) score++;
+    resultRowsHtml += '<div class="result-row ' + (r.correct ? 'ok' : 'err') + '">'
+      + '<span class="result-icon">' + (r.correct ? '\u2713' : '\u2717') + '</span>'
+      + '<div><strong>Q' + (i+1) + '</strong> &mdash; ' + s.label
+      + (r.correct ? '' : '<div class="result-detail">' + describeIssues(r) + '</div>')
+      + '</div></div>';
+  });
+
+  updateExamProgress();
+  var pct = Math.round(score / EXAM_SCENES.length * 100);
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-denom').textContent = ' / ' + EXAM_SCENES.length;
+  document.getElementById('score-pct').textContent = pct + '% \u2014 ' + (pct>=90?'Outstanding':pct>=70?'Good':pct>=50?'Needs improvement':'Keep studying');
+  document.getElementById('score-msg').textContent = pct>=90
+    ? 'Excellent! You have mastered FBD drawing.'
+    : pct>=70
+    ? 'Good work — review your mistakes and try again.'
+    : pct>=50
+    ? 'Keep practicing — revisit the course material.'
+    : 'Review the fundamentals carefully before retaking.';
+  document.getElementById('exam-result-list').innerHTML = resultRowsHtml;
+  document.getElementById('score-card').classList.add('show');
+  document.getElementById('exam-submit-btn').style.display = 'none';
+});
+
+document.getElementById('exam-retake-btn').addEventListener('click', function(){
+  eSubmitted = false;
+  eResults = [];
+  eSaved = {};
+  eIdx = 0;
+  document.getElementById('score-card').classList.remove('show');
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  buildExamProgress();
+  renderExam();
+});
+
+/* ---------- Init ---------- */
+renderPractice();
+buildExamProgress();
+renderExam();
+
+})();
+</script>
+</body>
+</html>

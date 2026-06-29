@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Feedback</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #eef3f9;
+      color: #102040;
+    }
+
+    .topbar {
+      background: #071b3d;
+      color: white;
+      padding: 18px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page {
+      padding: 38px 8%;
+    }
+
+    .title {
+      text-align: center;
+      color: #071b3d;
+      font-size: 38px;
+      margin-bottom: 28px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid #d9e5f2;
+      box-shadow: 0 8px 24px rgba(16,32,64,0.08);
+      text-align: center;
+    }
+
+    .summary-card strong {
+      font-size: 22px;
+      color: #071b3d;
+      word-break: break-word;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid #d9e5f2;
+      box-shadow: 0 8px 24px rgba(16,32,64,0.08);
+      margin-bottom: 22px;
+    }
+
+    .question-img, .solution-img {
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid #d9e5f2;
+      background: #fff;
+    }
+
+    .feedback {
+      white-space: pre-wrap;
+      line-height: 1.8;
+      font-size: 17px;
+      font-family: Arial, sans-serif;
+    }
+
+    .feedback mjx-container {
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+    }
+
+    .feedback-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feedback-card:before {
+      content: "∑F = 0";
+      position: absolute;
+      right: 24px;
+      top: 14px;
+      color: rgba(42,82,152,.08);
+      font-size: 58px;
+      font-weight: 900;
+    }
+
+    a.button {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      background: #071b3d;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .score-box {
+      background: #071b3d;
+      color: white;
+      padding: 24px;
+      border-radius: 18px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .score {
+      font-size: 54px;
+      font-weight: 900;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin: 18px 0 26px;
+    }
+
+    .evidence-card {
+      background: #f8fbff;
+      border: 1px solid #d9e5f2;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .evidence-card .label {
+      display: block;
+      font-size: 13px;
+      color: #52627a;
+      margin-bottom: 7px;
+    }
+
+    .evidence-card .value {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .value.yes {
+      background: #e7f7ed;
+      color: #176b37;
+    }
+
+    .value.no {
+      background: #fdecec;
+      color: #9b1c1c;
+    }
+
+    .topic-link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+      margin: 14px 0 24px;
+    }
+
+    .topic-link-card {
+      display: block;
+      padding: 16px;
+      border-radius: 14px;
+      background: #f5f9ff;
+      border: 1px solid #cdddf2;
+      text-decoration: none;
+      color: #071b3d;
+      transition: 0.2s;
+    }
+
+    .topic-link-card:hover {
+      background: #e8f1ff;
+      transform: translateY(-3px);
+    }
+
+    .topic-link-card span {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .topic-link-card small {
+      display: block;
+      margin-top: 8px;
+      color: #2a5298;
+      font-weight: 700;
+    }
+
+    .empty-note {
+      color: #52627a;
+      font-style: italic;
+    }
+
+    @media(max-width: 950px) {
+      .main-grid, .summary-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div>⚙ STATICS AI TUTOR</div>
+  <div>AI Feedback</div>
+</div>
+
+<div class="page">
+  <h1 class="title">🤖 AI Feedback</h1>
+
+  <div class="summary-row">
+    <div class="summary-card">
+      <p>Question</p>
+      <strong>{{ question_number }} of 10</strong>
+    </div>
+
+    <div class="summary-card">
+      <p>Submitted File</p>
+      <strong>{{ solution_file if solution_file else "No file" }}</strong>
+    </div>
+
+    <div class="summary-card">
+      <p>AI Engine</p>
+      <strong>{{ ai_provider }}</strong>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="card">
+        <h2>Question {{ question_number }}</h2>
+        {% if question_file %}
+          <img class="question-img"
+               src="{{ url_for('static', filename='questions/' + question_file) }}">
+        {% else %}
+          <p class="empty-note">Question image is not available.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Your Uploaded Solution</h2>
+
+        {% if solution_file and solution_file.lower().endswith('.pdf') %}
+          <p>PDF uploaded: {{ solution_file }}</p>
+        {% elif solution_file %}
+          <img class="solution-img"
+               src="{{ url_for('static', filename='uploads/' + solution_file) }}">
+        {% else %}
+          <p class="empty-note">No solution file was uploaded.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card feedback-card">
+      <h2>Detailed Feedback</h2>
+
+      <div class="score-box">
+        <div class="score">{{ feedback.score }}</div>
+        <div>Score / 100</div>
+      </div>
+
+      <h3>Grading Evidence</h3>
+      <div class="evidence-grid">
+        <div class="evidence-card">
+          <span class="label">Relevant Solution</span>
+          <span class="value {{ 'yes' if feedback.is_relevant else 'no' }}">
+            {{ "Yes" if feedback.is_relevant else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Cropped / Cut Off</span>
+          <span class="value {{ 'yes' if feedback.is_cropped else 'no' }}">
+            {{ "Yes" if feedback.is_cropped else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Solution Complete</span>
+          <span class="value {{ 'yes' if feedback.solution_complete else 'no' }}">
+            {{ "Yes" if feedback.solution_complete else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">FBD Visible</span>
+          <span class="value {{ 'yes' if feedback.fbd_visible else 'no' }}">
+            {{ "Yes" if feedback.fbd_visible else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Equilibrium Equations</span>
+          <span class="value {{ 'yes' if feedback.equilibrium_equations_visible else 'no' }}">
+            {{ "Yes" if feedback.equilibrium_equations_visible else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Moment Equations</span>
+          <span class="value {{ 'yes' if feedback.moment_equations_visible else 'no' }}">
+            {{ "Yes" if feedback.moment_equations_visible else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Equations Solved</span>
+          <span class="value {{ 'yes' if feedback.equations_solved else 'no' }}">
+            {{ "Yes" if feedback.equations_solved else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Final Answers Visible</span>
+          <span class="value {{ 'yes' if feedback.final_answers_visible else 'no' }}">
+            {{ "Yes" if feedback.final_answers_visible else "No" }}
+          </span>
+        </div>
+
+        <div class="evidence-card">
+          <span class="label">Units Visible</span>
+          <span class="value {{ 'yes' if feedback.units_visible else 'no' }}">
+            {{ "Yes" if feedback.units_visible else "No" }}
+          </span>
+        </div>
+      </div>
+
+      <h3>Overall Feedback</h3>
+      <p>{{ feedback.overall_feedback }}</p>
+
+      <h3>Main Mistakes</h3>
+      {% if feedback.main_mistakes %}
+        <ul>
+          {% for item in feedback.main_mistakes %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-note">No main mistakes listed.</p>
+      {% endif %}
+
+      <h3>Weak Subject Areas</h3>
+      {% if feedback.weak_subject_areas %}
+        <div class="topic-link-grid">
+          {% for item in feedback.weak_subject_areas %}
+            {% if item in topic_links %}
+              <a class="topic-link-card" href="{{ url_for('topic', filename=topic_links[item]) }}">
+                <span>📘</span>
+                <strong>{{ item }}</strong>
+                <small>Practice this topic →</small>
+              </a>
+            {% else %}
+              <div class="topic-link-card">
+                <span>📘</span>
+                <strong>{{ item }}</strong>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-note">No specific weak subject area detected.</p>
+      {% endif %}
+
+      <h3>Wrong or Missing Equations</h3>
+      {% if feedback.wrong_or_missing_equations %}
+        <ul>
+          {% for item in feedback.wrong_or_missing_equations %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-note">No wrong or missing equations listed.</p>
+      {% endif %}
+
+      <h3>Recommended Practice</h3>
+      {% if feedback.recommended_practice %}
+        <ul>
+          {% for item in feedback.recommended_practice %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-note">No recommended practice listed.</p>
+      {% endif %}
+
+      <h3>Detailed Math Feedback</h3>
+      <div class="feedback">
+        {{ detailed_html | safe }}
+      </div>
+
+      <h3>Next Step</h3>
+      <p>{{ feedback.next_step }}</p>
+    </div>
+  </div>
+
+  <a class="button" href="{{ url_for('index') }}">Try Another Question</a>
+</div>
+
+</body>
+</html>

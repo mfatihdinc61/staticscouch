@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shear & Moment Diagrams — Statics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B1623;--panel:#0F1E30;--card:#152638;--border:#1C3450;
+  --accent:#00C9FF;--amber:#F5A623;--green:#27AE60;--red:#E74C3C;
+  --violet:#A78BFA;--text:#E8F0FA;--sub:#6B8DAF;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--disp:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.7;min-height:100vh}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:200}
+.logo{font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.logo span{color:var(--sub);font-weight:400}
+.badge{font-family:var(--mono);font-size:10px;color:var(--sub);background:var(--card);border:1px solid var(--border);padding:4px 10px;border-radius:4px;letter-spacing:.05em}
+.tab-bar{display:flex;background:var(--panel);border-bottom:1px solid var(--border);padding:0 40px}
+.tab-btn{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--sub);background:none;border:none;padding:16px 26px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}.tab-content.active{display:block}
+.container{max-width:980px;margin:0 auto;padding:44px 40px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+h1.hero-title{font-family:var(--disp);font-size:28px;font-weight:700;line-height:1.2;margin-bottom:10px}
+.hero-sub{color:var(--sub);font-size:14px;max-width:580px;margin-bottom:24px}
+.sec-title{font-family:var(--disp);font-size:18px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sec-sub{color:var(--sub);font-size:13px;margin-bottom:20px}
+.pill{font-family:var(--mono);font-size:9px;color:var(--accent);background:rgba(0,201,255,.1);border:1px solid rgba(0,201,255,.22);padding:2px 8px;border-radius:100px;letter-spacing:.08em;text-transform:uppercase}
+.pill.amber{color:var(--amber);background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25)}
+.pill.green{color:var(--green);background:rgba(39,174,96,.1);border-color:rgba(39,174,96,.25)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px 26px;margin-bottom:16px}
+.card h3{font-family:var(--disp);font-size:14px;font-weight:600;margin-bottom:8px}
+.card p,.card li{color:var(--sub);font-size:14px;line-height:1.75}
+.card ul,.card ol{padding-left:18px}.card li{margin-bottom:4px}
+.card strong{color:var(--text)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.callout{border-left:3px solid var(--accent);background:rgba(0,201,255,.05);border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0}
+.callout.amber{border-left-color:var(--amber);background:rgba(245,166,35,.05)}
+.callout.violet{border-left-color:var(--violet);background:rgba(167,139,250,.05)}
+.callout.green{border-left-color:var(--green);background:rgba(39,174,96,.05)}
+.cl-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:5px;font-weight:500}
+.callout.amber .cl-label{color:var(--amber)}.callout.violet .cl-label{color:var(--violet)}.callout.green .cl-label{color:var(--green)}
+.callout p{font-size:14px;color:var(--text)}
+.fbox{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;color:var(--accent);line-height:1.9}
+.fbox .cm{color:var(--sub);font-size:11px}
+.div{height:1px;background:var(--border);margin:30px 0}
+.hero-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:30px;margin-bottom:32px;position:relative;overflow:hidden}
+.hero-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(0,201,255,.06) 0%,transparent 65%);pointer-events:none}
+
+/* ── DIAGRAM CONTROLS ── */
+.diagram-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:16px}
+.diagram-box canvas{display:block;width:100%}
+.load-type-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.lt-btn{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:6px 12px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--sub);cursor:pointer;transition:all .15s}
+.lt-btn:hover{color:var(--text);border-color:var(--sub)}.lt-btn.active{background:rgba(0,201,255,.1);border-color:var(--accent);color:var(--accent)}
+.ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px}
+.ctrl-group{display:flex;flex-direction:column;gap:4px}
+.ctrl-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--sub)}
+.ctrl-val{font-family:var(--mono);font-size:12px;color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--accent);border-radius:50%;cursor:pointer}
+
+/* ── WORKED EXAMPLE ── */
+.worked-ex{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:0;margin-bottom:20px;overflow:hidden}
+.we-header{background:linear-gradient(90deg,rgba(0,201,255,.08),transparent);border-bottom:1px solid var(--border);padding:16px 22px;display:flex;align-items:center;gap:12px}
+.we-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;background:rgba(0,201,255,.15);color:var(--accent);padding:3px 8px;border-radius:4px}
+.we-title{font-family:var(--disp);font-size:15px;font-weight:600}
+.we-body{padding:22px}
+.step-row{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.step-num{font-family:var(--mono);font-size:11px;background:rgba(0,201,255,.12);color:var(--accent);border:1px solid rgba(0,201,255,.25);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-content{flex:1}
+.step-content p{color:var(--sub);font-size:13px;margin-bottom:4px}
+.step-content strong{color:var(--text)}
+.svgbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;margin:8px 0;text-align:center}
+.svgbox svg{max-width:100%;height:auto}
+
+/* ── PRACTICE ── */
+.prob-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px}
+.prob-num{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.prob-card h3{font-family:var(--disp);font-size:15px;font-weight:600;margin-bottom:8px}
+.prob-card p{color:var(--sub);font-size:14px;margin-bottom:10px}
+.prob-card strong{color:var(--text)}
+.ans-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.ans-row input{flex:1;min-width:110px;max-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;transition:border-color .2s}
+.ans-row input:focus{border-color:var(--accent)}
+.unit-lbl{font-family:var(--mono);font-size:12px;color:var(--sub)}
+.btn{font-family:var(--disp);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
+.btn-p{background:var(--accent);color:var(--bg)}.btn-p:hover{background:#33d6ff}
+.btn-o{background:transparent;color:var(--sub);border:1px solid var(--border)}.btn-o:hover{color:var(--text);border-color:var(--sub)}
+.fb{margin-top:8px;font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:6px;display:none}
+.fb.ok{background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.3);color:var(--green);display:block}
+.fb.err{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);color:var(--red);display:block}
+.hint-box{background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.2);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13px;color:var(--amber);display:none}
+.hint-box.show{display:block}
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.prog-bar{flex:1;height:4px;background:var(--border);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .4s}
+.prog-lbl{font-family:var(--mono);font-size:11px;color:var(--sub);white-space:nowrap}
+
+/* ── MC VISUAL QUESTION ── */
+.visual-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.visual-opt{background:var(--panel);border:2px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .15s;text-align:center}
+.visual-opt:hover:not(.disabled){border-color:var(--accent)}
+.visual-opt.sel{border-color:var(--accent);background:rgba(0,201,255,.05)}
+.visual-opt.right{border-color:var(--green);background:rgba(39,174,96,.07)}
+.visual-opt.wrong{border-color:var(--red);background:rgba(231,76,60,.07)}
+.visual-opt.disabled{cursor:default}
+.visual-opt-lbl{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:6px}
+.visual-opt.sel .visual-opt-lbl{color:var(--accent)}
+.visual-opt.right .visual-opt-lbl{color:var(--green)}
+.visual-opt.wrong .visual-opt-lbl{color:var(--red)}
+
+/* ── EXAM ── */
+.exam-hdr{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.exam-hdr h2{font-family:var(--disp);font-size:17px;font-weight:700}
+.exam-hdr p{color:var(--sub);font-size:13px;margin-top:2px}
+.timer{font-family:var(--mono);font-size:26px;font-weight:500;color:var(--accent);letter-spacing:.05em;min-width:70px;text-align:right}
+.timer.warn{color:var(--amber)}.timer.dng{color:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.eq{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px}
+.eq-num{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:6px}
+.eq-type{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:10px}
+.eq-type.mc{background:rgba(0,201,255,.1);color:var(--accent)}
+.eq-type.num{background:rgba(167,139,250,.1);color:var(--violet)}
+.eq-type.tf{background:rgba(245,166,35,.1);color:var(--amber)}
+.eq-type.vis{background:rgba(39,174,96,.1);color:var(--green)}
+.eq-text{font-size:14px;font-weight:500;margin-bottom:14px;line-height:1.65;color:var(--text)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--sub);text-align:left;transition:all .15s;width:100%}
+.opt:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.opt.sel{border-color:var(--accent);color:var(--accent);background:rgba(0,201,255,.05)}
+.opt.right{border-color:var(--green);color:var(--green);background:rgba(39,174,96,.07)}
+.opt.wrong{border-color:var(--red);color:var(--red);background:rgba(231,76,60,.07)}
+.opt:disabled{cursor:default}
+.opt-k{font-family:var(--mono);font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 6px;min-width:20px;text-align:center;flex-shrink:0}
+.tf-row{display:flex;gap:10px}
+.tf-btn{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--sub);cursor:pointer;transition:all .15s}
+.tf-btn:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.tf-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(0,201,255,.05)}
+.tf-btn.right{border-color:var(--green);color:var(--green);background:rgba(39,174,96,.07)}
+.tf-btn.wrong{border-color:var(--red);color:var(--red);background:rgba(231,76,60,.07)}
+.tf-btn:disabled{cursor:default}
+.num-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.num-row input{background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;width:120px;transition:border-color .2s}
+.num-row input:focus{border-color:var(--accent)}.num-row input:disabled{opacity:.6;cursor:default}
+.num-unit{font-family:var(--mono);font-size:12px;color:var(--sub)}
+.eq-fb{margin-top:8px;font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:6px;display:none}
+.eq-fb.ok{background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.3);color:var(--green);display:block}
+.eq-fb.err{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);color:var(--red);display:block}
+.exam-acts{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.result-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:40px;text-align:center;display:none}
+.result-panel.show{display:block}
+.res-score{font-family:var(--disp);font-size:64px;font-weight:700;line-height:1;margin:12px 0}
+.res-score.pass{color:var(--green)}.res-score.fail{color:var(--red)}
+.res-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--sub)}
+.res-msg{color:var(--sub);font-size:14px;margin:8px 0 20px}
+table.rel-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+table.rel-table th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
+table.rel-table td{padding:9px 12px;border-bottom:1px solid rgba(28,52,80,.5);color:var(--sub);vertical-align:top}
+table.rel-table td:first-child{color:var(--text);font-family:var(--mono);font-size:12px}
+table.rel-table tr:last-child td{border-bottom:none}
+@media(max-width:640px){
+  .container{padding:24px 16px}.tab-bar,.header{padding:0 14px}
+  .tab-btn{padding:12px 10px;font-size:10px}.g2,.g3{grid-template-columns:1fr}
+  .exam-hdr{flex-direction:column;align-items:flex-start}.visual-opts{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Statics <span>/ Shear & Moment Diagrams</span></div>
+  <div class="badge">ENGR 201 — UNIT 5</div>
+</header>
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('learn',this)">📐 Learn</button>
+  <button class="tab-btn" onclick="switchTab('practice',this)">🔧 Practice</button>
+  <button class="tab-btn" onclick="switchTab('exam',this)">📋 Exam</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     LEARN TAB
+══════════════════════════════════════════════════════════ -->
+<div id="learn" class="tab-content active">
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero-panel">
+    <div class="eyebrow">Unit 5 — Internal Resultants</div>
+    <h1 class="hero-title">Shear & Moment Equations<br>and Diagrams</h1>
+    <p class="hero-sub">Visualize how internal shear forces and bending moments vary along a beam under any combination of loads.</p>
+
+    <!-- KEY NOTE -->
+    <div class="callout green" style="margin-bottom:20px">
+      <div class="cl-label">📌 Most Important Note</div>
+      <p>Answering Shear &amp; Moment equations and diagrams questions accurately is <strong>mostly dependent on drawing the FBD correctly</strong> (and obtaining support reactions accurately) and being able to <strong>transform w(x) → V(x) → M(x)</strong> correctly using the differential and integral relations. Master these two skills and the rest follows.</p>
+    </div>
+
+    <!-- INTERACTIVE DIAGRAM -->
+    <div class="diagram-box">
+      <div class="eyebrow" style="margin-bottom:10px">⚡ Interactive Diagram — choose load type and adjust parameters</div>
+      <div class="load-type-row">
+        <button class="lt-btn active" onclick="setLoad('point',this)">Concentrated Force</button>
+        <button class="lt-btn" onclick="setLoad('udl',this)">Uniform Load (UDL)</button>
+        <button class="lt-btn" onclick="setLoad('triangular',this)">Triangular Load</button>
+        <button class="lt-btn" onclick="setLoad('moment',this)">Couple Moment</button>
+        <button class="lt-btn" onclick="setLoad('combined',this)">Force + UDL</button>
+      </div>
+      <canvas id="liveCanvas" height="300" style="width:100%"></canvas>
+      <div class="ctrl-grid" id="ctrlGrid"></div>
+    </div>
+  </div>
+
+  <!-- CORE NOTE -->
+  <div class="sec-title">The FBD → w(x) → V(x) → M(x) Chain <span class="pill green">Master This</span></div>
+  <div class="sec-sub">Every shear and moment problem follows the same transformation pipeline. Understanding each step makes the whole problem routine.</div>
+
+  <div class="card">
+    <h3>The Transformation Pipeline</h3>
+    <p>The workflow for any beam problem is a strict sequence:</p>
+    <ol style="padding-left:20px;margin-top:8px">
+      <li style="margin-bottom:8px;color:var(--sub)"><strong>FBD of entire beam</strong> → find support reactions (Ay, By, MA…)</li>
+      <li style="margin-bottom:8px;color:var(--sub)"><strong>From reactions + loading → w(x)</strong> — identify the distributed load function on each segment</li>
+      <li style="margin-bottom:8px;color:var(--sub)"><strong>w(x) → V(x)</strong> via dV/dx = −w(x), or equivalently ΔV = −∫w dx</li>
+      <li style="margin-bottom:8px;color:var(--sub)"><strong>V(x) → M(x)</strong> via dM/dx = V(x), or equivalently ΔM = ∫V dx</li>
+      <li style="color:var(--sub)"><strong>Verify boundary conditions</strong> at supports and free ends</li>
+    </ol>
+  </div>
+
+  <div class="fbox">
+    dV/dx = −w(x) &nbsp;&nbsp;<span class="cm">// slope of SFD = −(distributed load intensity)</span><br>
+    dM/dx = V(x) &nbsp;&nbsp;&nbsp;<span class="cm">// slope of BMD = shear force at that point</span><br>
+    ΔV = −∫w(x) dx &nbsp;<span class="cm">// change in V = −area under load diagram</span><br>
+    ΔM = ∫V(x) dx &nbsp;&nbsp;<span class="cm">// change in M = area under shear diagram</span>
+  </div>
+
+  <div class="div"></div>
+
+  <!-- SIGN CONVENTIONS -->
+  <div class="sec-title">Sign Convention <span class="pill amber">Critical — Never Skip</span></div>
+  <div class="sec-sub">All results are meaningless without a consistent, stated sign convention.</div>
+  <div class="g2">
+    <div class="card"><h3>✅ Positive Shear V</h3><p>Upward force on the <strong>left</strong> face of the cut; downward on the <strong>right</strong> face. Tends to cause clockwise rotation of the free body element.</p></div>
+    <div class="card"><h3>✅ Positive Moment M (Sagging)</h3><p>Concave <strong>upward</strong> bending — the beam "smiles." Compresses top fibers. This is positive in the standard beam convention.</p></div>
+  </div>
+
+  <div class="div"></div>
+
+  <!-- LOAD → DIAGRAM SHAPE TABLE -->
+  <div class="sec-title">Load Type → Diagram Shape Reference</div>
+  <table class="rel-table">
+    <thead><tr><th>w(x) Loading</th><th>V(x) Shape (SFD)</th><th>M(x) Shape (BMD)</th></tr></thead>
+    <tbody>
+      <tr><td>None (w=0)</td><td>Constant (flat)</td><td>Linear (sloped line)</td></tr>
+      <tr><td>Uniform (UDL, w=const)</td><td>Linear (1st degree)</td><td>Parabolic (2nd degree)</td></tr>
+      <tr><td>Triangular (w∝x)</td><td>Parabolic (2nd degree)</td><td>Cubic (3rd degree)</td></tr>
+      <tr><td>Concentrated force P</td><td>Jump of magnitude P</td><td>Kink (slope change)</td></tr>
+      <tr><td>Concentrated moment M₀</td><td>No change</td><td>Jump of magnitude M₀</td></tr>
+    </tbody>
+  </table>
+
+  <div class="div"></div>
+
+  <!-- WORKED EXAMPLE 1 -->
+  <div class="sec-title">Worked Example 1 <span class="pill">Simply Supported + Point Load</span></div>
+  <div class="sec-sub">Full FBD → w(x) → V(x) → M(x) pipeline for a simply supported beam with a single concentrated force.</div>
+
+  <div class="worked-ex">
+    <div class="we-header"><span class="we-tag">Worked Example 1</span><span class="we-title">Simply Supported Beam — Concentrated Load P = 60 kN at x = 4 m</span></div>
+    <div class="we-body">
+      <div style="margin-bottom:12px;font-family:var(--mono);font-size:11px;color:var(--sub)">GIVEN: L = 10 m &nbsp;|&nbsp; P = 60 kN downward &nbsp;|&nbsp; a = 4 m from A</div>
+
+      <!-- STEP 1: FBD -->
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <p><strong>FBD of entire beam — find reactions</strong></p>
+          <p>Apply ΣM_B = 0 (moments about B to eliminate By):</p>
+          <div class="fbox" style="margin:6px 0">Ay × 10 = 60 × (10−4) = 360 → <strong>Ay = 36 kN ↑</strong><br>ΣFy = 0: By = 60 − 36 = <strong>24 kN ↑</strong></div>
+          <!-- FBD VISUAL -->
+          <div class="svgbox">
+            <svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="e1a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4Z" fill="#F5A623"/></marker>
+                <marker id="e1g" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4Z" fill="#27AE60"/></marker>
+                <marker id="e1d" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4Z" fill="#6B8DAF"/></marker>
+                <marker id="e1dh" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M0,0 L0,8 L8,4Z" fill="#1C3450"/></marker>
+              </defs>
+              <!-- beam -->
+              <rect x="60" y="52" width="420" height="14" rx="2" fill="#152638" stroke="#1C3450" stroke-width="1.5"/>
+              <!-- pin A -->
+              <polygon points="60,66 46,88 74,88" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="42" y1="89" x2="78" y2="89" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="36" y1="93" x2="44" y2="89" stroke="#6B8DAF" stroke-width="1"/><line x1="44" y1="93" x2="52" y2="89" stroke="#6B8DAF" stroke-width="1"/><line x1="52" y1="93" x2="60" y2="89" stroke="#6B8DAF" stroke-width="1"/><line x1="60" y1="93" x2="68" y2="89" stroke="#6B8DAF" stroke-width="1"/><line x1="68" y1="93" x2="76" y2="89" stroke="#6B8DAF" stroke-width="1"/>
+              <!-- roller B -->
+              <polygon points="480,66 466,88 494,88" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <circle cx="472" cy="93" r="4.5" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <circle cx="488" cy="93" r="4.5" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="460" y1="99" x2="502" y2="99" stroke="#6B8DAF" stroke-width="1.2"/>
+              <!-- P load arrow -->
+              <line x1="228" y1="8" x2="228" y2="50" stroke="#F5A623" stroke-width="2.5" marker-end="url(#e1a)"/>
+              <!-- Ay reaction arrow -->
+              <line x1="60" y1="115" x2="60" y2="68" stroke="#27AE60" stroke-width="2.5" marker-end="url(#e1g)"/>
+              <!-- By reaction arrow -->
+              <line x1="480" y1="115" x2="480" y2="68" stroke="#27AE60" stroke-width="2.5" marker-end="url(#e1g)"/>
+              <!-- Labels -->
+              <text x="60" y="44" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">A</text>
+              <text x="480" y="44" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">B</text>
+              <text x="244" y="18" font-family="JetBrains Mono" font-size="10" fill="#F5A623" font-weight="500">P = 60 kN</text>
+              <text x="38" y="128" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#27AE60">Ay=36kN</text>
+              <text x="504" y="128" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#27AE60">By=24kN</text>
+              <!-- dimension line -->
+              <line x1="60" y1="28" x2="225" y2="28" stroke="#1C3450" stroke-width="1" marker-end="url(#e1dh)" marker-start="url(#e1dh)"/>
+              <text x="143" y="24" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">a = 4 m</text>
+              <line x1="231" y1="28" x2="477" y2="28" stroke="#1C3450" stroke-width="1" marker-end="url(#e1dh)" marker-start="url(#e1dh)"/>
+              <text x="354" y="24" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">b = 6 m</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: w(x) diagram -->
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <p><strong>Identify w(x) — no distributed load on either segment</strong></p>
+          <div class="fbox" style="margin:6px 0">Segment 0 &lt; x &lt; 4: &nbsp;w(x) = 0 &nbsp;&nbsp;<span class="cm">// no distributed load</span><br>Segment 4 &lt; x &lt; 10: w(x) = 0 &nbsp;<span class="cm">// no distributed load</span></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 70" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="16" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">w(x) diagram</text>
+              <!-- baseline -->
+              <line x1="60" y1="45" x2="480" y2="45" stroke="#1C3450" stroke-width="1" stroke-dasharray="4,3"/>
+              <!-- zero load line -->
+              <line x1="60" y1="45" x2="480" y2="45" stroke="#00C9FF" stroke-width="2.5"/>
+              <!-- axis labels -->
+              <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="228" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">x=4m</text>
+              <text x="480" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(10)</text>
+              <text x="270" y="40" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#00C9FF">w(x) = 0 everywhere</text>
+              <!-- vertical tick at load position -->
+              <line x1="228" y1="38" x2="228" y2="52" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="228" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#F5A623">P here</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: SFD -->
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <p><strong>w(x) → V(x): constant in each segment, jump at point load</strong></p>
+          <div class="fbox" style="margin:6px 0">V(0⁺) = +Ay = <strong>+36 kN</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// starts at reaction</span><br>V(4⁻) = +36 kN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// no change (w=0)</span><br>V(4⁺) = 36 − 60 = <strong>−24 kN</strong> &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// jump down by P</span><br>V(10) = −24 + 24 = <strong>0 ✓</strong></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 110" xmlns="http://www.w3.org/2000/svg">
+              <defs><marker id="e1v" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3Z" fill="#00C9FF"/></marker></defs>
+              <text x="10" y="16" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">SFD — V(x)</text>
+              <!-- zero line -->
+              <line x1="60" y1="60" x2="480" y2="60" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- SFD shape: +36 to x=4, jump, -24 to x=10 -->
+              <polygon points="60,60 60,25 228,25 228,60" fill="rgba(0,201,255,0.1)" stroke="none"/>
+              <polygon points="228,60 228,88 480,88 480,60" fill="rgba(231,76,60,0.08)" stroke="none"/>
+              <polyline points="60,60 60,25 228,25 228,88 480,88 480,60" fill="none" stroke="#00C9FF" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- value labels -->
+              <text x="143" y="20" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#00C9FF" font-weight="500">+36 kN</text>
+              <text x="354" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#E74C3C" font-weight="500">−24 kN</text>
+              <!-- jump annotation -->
+              <line x1="228" y1="25" x2="228" y2="88" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="4,2"/>
+              <text x="238" y="60" font-family="JetBrains Mono" font-size="8" fill="#F5A623">jump=60kN</text>
+              <!-- axis labels -->
+              <text x="60" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="228" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">x=4m</text>
+              <text x="480" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(10)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: BMD -->
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <p><strong>V(x) → M(x): area under SFD accumulates moment</strong></p>
+          <div class="fbox" style="margin:6px 0">M(0) = 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// BC: pin end</span><br>M(4) = 0 + 36×4 = <strong>+144 kN·m</strong> &nbsp;<span class="cm">// area of +36 rectangle</span><br>M(10) = 144 + (−24)×6 = <strong>0 ✓</strong> <span class="cm">// BC: roller end</span></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 110" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="16" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">BMD — M(x)</text>
+              <!-- zero line -->
+              <line x1="60" y1="85" x2="480" y2="85" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- BMD: triangle peaking at x=4 -->
+              <polygon points="60,85 228,22 480,85" fill="rgba(167,139,250,0.12)" stroke="none"/>
+              <polyline points="60,85 228,22 480,85" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- peak label -->
+              <line x1="228" y1="22" x2="228" y2="85" stroke="#A78BFA" stroke-width="1" stroke-dasharray="3,2"/>
+              <text x="248" y="26" font-family="JetBrains Mono" font-size="10" fill="#A78BFA" font-weight="500">M_max = 144 kN·m</text>
+              <!-- area annotation -->
+              <text x="130" y="72" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#A78BFA">Area=36×4=144</text>
+              <text x="365" y="72" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#A78BFA">Area=24×6=144</text>
+              <!-- axis labels -->
+              <text x="60" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="228" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">x=4m</text>
+              <text x="480" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(10)</text>
+              <text x="60" y="90" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#27AE60">0</text>
+              <text x="480" y="90" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#27AE60">0</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: Summary -->
+      <div class="step-row">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <p><strong>Complete beam + SFD + BMD stacked summary</strong></p>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 290" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="e1sa" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5Z" fill="#F5A623"/></marker>
+                <marker id="e1sg" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5Z" fill="#27AE60"/></marker>
+              </defs>
+              <!-- BEAM ROW -->
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">Beam</text>
+              <rect x="60" y="22" width="420" height="11" rx="2" fill="#152638" stroke="#1C3450" stroke-width="1.5"/>
+              <polygon points="60,33 49,48 71,48" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="45" y1="49" x2="75" y2="49" stroke="#6B8DAF" stroke-width="1.5"/>
+              <polygon points="480,33 469,48 491,48" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <circle cx="474" cy="53" r="3.5" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <circle cx="486" cy="53" r="3.5" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="228" y1="4" x2="228" y2="20" stroke="#F5A623" stroke-width="2" marker-end="url(#e1sa)"/>
+              <text x="244" y="12" font-family="JetBrains Mono" font-size="8" fill="#F5A623">P=60kN</text>
+              <line x1="60" y1="60" x2="60" y2="35" stroke="#27AE60" stroke-width="2" marker-end="url(#e1sg)"/>
+              <text x="60" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#27AE60">36kN</text>
+              <line x1="480" y1="60" x2="480" y2="35" stroke="#27AE60" stroke-width="2" marker-end="url(#e1sg)"/>
+              <text x="480" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#27AE60">24kN</text>
+              <!-- SFD ROW -->
+              <text x="10" y="90" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">SFD</text>
+              <line x1="60" y1="120" x2="480" y2="120" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <polygon points="60,120 60,93 228,93 228,120" fill="rgba(0,201,255,0.1)" stroke="none"/>
+              <polygon points="228,120 228,140 480,140 480,120" fill="rgba(231,76,60,0.07)" stroke="none"/>
+              <polyline points="60,120 60,93 228,93 228,140 480,140 480,120" fill="none" stroke="#00C9FF" stroke-width="2" stroke-linejoin="round"/>
+              <text x="143" y="89" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">+36</text>
+              <text x="354" y="152" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#E74C3C">−24</text>
+              <text x="60" y="165" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">0</text>
+              <text x="228" y="165" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">4m</text>
+              <text x="480" y="165" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">10m</text>
+              <!-- BMD ROW -->
+              <text x="10" y="188" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">BMD</text>
+              <line x1="60" y1="265" x2="480" y2="265" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <polygon points="60,265 228,198 480,265" fill="rgba(167,139,250,0.1)" stroke="none"/>
+              <polyline points="60,265 228,198 480,265" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linejoin="round"/>
+              <line x1="228" y1="198" x2="228" y2="265" stroke="#A78BFA" stroke-width="1" stroke-dasharray="3,2"/>
+              <text x="248" y="205" font-family="JetBrains Mono" font-size="9" fill="#A78BFA">144 kN·m</text>
+              <text x="60" y="278" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">0</text>
+              <text x="228" y="278" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">4m</text>
+              <text x="480" y="278" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">10m</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKED EXAMPLE 2 -->
+  <div class="sec-title" style="margin-top:28px">Worked Example 2 <span class="pill">Cantilever + UDL</span></div>
+  <div class="sec-sub">Full pipeline for a cantilever beam with a uniform distributed load — w(x)→V(x)→M(x) with integration.</div>
+
+  <div class="worked-ex">
+    <div class="we-header"><span class="we-tag">Worked Example 2</span><span class="we-title">Cantilever Beam — UDL w₀ = 8 kN/m over full span</span></div>
+    <div class="we-body">
+      <div style="margin-bottom:12px;font-family:var(--mono);font-size:11px;color:var(--sub)">GIVEN: Fixed at A (left), free at B (right) &nbsp;|&nbsp; L = 6 m &nbsp;|&nbsp; w₀ = 8 kN/m downward</div>
+
+      <!-- STEP 1 FBD -->
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <p><strong>FBD — fixed wall provides vertical force Ay and moment MA</strong></p>
+          <div class="fbox" style="margin:6px 0">W = w₀ × L = 8 × 6 = 48 kN (resultant at midspan x=3m)<br>ΣFy=0: <strong>Ay = 48 kN ↑</strong><br>ΣM_A=0: <strong>MA = w₀L²/2 = 8×36/2 = 144 kN·m ↺</strong></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="e2a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4Z" fill="#00C9FF"/></marker>
+                <marker id="e2g" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4Z" fill="#27AE60"/></marker>
+              </defs>
+              <!-- fixed wall -->
+              <rect x="42" y="18" width="16" height="94" fill="#1C3450" stroke="#1C3450" stroke-width="1"/>
+              <line x1="42" y1="22" x2="30" y2="30" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="34" x2="30" y2="42" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="46" x2="30" y2="54" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="58" x2="30" y2="66" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="70" x2="30" y2="78" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="82" x2="30" y2="90" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="94" x2="30" y2="102" stroke="#6B8DAF" stroke-width="1.2"/>
+              <line x1="42" y1="106" x2="30" y2="114" stroke="#6B8DAF" stroke-width="1.2"/>
+              <!-- beam -->
+              <rect x="58" y="55" width="420" height="14" rx="2" fill="#152638" stroke="#1C3450" stroke-width="1.5"/>
+              <!-- UDL arrows -->
+              <line x1="80" y1="25" x2="80" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="130" y1="25" x2="130" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="180" y1="25" x2="180" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="230" y1="25" x2="230" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="280" y1="25" x2="280" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="330" y1="25" x2="330" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="380" y1="25" x2="380" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="430" y1="25" x2="430" y2="53" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#e2a)"/>
+              <line x1="80" y1="25" x2="478" y2="25" stroke="#00C9FF" stroke-width="1.5"/>
+              <text x="270" y="18" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">w₀ = 8 kN/m</text>
+              <!-- Ay reaction -->
+              <line x1="58" y1="110" x2="58" y2="71" stroke="#27AE60" stroke-width="2.5" marker-end="url(#e2g)"/>
+              <text x="58" y="122" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#27AE60">Ay=48kN</text>
+              <!-- MA moment arc -->
+              <path d="M 58 52 A 20 20 0 1 0 58 72" stroke="#F5A623" stroke-width="2" fill="none"/>
+              <polygon points="58,72 50,65 66,65" fill="#F5A623"/>
+              <text x="20" y="62" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#F5A623">MA</text>
+              <text x="20" y="73" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#F5A623">144</text>
+              <!-- labels -->
+              <text x="58" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">A</text>
+              <text x="478" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">B (free)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 w(x) diagram -->
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <p><strong>w(x) = 8 kN/m constant — uniform load over full span</strong></p>
+          <div class="fbox" style="margin:6px 0">w(x) = 8 kN/m &nbsp;&nbsp;<span class="cm">// constant, downward, 0 ≤ x ≤ 6 m</span><br>dV/dx = −w(x) = −8 &nbsp;<span class="cm">// slope of SFD is −8 everywhere</span></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 80" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">w(x) diagram</text>
+              <line x1="60" y1="60" x2="480" y2="60" stroke="#1C3450" stroke-width="1" stroke-dasharray="4,3"/>
+              <!-- filled rectangle for UDL -->
+              <rect x="60" y="28" width="420" height="32" fill="rgba(0,201,255,0.08)" stroke="none"/>
+              <line x1="60" y1="28" x2="480" y2="28" stroke="#00C9FF" stroke-width="2.5"/>
+              <line x1="60" y1="28" x2="60" y2="60" stroke="#00C9FF" stroke-width="1.5"/>
+              <line x1="480" y1="28" x2="480" y2="60" stroke="#00C9FF" stroke-width="1.5"/>
+              <text x="270" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#00C9FF" font-weight="500">w(x) = 8 kN/m (constant)</text>
+              <text x="60" y="74" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="270" y="74" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">3m</text>
+              <text x="480" y="74" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(6)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 SFD -->
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <p><strong>w(x) → V(x): V(x) = 48 − 8x (linear, slope = −8)</strong></p>
+          <div class="fbox" style="margin:6px 0">V(x) = Ay − w·x = 48 − 8x<br>V(0) = <strong>+48 kN</strong>, V(3) = +24 kN, V(6) = <strong>0 ✓</strong></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 110" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">SFD — V(x)</text>
+              <line x1="60" y1="85" x2="480" y2="85" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- linear SFD: from +48 at A to 0 at B -->
+              <polygon points="60,85 60,20 480,85" fill="rgba(0,201,255,0.1)" stroke="none"/>
+              <polyline points="60,20 480,85" fill="none" stroke="#00C9FF" stroke-width="2.5"/>
+              <line x1="60" y1="85" x2="60" y2="20" stroke="#00C9FF" stroke-width="2.5"/>
+              <line x1="480" y1="85" x2="480" y2="85" stroke="#00C9FF" stroke-width="2.5"/>
+              <!-- labels -->
+              <text x="70" y="16" font-family="JetBrains Mono" font-size="10" fill="#00C9FF" font-weight="500">+48 kN</text>
+              <text x="270" y="60" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">V = 48 − 8x (linear)</text>
+              <text x="480" y="80" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#27AE60">0 ✓</text>
+              <!-- midpoint dot -->
+              <circle cx="270" cy="52" r="3" fill="#00C9FF"/>
+              <text x="282" y="48" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">V(3)=+24</text>
+              <!-- axis labels -->
+              <text x="60" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="270" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">3m</text>
+              <text x="480" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(6)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 BMD -->
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <p><strong>V(x) → M(x): integrate linear V → parabolic M</strong></p>
+          <div class="fbox" style="margin:6px 0">M(x) = MA + ∫₀ˣ V dx = 144 + 48x − 4x²<br>M(0) = <strong>144 kN·m</strong> (fixed-end), M(6) = 144+288−144 = <strong>0 ✓</strong> (free end)</div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 115" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">BMD — M(x)</text>
+              <line x1="60" y1="90" x2="480" y2="90" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- parabolic BMD: max at x=0 (144), zero at x=6 -->
+              <!-- approximate with quadratic bezier: from (60,22) control (60,22) to (480,90) -->
+              <path d="M60,22 Q270,22 480,90" fill="rgba(167,139,250,0.12)" stroke="none"/>
+              <line x1="60" y1="22" x2="60" y2="90" stroke="#A78BFA" stroke-width="1.5"/>
+              <path d="M60,22 Q270,22 480,90" fill="none" stroke="#A78BFA" stroke-width="2.5"/>
+              <!-- labels -->
+              <text x="70" y="18" font-family="JetBrains Mono" font-size="10" fill="#A78BFA" font-weight="500">144 kN·m (max)</text>
+              <text x="480" y="86" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#27AE60">0 ✓</text>
+              <text x="270" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#A78BFA">M = 144 + 48x − 4x² (parabola)</text>
+              <!-- axis labels -->
+              <text x="60" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="270" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">3m</text>
+              <text x="480" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(6) free</text>
+            </svg>
+          </div>
+          <p style="margin-top:6px;font-size:13px;color:var(--sub)">⚠ Note: M is maximum at the <strong style="color:var(--text)">fixed end A</strong>, not mid-span. For a cantilever, the wall must resist the full accumulated moment from all the distributed load.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKED EXAMPLE 3 -->
+  <div class="sec-title" style="margin-top:28px">Worked Example 3 <span class="pill">Triangular Load → V(x) → M(x)</span></div>
+  <div class="sec-sub">Non-uniform w(x) produces increasingly complex V and M — showing the full chain with integration.</div>
+
+  <div class="worked-ex">
+    <div class="we-header"><span class="we-tag">Worked Example 3</span><span class="we-title">Simply Supported — Triangular Load (0 at A, w₀ = 12 kN/m at B)</span></div>
+    <div class="we-body">
+      <div style="margin-bottom:12px;font-family:var(--mono);font-size:11px;color:var(--sub)">GIVEN: L = 9 m &nbsp;|&nbsp; w(x) = (4/3)x kN/m &nbsp;|&nbsp; zero at A, 12 kN/m at B</div>
+
+      <!-- STEP 1 FBD -->
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <p><strong>FBD — resultant of triangular load acts at 2L/3 from A</strong></p>
+          <div class="fbox" style="margin:6px 0">w(x) = (w₀/L)·x = (12/9)x = (4/3)x kN/m<br>Resultant W = ½·w₀·L = ½×12×9 = <strong>54 kN</strong> at x = 2L/3 = 6 m from A<br>ΣM_A=0: By×9 = 54×6 = 324 → <strong>By = 36 kN</strong><br>ΣFy=0: Ay = 54−36 = <strong>18 kN</strong></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 140" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="e3a" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5Z" fill="#00C9FF"/></marker>
+                <marker id="e3g" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5Z" fill="#27AE60"/></marker>
+                <marker id="e3am" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5Z" fill="#F5A623"/></marker>
+              </defs>
+              <!-- beam -->
+              <rect x="60" y="70" width="420" height="12" rx="2" fill="#152638" stroke="#1C3450" stroke-width="1.5"/>
+              <!-- pin A -->
+              <polygon points="60,82 48,100 72,100" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="44" y1="101" x2="76" y2="101" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="38" y1="105" x2="46" y2="101" stroke="#6B8DAF" stroke-width="1"/><line x1="46" y1="105" x2="54" y2="101" stroke="#6B8DAF" stroke-width="1"/><line x1="54" y1="105" x2="62" y2="101" stroke="#6B8DAF" stroke-width="1"/><line x1="62" y1="105" x2="70" y2="101" stroke="#6B8DAF" stroke-width="1"/>
+              <!-- roller B -->
+              <polygon points="480,82 468,100 492,100" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <circle cx="474" cy="105" r="4" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <circle cx="486" cy="105" r="4" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+              <line x1="466" y1="110" x2="496" y2="110" stroke="#6B8DAF" stroke-width="1.2"/>
+              <!-- triangular load (grows from left to right) -->
+              <polygon points="60,68 480,14 480,68" fill="rgba(0,201,255,0.12)" stroke="none"/>
+              <line x1="60" y1="68" x2="480" y2="14" stroke="#00C9FF" stroke-width="2"/>
+              <line x1="480" y1="14" x2="480" y2="68" stroke="#00C9FF" stroke-width="1.5"/>
+              <!-- load arrows (growing) -->
+              <line x1="130" y1="54" x2="130" y2="68" stroke="#00C9FF" stroke-width="1.3" marker-end="url(#e3a)"/>
+              <line x1="200" y1="41" x2="200" y2="68" stroke="#00C9FF" stroke-width="1.3" marker-end="url(#e3a)"/>
+              <line x1="270" y1="41" x2="270" y2="68" stroke="#00C9FF" stroke-width="1.3" marker-end="url(#e3a)"/>
+              <line x1="340" y1="32" x2="340" y2="68" stroke="#00C9FF" stroke-width="1.3" marker-end="url(#e3a)"/>
+              <line x1="410" y1="22" x2="410" y2="68" stroke="#00C9FF" stroke-width="1.3" marker-end="url(#e3a)"/>
+              <text x="496" y="18" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">w₀=12</text>
+              <text x="496" y="28" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">kN/m</text>
+              <text x="60" y="62" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">0</text>
+              <!-- resultant arrow -->
+              <line x1="340" y1="50" x2="340" y2="15" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="4,2"/>
+              <text x="350" y="42" font-family="JetBrains Mono" font-size="8" fill="#F5A623">W=54kN</text>
+              <text x="350" y="52" font-family="JetBrains Mono" font-size="8" fill="#F5A623">at 2L/3=6m</text>
+              <!-- reactions -->
+              <line x1="60" y1="128" x2="60" y2="84" stroke="#27AE60" stroke-width="2.5" marker-end="url(#e3g)"/>
+              <text x="60" y="138" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#27AE60">Ay=18kN</text>
+              <line x1="480" y1="128" x2="480" y2="84" stroke="#27AE60" stroke-width="2.5" marker-end="url(#e3g)"/>
+              <text x="480" y="138" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#27AE60">By=36kN</text>
+              <!-- labels -->
+              <text x="60" y="62" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">A </text>
+              <text x="485" y="62" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500"> B</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 w(x) diagram -->
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <p><strong>w(x) = (4/3)x — linearly increasing load</strong></p>
+          <div class="fbox" style="margin:6px 0">w(x) = (4/3)x kN/m &nbsp;<span class="cm">// linear, 0 at x=0, 12 at x=9</span><br>dV/dx = −w(x) = −(4/3)x &nbsp;<span class="cm">// slope of V is also linear → V is parabolic</span></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 85" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">w(x) diagram</text>
+              <line x1="60" y1="70" x2="480" y2="70" stroke="#1C3450" stroke-width="1" stroke-dasharray="4,3"/>
+              <polygon points="60,70 480,15 480,70" fill="rgba(0,201,255,0.1)" stroke="none"/>
+              <line x1="60" y1="70" x2="480" y2="15" stroke="#00C9FF" stroke-width="2.5"/>
+              <line x1="480" y1="15" x2="480" y2="70" stroke="#00C9FF" stroke-width="1.5"/>
+              <text x="65" y="68" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">0</text>
+              <text x="490" y="19" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">12 kN/m</text>
+              <text x="270" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#00C9FF">w(x) = (4/3)x (linear)</text>
+              <text x="60" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="270" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">4.5m</text>
+              <text x="480" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(9)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 SFD -->
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <p><strong>w(x) → V(x) = 18 − (2/3)x² — parabolic SFD</strong></p>
+          <div class="fbox" style="margin:6px 0">V(x) = Ay − ∫₀ˣ w dx = 18 − (2/3)x²<br>V(0)=<strong>+18 kN</strong>, V(9)=18−54=−36+36=<strong>0 ✓</strong><br>V=0 at x=√27 = 3√3 ≈ <strong>5.20 m</strong> ← location of M_max</div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">SFD — V(x) parabolic</text>
+              <line x1="60" y1="70" x2="480" y2="70" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- parabola: V=18 at x=0, crosses 0 at x≈5.2, V=-36 at x=9 (but reaction adds 36, so ends at 0) -->
+              <!-- approximate with path: starts (60,45), crosses baseline at ~x=5.2 → xpx=60+5.2/9*420=303, ends (480,70) -->
+              <path d="M60,45 Q303,70 480,110" fill="rgba(0,201,255,0.07)" stroke="none"/>
+              <path d="M60,70 L480,70 L480,110 Q303,70 60,45 Z" fill="rgba(0,201,255,0.07)" stroke="none"/>
+              <path d="M60,45 Q303,70 480,110" fill="none" stroke="#00C9FF" stroke-width="2.5"/>
+              <line x1="60" y1="70" x2="60" y2="45" stroke="#00C9FF" stroke-width="2.5"/>
+              <line x1="480" y1="110" x2="480" y2="70" stroke="#00C9FF" stroke-width="2" stroke-dasharray="1,0"/>
+              <!-- reaction jump at B -->
+              <line x1="480" y1="70" x2="480" y2="110" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="493" y="95" font-family="JetBrains Mono" font-size="8" fill="#F5A623">+By=36</text>
+              <!-- labels -->
+              <text x="70" y="40" font-family="JetBrains Mono" font-size="10" fill="#00C9FF" font-weight="500">+18 kN</text>
+              <text x="480" y="118" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#E74C3C">−36 kN</text>
+              <!-- V=0 marker -->
+              <circle cx="303" cy="70" r="4" fill="#F5A623"/>
+              <line x1="303" y1="70" x2="303" y2="20" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="313" y="24" font-family="JetBrains Mono" font-size="8" fill="#F5A623">V=0 at x=5.20m</text>
+              <text x="313" y="34" font-family="JetBrains Mono" font-size="8" fill="#F5A623">← M_max here</text>
+              <!-- axis labels -->
+              <text x="60" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="303" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">5.20m</text>
+              <text x="480" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(9)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 BMD -->
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <p><strong>V(x) → M(x) = 18x − (2/9)x³ — cubic BMD</strong></p>
+          <div class="fbox" style="margin:6px 0">M(x) = ∫₀ˣ V dx = 18x − (2/9)x³<br>M(0)=<strong>0</strong>, M(9)=162−162=<strong>0 ✓</strong><br>M_max at x=5.20m: M=18(5.20)−(2/9)(5.20)³ = 93.6−32.2 = <strong>≈ 62.4 kN·m</strong></div>
+          <div class="svgbox">
+            <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="14" font-family="JetBrains Mono" font-size="10" fill="#6B8DAF" font-weight="500">BMD — M(x) cubic</text>
+              <line x1="60" y1="90" x2="480" y2="90" stroke="#1C3450" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- cubic BMD: starts at 0, peaks at x≈5.2 (xpx=303), ends at 0 at x=9 (xpx=480) -->
+              <!-- approximate: bezier from (60,90) through (303,30) to (480,90) — slightly right-skewed -->
+              <path d="M60,90 C150,90 260,30 303,30 C360,30 440,90 480,90" fill="rgba(167,139,250,0.12)" stroke="none"/>
+              <path d="M60,90 C150,90 260,30 303,30 C360,30 440,90 480,90" fill="none" stroke="#A78BFA" stroke-width="2.5"/>
+              <!-- peak marker -->
+              <line x1="303" y1="30" x2="303" y2="90" stroke="#A78BFA" stroke-width="1" stroke-dasharray="3,2"/>
+              <circle cx="303" cy="30" r="4" fill="#A78BFA"/>
+              <text x="313" y="34" font-family="JetBrains Mono" font-size="10" fill="#A78BFA" font-weight="500">62.4 kN·m</text>
+              <text x="313" y="46" font-family="JetBrains Mono" font-size="8" fill="#6B8DAF">(at x = 5.20 m)</text>
+              <text x="270" y="75" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#A78BFA">M = 18x − (2/9)x³ (cubic)</text>
+              <text x="60" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A(0)</text>
+              <text x="303" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">5.20m</text>
+              <text x="480" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B(9)</text>
+              <text x="60" y="88" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#27AE60">0</text>
+              <text x="480" y="88" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#27AE60">0</text>
+            </svg>
+          </div>
+          <p style="margin-top:6px;font-size:13px;color:var(--sub)">Key insight: triangular load (linear w) → parabolic V → <strong style="color:var(--text)">cubic M</strong>. Each integration raises the polynomial degree by 1.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="div"></div>
+
+  <!-- BOUNDARY CONDITIONS -->
+  <div class="sec-title">Boundary Conditions Summary</div>
+  <div class="g3">
+    <div class="card"><h3>Pin / Roller End</h3><p>V = reaction<br><strong>M = 0</strong></p></div>
+    <div class="card"><h3>Free End</h3><p><strong>V = 0</strong><br><strong>M = 0</strong></p></div>
+    <div class="card"><h3>Fixed End</h3><p>V = reaction shear<br><strong>M = reaction moment</strong></p></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PRACTICE TAB
+══════════════════════════════════════════════════════════ -->
+<div id="practice" class="tab-content">
+<div class="container">
+  <div class="sec-title">Practice Problems</div>
+  <div class="sec-sub">Seven problems covering FBD, w(x)→V(x)→M(x) transformations, and visual diagram identification.</div>
+  <div class="prog-row">
+    <span class="prog-lbl">Score</span>
+    <div class="prog-bar"><div class="prog-fill" id="pProg"></div></div>
+    <span class="prog-lbl" id="pCount">0 / 7</span>
+  </div>
+
+  <!-- P1: FBD reactions -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 01 — FBD &amp; Reactions</div>
+    <h3>Simply Supported Beam — Find Reactions</h3>
+    <p>A simply supported beam of length <strong>L = 12 m</strong> carries a concentrated load <strong>P = 72 kN</strong> at <strong>x = 3 m</strong> from the left support A. Draw the FBD and find <strong>A<sub>y</sub></strong>.</p>
+    <div class="svgbox">
+      <svg viewBox="0 0 500 90" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="p1a" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5Z" fill="#F5A623"/></marker></defs>
+        <rect x="60" y="38" width="380" height="11" rx="2" fill="#152638" stroke="#1C3450" stroke-width="1.5"/>
+        <polygon points="60,49 47,67 73,67" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <line x1="43" y1="68" x2="77" y2="68" stroke="#6B8DAF" stroke-width="1.5"/>
+        <polygon points="440,49 427,67 453,67" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <circle cx="433" cy="73" r="4" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <circle cx="447" cy="73" r="4" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <line x1="155" y1="8" x2="155" y2="36" stroke="#F5A623" stroke-width="2" marker-end="url(#p1a)"/>
+        <text x="170" y="14" font-family="JetBrains Mono" font-size="9" fill="#F5A623">P=72kN</text>
+        <text x="60" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">A</text>
+        <text x="440" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">B</text>
+        <text x="155" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#F5A623">3m</text>
+        <text x="250" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6B8DAF">L = 12 m</text>
+      </svg>
+    </div>
+    <div class="ans-row">
+      <input type="number" id="a1" placeholder="Ay =">
+      <span class="unit-lbl">kN</span>
+      <button class="btn btn-p" onclick="chk(1,54,'a1','f1')">Check</button>
+      <button class="btn btn-o" onclick="tHint('h1')">Hint</button>
+    </div>
+    <div class="hint-box" id="h1">ΣM_B=0: Ay×12 = 72×(12−3) = 648 → Ay = 54 kN. Then By = 72−54 = 18 kN.</div>
+    <div class="fb" id="f1"></div>
+  </div>
+
+  <!-- P2: V from w -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 02 — w(x) → V(x)</div>
+    <h3>Shear Force from UDL Using the Differential Relation</h3>
+    <p>A simply supported beam (L=10 m) carries a <strong>uniform load w = 5 kN/m</strong> over its full length. Reactions: Ay = By = 25 kN. Using V(x) = Ay − w·x, find <strong>V at x = 3 m</strong>.</p>
+    <div class="fbox" style="font-size:12px">V(x) = Ay − w·x &nbsp;<span class="cm">// from integrating dV/dx = −w with V(0) = Ay</span></div>
+    <div class="ans-row">
+      <input type="number" id="a2" placeholder="V(3) =">
+      <span class="unit-lbl">kN</span>
+      <button class="btn btn-p" onclick="chk(2,10,'a2','f2')">Check</button>
+      <button class="btn btn-o" onclick="tHint('h2')">Hint</button>
+    </div>
+    <div class="hint-box" id="h2">V(3) = 25 − 5×3 = 25 − 15 = 10 kN.</div>
+    <div class="fb" id="f2"></div>
+  </div>
+
+  <!-- P3: M from V area -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 03 — V(x) → M(x) Area Method</div>
+    <h3>Bending Moment via Area Under SFD</h3>
+    <p>Continuing from P2 (UDL w=5 kN/m, L=10 m, Ay=25 kN). The shear function is V(x) = 25−5x (linear). Using ΔM = ∫V dx, find <strong>M at x = 5 m</strong> (mid-span).</p>
+    <div class="fbox" style="font-size:12px">M(5) = ∫₀⁵ V dx = ∫₀⁵ (25−5x) dx = [25x − 2.5x²]₀⁵</div>
+    <div class="ans-row">
+      <input type="number" id="a3" placeholder="M(5) =">
+      <span class="unit-lbl">kN·m</span>
+      <button class="btn btn-p" onclick="chk(3,62.5,'a3','f3')">Check</button>
+      <button class="btn btn-o" onclick="tHint('h3')">Hint</button>
+    </div>
+    <div class="hint-box" id="h3">M(5) = 25(5) − 2.5(25) = 125 − 62.5 = 62.5 kN·m. Also = wL²/8 = 5×100/8 = 62.5 ✓</div>
+    <div class="fb" id="f3"></div>
+  </div>
+
+  <!-- P4: Fixed end moment -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 04 — FBD + Full Pipeline</div>
+    <h3>Cantilever — Fixed-End Moment from w(x)→V(x)→M(x)</h3>
+    <p>A cantilever beam is fixed at A (left), free at B (right). Length <strong>L = 5 m</strong>, uniform load <strong>w = 10 kN/m</strong>. Using the pipeline, find the magnitude of <strong>M at x = 0</strong> (fixed end).</p>
+    <div class="fbox" style="font-size:12px">From free end: V(5)=0, V(0)=w×L=10×5=50kN<br>M(5)=0, M(0) = M(5)−∫₀⁵V dx</div>
+    <div class="ans-row">
+      <input type="number" id="a4" placeholder="|MA| =">
+      <span class="unit-lbl">kN·m</span>
+      <button class="btn btn-p" onclick="chk(4,125,'a4','f4')">Check</button>
+      <button class="btn btn-o" onclick="tHint('h4')">Hint</button>
+    </div>
+    <div class="hint-box" id="h4">Working from free end B: V(x from B) = w·s where s is distance from B. M at fixed end = ½·w·L² = ½×10×25 = 125 kN·m. Or: ∫₀⁵(50−10x)dx = [50x−5x²]₀⁵ = 250−125=125.</div>
+    <div class="fb" id="f4"></div>
+  </div>
+
+  <!-- P5: Find x where V=0 -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 05 — Find Location of Maximum Moment</div>
+    <h3>Position Where V(x) = 0 (Triangular Load)</h3>
+    <p>A simply supported beam (L=9m) has a triangular load: w(x) = (4/3)x kN/m (zero at A, 12 kN/m at B). Reactions: Ay=18 kN, By=36 kN. The shear is <strong>V(x) = 18 − (2/3)x²</strong>. Find the value of x (in m) where <strong>V(x) = 0</strong> (maximum moment location). Round to 2 decimal places.</p>
+    <div class="fbox" style="font-size:12px">Set V(x) = 0: 18 − (2/3)x² = 0 → x² = 27 → x = ?</div>
+    <div class="ans-row">
+      <input type="number" id="a5" placeholder="x =">
+      <span class="unit-lbl">m</span>
+      <button class="btn btn-p" onclick="chk(5,5.20,'a5','f5')">Check</button>
+      <button class="btn btn-o" onclick="tHint('h5')">Hint</button>
+    </div>
+    <div class="hint-box" id="h5">18 = (2/3)x² → x² = 27 → x = √27 = 3√3 ≈ 5.196 ≈ 5.20 m</div>
+    <div class="fb" id="f5"></div>
+  </div>
+
+  <!-- P6: Visual — identify SFD -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 06 — Visual: Identify the Correct SFD</div>
+    <h3>Which SFD matches this beam?</h3>
+    <p>A simply supported beam carries a <strong>uniform distributed load w over its full span</strong>. The reactions are equal (Ay = By = wL/2). Which of the four SFDs below is correct?</p>
+    <div class="svgbox">
+      <svg viewBox="0 0 500 70" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="30" width="380" height="10" rx="2" fill="#152638" stroke="#1C3450" stroke-width="1.5"/>
+        <polygon points="60,40 48,56 72,56" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <line x1="44" y1="57" x2="76" y2="57" stroke="#6B8DAF" stroke-width="1.5"/>
+        <polygon points="440,40 428,56 452,56" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <circle cx="434" cy="61" r="3.5" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <circle cx="446" cy="61" r="3.5" fill="none" stroke="#6B8DAF" stroke-width="1.5"/>
+        <!-- UDL arrows -->
+        <line x1="100" y1="10" x2="100" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="150" y1="10" x2="150" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="200" y1="10" x2="200" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="250" y1="10" x2="250" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="300" y1="10" x2="300" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="350" y1="10" x2="350" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="400" y1="10" x2="400" y2="28" stroke="#00C9FF" stroke-width="1.5" marker-end="url(#bh2)"/>
+        <line x1="80" y1="10" x2="420" y2="10" stroke="#00C9FF" stroke-width="1.5"/>
+        <text x="250" y="7" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#00C9FF">w (uniform)</text>
+        <defs><marker id="bh2" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5Z" fill="#00C9FF"/></marker></defs>
+      </svg>
+    </div>
+    <div class="visual-opts" id="p6opts">
+      <div class="visual-opt" onclick="selVisual(this,'p6',0)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <polyline points="10,10 110,50" fill="none" stroke="#00C9FF" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Diagonal line</text>
+        </svg>
+        <div class="visual-opt-lbl">Option A</div>
+      </div>
+      <div class="visual-opt" onclick="selVisual(this,'p6',1)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <polyline points="10,10 10,50 110,50 110,10" fill="rgba(0,201,255,0.08)" stroke="#00C9FF" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Rectangular</text>
+        </svg>
+        <div class="visual-opt-lbl">Option B</div>
+      </div>
+      <div class="visual-opt" onclick="selVisual(this,'p6',2)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <polyline points="10,30 10,12 110,48 110,30" fill="rgba(0,201,255,0.08)" stroke="#00C9FF" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Trapezoid-linear</text>
+        </svg>
+        <div class="visual-opt-lbl">Option C</div>
+      </div>
+      <div class="visual-opt" onclick="selVisual(this,'p6',3)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <path d="M10,30 Q60,5 110,30" fill="rgba(0,201,255,0.08)" stroke="#00C9FF" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Parabola</text>
+        </svg>
+        <div class="visual-opt-lbl">Option D</div>
+      </div>
+    </div>
+    <div class="hint-box" id="h6p" style="display:none">Under a UDL, dV/dx = −w = constant → V(x) is linear. Starting at +wL/2 and ending at −wL/2, crossing zero at mid-span. That's a linear (diagonal) trapezoid shape crossing zero — Option C.</div>
+    <button class="btn btn-o" style="margin-top:8px" onclick="tHint('h6p')">Hint</button>
+    <div class="fb" id="f6"></div>
+  </div>
+
+  <!-- P7: Visual — identify BMD -->
+  <div class="prob-card">
+    <div class="prob-num">Problem 07 — Visual: Identify the Correct BMD</div>
+    <h3>Which BMD matches a simply supported beam with a single point load at mid-span?</h3>
+    <p>The beam has a concentrated load <strong>P at the center</strong> (x = L/2). SFD has a jump at center. Which BMD is correct?</p>
+    <div class="visual-opts" id="p7opts">
+      <div class="visual-opt" onclick="selVisual(this,'p7',0)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="50" x2="110" y2="50" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <path d="M10,50 Q60,5 110,50" fill="rgba(167,139,250,0.1)" stroke="#A78BFA" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Parabola</text>
+        </svg>
+        <div class="visual-opt-lbl">Option A</div>
+      </div>
+      <div class="visual-opt" onclick="selVisual(this,'p7',1)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="50" x2="110" y2="50" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <polyline points="10,50 60,10 110,50" fill="rgba(167,139,250,0.1)" stroke="#A78BFA" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Triangle peak</text>
+        </svg>
+        <div class="visual-opt-lbl">Option B</div>
+      </div>
+      <div class="visual-opt" onclick="selVisual(this,'p7',2)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#A78BFA" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Constant</text>
+        </svg>
+        <div class="visual-opt-lbl">Option C</div>
+      </div>
+      <div class="visual-opt" onclick="selVisual(this,'p7',3)">
+        <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+          <polyline points="10,30 10,10 60,10 60,50 110,50 110,30" fill="rgba(167,139,250,0.1)" stroke="#A78BFA" stroke-width="2"/>
+          <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Step shape</text>
+        </svg>
+        <div class="visual-opt-lbl">Option D</div>
+      </div>
+    </div>
+    <div class="hint-box" id="h7p" style="display:none">Under a point load, w=0 in each segment → V is constant in each half → dM/dx = V = constant → M is linear in each segment. It peaks (triangle) at the load point where shear crosses zero. Option B.</div>
+    <button class="btn btn-o" style="margin-top:8px" onclick="tHint('h7p')">Hint</button>
+    <div class="fb" id="f7"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     EXAM TAB
+══════════════════════════════════════════════════════════ -->
+<div id="exam" class="tab-content">
+<div class="container">
+
+  <div id="examStart">
+    <div class="hero-panel" style="text-align:center;padding:48px 36px">
+      <div class="eyebrow">Assessment — Unit 5</div>
+      <h1 class="hero-title" style="font-size:24px;margin-bottom:10px">Shear &amp; Moment Diagrams</h1>
+      <p class="hero-sub" style="margin:0 auto 26px">12 questions · Mixed types including visual · 20 minute limit · 70% to pass</p>
+      <div class="g3" style="max-width:480px;margin:0 auto 26px">
+        <div class="card" style="padding:14px;text-align:center"><div style="font-family:var(--mono);font-size:22px;color:var(--accent);font-weight:600">12</div><div style="font-size:11px;color:var(--sub);margin-top:2px">Questions</div></div>
+        <div class="card" style="padding:14px;text-align:center"><div style="font-family:var(--mono);font-size:22px;color:var(--amber);font-weight:600">20:00</div><div style="font-size:11px;color:var(--sub);margin-top:2px">Time Limit</div></div>
+        <div class="card" style="padding:14px;text-align:center"><div style="font-family:var(--mono);font-size:22px;color:var(--green);font-weight:600">70%</div><div style="font-size:11px;color:var(--sub);margin-top:2px">To Pass</div></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
+        <span class="eq-type mc" style="font-size:10px">5× Multiple Choice</span>
+        <span class="eq-type num" style="font-size:10px">4× Numeric</span>
+        <span class="eq-type tf" style="font-size:10px">1× True/False</span>
+        <span class="eq-type vis" style="font-size:10px">2× Visual</span>
+      </div>
+      <button class="btn btn-p" style="font-size:13px;padding:12px 36px" onclick="startExam()">Begin Exam</button>
+    </div>
+  </div>
+
+  <div id="examContent" style="display:none">
+    <div class="exam-hdr">
+      <div><h2>Exam in Progress</h2><p>12 questions — FBD, transformation pipeline, diagrams. Lock-in on Submit.</p></div>
+      <div class="timer" id="examTimer">20:00</div>
+    </div>
+
+    <!-- Q1 MC -->
+    <div class="eq">
+      <div class="eq-num">Question 01 of 12</div><span class="eq-type mc">Multiple Choice</span>
+      <div class="eq-text">What does the differential relation dV/dx = −w(x) tell us about the Shear Force Diagram?</div>
+      <div class="opts" id="q1o">
+        <button class="opt" onclick="selMC(this,'q1',0)"><span class="opt-k">A</span>The shear force equals the negative of the bending moment.</button>
+        <button class="opt" onclick="selMC(this,'q1',1)"><span class="opt-k">B</span>The slope of the SFD at any point equals the negative of the distributed load intensity at that point.</button>
+        <button class="opt" onclick="selMC(this,'q1',2)"><span class="opt-k">C</span>The area under the SFD equals the distributed load.</button>
+        <button class="opt" onclick="selMC(this,'q1',3)"><span class="opt-k">D</span>The shear is always negative under a downward load.</button>
+      </div>
+    </div>
+
+    <!-- Q2 Numeric: Reaction -->
+    <div class="eq">
+      <div class="eq-num">Question 02 of 12</div><span class="eq-type num">Numeric</span>
+      <div class="eq-text">A simply supported beam (L = 10 m) carries P = 80 kN at x = 2 m from A. Perform the FBD and find <strong>A<sub>y</sub></strong> (in kN). ΣM_B = 0.</div>
+      <div class="num-row"><input type="number" id="q2i" placeholder="Ay ="><span class="num-unit">kN</span></div>
+      <div class="eq-fb" id="q2fb"></div>
+    </div>
+
+    <!-- Q3 MC: w→V -->
+    <div class="eq">
+      <div class="eq-num">Question 03 of 12</div><span class="eq-type mc">Multiple Choice</span>
+      <div class="eq-text">A beam segment has no distributed load (w = 0). What is the shape of the Shear Force Diagram in that segment?</div>
+      <div class="opts" id="q3o">
+        <button class="opt" onclick="selMC(this,'q3',0)"><span class="opt-k">A</span>Parabolic</button>
+        <button class="opt" onclick="selMC(this,'q3',1)"><span class="opt-k">B</span>Constant (horizontal)</button>
+        <button class="opt" onclick="selMC(this,'q3',2)"><span class="opt-k">C</span>Linear with positive slope</button>
+        <button class="opt" onclick="selMC(this,'q3',3)"><span class="opt-k">D</span>Cubic</button>
+      </div>
+    </div>
+
+    <!-- Q4 Numeric: V from UDL -->
+    <div class="eq">
+      <div class="eq-num">Question 04 of 12</div><span class="eq-type num">Numeric</span>
+      <div class="eq-text">A simply supported beam (L=8m) carries a UDL of w=6 kN/m over the full span. Reactions: Ay=By=24 kN. Using V(x) = Ay − w·x, find <strong>V at x = 6 m</strong> (in kN). Include sign.</div>
+      <div class="num-row"><input type="number" id="q4i" placeholder="V(6) ="><span class="num-unit">kN</span></div>
+      <div class="eq-fb" id="q4fb"></div>
+    </div>
+
+    <!-- Q5 MC: area method -->
+    <div class="eq">
+      <div class="eq-num">Question 05 of 12</div><span class="eq-type mc">Multiple Choice</span>
+      <div class="eq-text">In the area method, the change in bending moment ΔM between two points equals:</div>
+      <div class="opts" id="q5o">
+        <button class="opt" onclick="selMC(this,'q5',0)"><span class="opt-k">A</span>The area under the distributed load diagram</button>
+        <button class="opt" onclick="selMC(this,'q5',1)"><span class="opt-k">B</span>The area under the shear force diagram</button>
+        <button class="opt" onclick="selMC(this,'q5',2)"><span class="opt-k">C</span>The negative of the shear force</button>
+        <button class="opt" onclick="selMC(this,'q5',3)"><span class="opt-k">D</span>The slope of the load diagram</button>
+      </div>
+    </div>
+
+    <!-- Q6 Numeric: M from area -->
+    <div class="eq">
+      <div class="eq-num">Question 06 of 12</div><span class="eq-type num">Numeric</span>
+      <div class="eq-text">A beam segment has a <strong>constant shear V = +40 kN</strong> over a length of <strong>3 m</strong>. The moment at the left end of this segment is <strong>M₁ = 50 kN·m</strong>. Using the area method (ΔM = V·Δx), find <strong>M₂</strong> at the right end (in kN·m).</div>
+      <div class="num-row"><input type="number" id="q6i" placeholder="M2 ="><span class="num-unit">kN·m</span></div>
+      <div class="eq-fb" id="q6fb"></div>
+    </div>
+
+    <!-- Q7 TF -->
+    <div class="eq">
+      <div class="eq-num">Question 07 of 12</div><span class="eq-type tf">True / False</span>
+      <div class="eq-text">A concentrated moment M₀ applied at a point on a beam causes a step (jump) in the Bending Moment Diagram but does NOT cause a jump in the Shear Force Diagram.</div>
+      <div class="tf-row" id="q7o">
+        <button class="tf-btn" onclick="selTF(this,'q7',true)">True</button>
+        <button class="tf-btn" onclick="selTF(this,'q7',false)">False</button>
+      </div>
+    </div>
+
+    <!-- Q8 Numeric: max M for UDL cantilever -->
+    <div class="eq">
+      <div class="eq-num">Question 08 of 12</div><span class="eq-type num">Numeric</span>
+      <div class="eq-text">A cantilever beam (fixed at left, free at right) has length <strong>L = 4 m</strong> and UDL <strong>w = 15 kN/m</strong>. Using the pipeline: Ay = w·L = 60 kN, M_A = w·L²/2. Find <strong>|M_A|</strong> (in kN·m).</div>
+      <div class="num-row"><input type="number" id="q8i" placeholder="|MA| ="><span class="num-unit">kN·m</span></div>
+      <div class="eq-fb" id="q8fb"></div>
+    </div>
+
+    <!-- Q9 MC: triangular load V shape -->
+    <div class="eq">
+      <div class="eq-num">Question 09 of 12</div><span class="eq-type mc">Multiple Choice</span>
+      <div class="eq-text">A beam segment has a <strong>triangular distributed load</strong> (linearly increasing from 0 to w₀). The Shear Force Diagram in this segment is:</div>
+      <div class="opts" id="q9o">
+        <button class="opt" onclick="selMC(this,'q9',0)"><span class="opt-k">A</span>Constant</button>
+        <button class="opt" onclick="selMC(this,'q9',1)"><span class="opt-k">B</span>Linear (1st degree)</button>
+        <button class="opt" onclick="selMC(this,'q9',2)"><span class="opt-k">C</span>Parabolic (2nd degree)</button>
+        <button class="opt" onclick="selMC(this,'q9',3)"><span class="opt-k">D</span>Cubic (3rd degree)</button>
+      </div>
+    </div>
+
+    <!-- Q10 Visual: identify correct BMD for cantilever+UDL -->
+    <div class="eq">
+      <div class="eq-num">Question 10 of 12</div><span class="eq-type vis">Visual</span>
+      <div class="eq-text">A <strong>cantilever beam</strong> is fixed at the left end A and free at B. A <strong>uniform distributed load</strong> acts downward over the full span. Which diagram shows the correct shape of the Bending Moment Diagram? (Note: M=0 at free end, M=max at fixed end.)</div>
+      <div class="visual-opts" id="q10o">
+        <div class="visual-opt" onclick="selEVisual(this,'q10',0)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="50" x2="110" y2="50" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <polyline points="10,10 110,50" fill="none" stroke="#A78BFA" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Linear (max at A)</text>
+          </svg>
+          <div class="visual-opt-lbl">Option A</div>
+        </div>
+        <div class="visual-opt" onclick="selEVisual(this,'q10',1)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="50" x2="110" y2="50" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <path d="M10,10 Q10,50 110,50" fill="rgba(167,139,250,0.1)" stroke="#A78BFA" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Parabola (max at A)</text>
+          </svg>
+          <div class="visual-opt-lbl">Option B</div>
+        </div>
+        <div class="visual-opt" onclick="selEVisual(this,'q10',2)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <path d="M10,50 Q60,5 110,50" fill="rgba(167,139,250,0.1)" stroke="#A78BFA" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Parabola (max mid)</text>
+          </svg>
+          <div class="visual-opt-lbl">Option C</div>
+        </div>
+        <div class="visual-opt" onclick="selEVisual(this,'q10',3)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#A78BFA" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Constant</text>
+          </svg>
+          <div class="visual-opt-lbl">Option D</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q11 MC: location of max M -->
+    <div class="eq">
+      <div class="eq-num">Question 11 of 12</div><span class="eq-type mc">Multiple Choice</span>
+      <div class="eq-text">To find the location of <strong>maximum bending moment</strong> on a beam, you should look for the point where:</div>
+      <div class="opts" id="q11o">
+        <button class="opt" onclick="selMC(this,'q11',0)"><span class="opt-k">A</span>The distributed load w(x) is maximum</button>
+        <button class="opt" onclick="selMC(this,'q11',1)"><span class="opt-k">B</span>The shear force V(x) = 0 (changes sign)</button>
+        <button class="opt" onclick="selMC(this,'q11',2)"><span class="opt-k">C</span>The bending moment diagram crosses the baseline</button>
+        <button class="opt" onclick="selMC(this,'q11',3)"><span class="opt-k">D</span>The reaction force is largest</button>
+      </div>
+    </div>
+
+    <!-- Q12 Visual: identify correct SFD for cantilever+point load at tip -->
+    <div class="eq">
+      <div class="eq-num">Question 12 of 12</div><span class="eq-type vis">Visual</span>
+      <div class="eq-text">A <strong>cantilever beam</strong> is fixed at left (A) and free at right (B). A single <strong>concentrated force P acts downward at the free end B</strong>. Which SFD is correct? (No distributed load exists — so V is constant throughout.)</div>
+      <div class="visual-opts" id="q12o">
+        <div class="visual-opt" onclick="selEVisual(this,'q12',0)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <polyline points="10,30 10,10 110,10 110,30" fill="rgba(0,201,255,0.08)" stroke="#00C9FF" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Constant positive</text>
+          </svg>
+          <div class="visual-opt-lbl">Option A</div>
+        </div>
+        <div class="visual-opt" onclick="selEVisual(this,'q12',1)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <polyline points="10,10 110,50" fill="none" stroke="#00C9FF" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Linear decreasing</text>
+          </svg>
+          <div class="visual-opt-lbl">Option B</div>
+        </div>
+        <div class="visual-opt" onclick="selEVisual(this,'q12',2)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <path d="M10,50 Q60,5 110,50" fill="rgba(0,201,255,0.08)" stroke="#00C9FF" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Parabolic</text>
+          </svg>
+          <div class="visual-opt-lbl">Option C</div>
+        </div>
+        <div class="visual-opt" onclick="selEVisual(this,'q12',3)">
+          <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="30" x2="110" y2="30" stroke="#1C3450" stroke-width="1" stroke-dasharray="2,2"/>
+            <polyline points="10,10 110,10 110,50" fill="rgba(0,201,255,0.08)" stroke="#00C9FF" stroke-width="2"/>
+            <text x="60" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#6B8DAF">Step at free end</text>
+          </svg>
+          <div class="visual-opt-lbl">Option D</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exam-acts">
+      <button class="btn btn-o" onclick="resetExam()">Restart</button>
+      <button class="btn btn-p" id="subBtn" onclick="submitExam()">Submit Exam</button>
+    </div>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="res-lbl">Exam Complete</div>
+    <div class="res-score" id="resScore"></div>
+    <div id="resMsg" class="res-msg"></div>
+    <button class="btn btn-p" style="margin-bottom:10px" onclick="resetExam()">Retake Exam</button>
+    <button class="btn btn-o" onclick="switchTab('learn',document.querySelector('.tab-btn'))">Review Material</button>
+    <div id="ansRev" style="margin-top:28px;text-align:left"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ── TABS ── */
+function switchTab(n,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(n).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── LIVE DIAGRAM ── */
+let loadType='point';
+const sliders={};
+function setLoad(type,btn){
+  loadType=type;
+  document.querySelectorAll('.lt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildControls();
+  drawLive();
+}
+
+function buildControls(){
+  const grid=document.getElementById('ctrlGrid');
+  const configs={
+    point:[
+      {id:'sA',label:'Load Position a (m)',min:0.5,max:9.5,step:0.1,val:4,display:'a = {v} m'},
+      {id:'sP',label:'Load P (kN)',min:10,max:120,step:5,val:60,display:'P = {v} kN'},
+    ],
+    udl:[
+      {id:'sW',label:'UDL intensity w (kN/m)',min:2,max:30,step:1,val:10,display:'w = {v} kN/m'},
+    ],
+    triangular:[
+      {id:'sW0',label:'Peak load w₀ (kN/m)',min:5,max:40,step:1,val:15,display:'w₀ = {v} kN/m'},
+    ],
+    moment:[
+      {id:'sM0',label:'Moment M₀ (kN·m)',min:10,max:200,step:10,val:80,display:'M₀ = {v} kN·m'},
+      {id:'sMA',label:'Position a (m)',min:1,max:9,step:0.5,val:4,display:'a = {v} m'},
+    ],
+    combined:[
+      {id:'sCP',label:'Point Load P (kN)',min:10,max:80,step:5,val:40,display:'P = {v} kN'},
+      {id:'sCa',label:'Load Position a (m)',min:1,max:9,step:0.5,val:3,display:'a = {v} m'},
+      {id:'sCw',label:'UDL w (kN/m)',min:2,max:20,step:1,val:8,display:'w = {v} kN/m'},
+    ]
+  };
+  const cfg=configs[loadType];
+  grid.innerHTML='';
+  cfg.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='ctrl-group';
+    div.innerHTML=`<span class="ctrl-label">${c.label}</span>
+      <input type="range" id="${c.id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.val}" oninput="updateCtrl('${c.id}','${c.display}','lv_${c.id}');drawLive()">
+      <span class="ctrl-val" id="lv_${c.id}">${c.display.replace('{v}',c.val)}</span>`;
+    grid.appendChild(div);
+  });
+}
+function updateCtrl(id,tpl,lvId){
+  const v=document.getElementById(id).value;
+  document.getElementById(lvId).textContent=tpl.replace('{v}',parseFloat(v).toFixed(1));
+}
+function gv(id){const el=document.getElementById(id);return el?parseFloat(el.value):0;}
+
+function drawLive(){
+  const canvas=document.getElementById('liveCanvas');
+  const ctx=canvas.getContext('2d');
+  const DPR=window.devicePixelRatio||1;
+  const W=canvas.clientWidth;
+  const H=300;
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  ctx.scale(DPR,DPR);
+
+  const L=10;
+  const lPad=70, rPad=50, tPad=20;
+  const bW=W-lPad-rPad;
+  const beamY=tPad+50;
+  const sfdY=beamY+90;
+  const bmdY=sfdY+90;
+
+  ctx.clearRect(0,0,W,H);
+
+  // helpers
+  function xp(x){return lPad+x/L*bW;}
+  function drawArrowV(x,y1,y2,col,lbl,lblSide){
+    const dir=y2>y1?1:-1;
+    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,y2);ctx.lineTo(x-5,y2-dir*9);ctx.lineTo(x+5,y2-dir*9);ctx.fill();
+    ctx.font=`500 9px 'JetBrains Mono'`;ctx.fillStyle=col;ctx.textAlign=lblSide==='right'?'left':'center';
+    if(lblSide==='right') ctx.fillText(lbl,x+8,Math.min(y1,y2)-4);
+    else ctx.fillText(lbl,x,Math.min(y1,y2)-6);
+  }
+  function label(txt,x,y,col,align){
+    ctx.font=`500 9px 'JetBrains Mono'`;ctx.fillStyle=col||'#6B8DAF';ctx.textAlign=align||'center';ctx.fillText(txt,x,y);
+  }
+  function baseline(y){ctx.strokeStyle='#1C3450';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(lPad,y);ctx.lineTo(lPad+bW,y);ctx.stroke();ctx.setLineDash([]);}
+
+  // BEAM
+  ctx.fillStyle='#152638';ctx.strokeStyle='#1C3450';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(lPad,beamY-6,bW,12,2);ctx.fill();ctx.stroke();
+
+  // SUPPORTS (pin left, roller right) — spaced below beam
+  function drawPin(x,y){
+    ctx.strokeStyle='#6B8DAF';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-11,y+18);ctx.lineTo(x+11,y+18);ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x-14,y+20);ctx.lineTo(x+14,y+20);ctx.stroke();
+  }
+  function drawRoller(x,y){
+    ctx.strokeStyle='#6B8DAF';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-11,y+15);ctx.lineTo(x+11,y+15);ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.arc(x-7,y+20,4,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(x+7,y+20,4,0,Math.PI*2);ctx.stroke();
+  }
+  drawPin(xp(0),beamY+6);
+  drawRoller(xp(L),beamY+6);
+
+  // support labels well clear of arrows
+  label('A',xp(0),beamY-14,'#6B8DAF');
+  label('B',xp(L),beamY-14,'#6B8DAF');
+
+  // section labels
+  label('SFD',lPad-6,sfdY+4,'#6B8DAF','right');
+  label('BMD',lPad-6,bmdY+4,'#6B8DAF','right');
+  baseline(sfdY);
+  baseline(bmdY);
+
+  // compute & draw based on load type
+  const Vpts=[], Mpts=[];
+  const N=200;
+
+  if(loadType==='point'){
+    const a=gv('sA'), P=gv('sP');
+    const Ay=P*(L-a)/L, By=P*a/L;
+    // load arrow — above beam, label to side
+    drawArrowV(xp(a),beamY-44,beamY-8,'#F5A623','P='+P.toFixed(0)+'kN','right');
+    // reaction arrows — below supports, clear of support drawings
+    drawArrowV(xp(0),beamY+46,beamY+8,'#6B8DAF','Ay='+Ay.toFixed(0),'right');
+    drawArrowV(xp(L),beamY+46,beamY+8,'#6B8DAF','By='+By.toFixed(0),'right');
+    for(let i=0;i<=N;i++){
+      const x=i/N*L;
+      const v=x<a?Ay:Ay-P;
+      const m=x<a?Ay*x:Ay*x-P*(x-a);
+      Vpts.push([x,v]);Mpts.push([x,m]);
+    }
+  } else if(loadType==='udl'){
+    const w=gv('sW');
+    const Ay=w*L/2;
+    // UDL visual: horizontal line + downward ticks
+    ctx.strokeStyle='#00C9FF';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(xp(0),beamY-32);ctx.lineTo(xp(L),beamY-32);ctx.stroke();
+    for(let i=0;i<=8;i++){
+      const xi=i/8*L;
+      ctx.beginPath();ctx.moveTo(xp(xi),beamY-32);ctx.lineTo(xp(xi),beamY-8);ctx.stroke();
+    }
+    label('w='+w.toFixed(0)+' kN/m',xp(L/2),beamY-38,'#00C9FF');
+    drawArrowV(xp(0),beamY+46,beamY+8,'#6B8DAF','Ay='+Ay.toFixed(0),'right');
+    drawArrowV(xp(L),beamY+46,beamY+8,'#6B8DAF','By='+Ay.toFixed(0),'right');
+    for(let i=0;i<=N;i++){
+      const x=i/N*L;
+      Vpts.push([x,Ay-w*x]);
+      Mpts.push([x,Ay*x-w*x*x/2]);
+    }
+  } else if(loadType==='triangular'){
+    const w0=gv('sW0');
+    const Ay=w0*L/6, By=w0*L/3;
+    // triangular load visual
+    ctx.strokeStyle='#00C9FF';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(xp(0),beamY-8);ctx.lineTo(xp(L),beamY-40);ctx.lineTo(xp(L),beamY-8);ctx.stroke();
+    for(let i=1;i<=6;i++){
+      const xi=i/6*L;
+      const hi=8+(40-8)*i/6;
+      ctx.beginPath();ctx.moveTo(xp(xi),beamY-hi);ctx.lineTo(xp(xi),beamY-8);ctx.stroke();
+    }
+    label('w₀='+w0+'kN/m',xp(L)+4,beamY-44,'#00C9FF','left');
+    drawArrowV(xp(0),beamY+46,beamY+8,'#6B8DAF','Ay='+Ay.toFixed(1),'right');
+    drawArrowV(xp(L),beamY+46,beamY+8,'#6B8DAF','By='+By.toFixed(1),'right');
+    for(let i=0;i<=N;i++){
+      const x=i/N*L;
+      Vpts.push([x,Ay-w0*x*x/(2*L)]);
+      Mpts.push([x,Ay*x-w0*x*x*x/(6*L)]);
+    }
+  } else if(loadType==='moment'){
+    const M0=gv('sM0'), a=gv('sMA');
+    const Ay=-M0/L, By=M0/L;
+    // couple moment arc
+    const cx=xp(a),cy=beamY;
+    ctx.strokeStyle='#A78BFA';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx,cy,18,0.3,Math.PI*1.8);ctx.stroke();
+    ctx.fillStyle='#A78BFA';
+    const ex=cx+18*Math.cos(Math.PI*1.8),ey=cy+18*Math.sin(Math.PI*1.8);
+    ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-8,ey-3);ctx.lineTo(ex-3,ey+7);ctx.fill();
+    label('M₀='+M0+' kN·m',cx,cy-26,'#A78BFA');
+    drawArrowV(xp(0),beamY+46,beamY+8,'#6B8DAF','Ay='+Math.abs(Ay).toFixed(1),'right');
+    drawArrowV(xp(L),beamY+46,beamY+8,'#6B8DAF','By='+By.toFixed(1),'right');
+    for(let i=0;i<=N;i++){
+      const x=i/N*L;
+      const v=Ay; // constant
+      const m=x<a?Ay*x:Ay*x+M0;
+      Vpts.push([x,v]);Mpts.push([x,m]);
+    }
+  } else if(loadType==='combined'){
+    const P=gv('sCP'),a=gv('sCa'),w=gv('sCw');
+    const W=w*L;
+    const Ay=(P*(L-a)+W*L/2)/L, By=P+W-Ay;
+    // UDL
+    ctx.strokeStyle='#00C9FF';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(xp(0),beamY-26);ctx.lineTo(xp(L),beamY-26);ctx.stroke();
+    for(let i=0;i<=6;i++){const xi=i/6*L;ctx.beginPath();ctx.moveTo(xp(xi),beamY-26);ctx.lineTo(xp(xi),beamY-8);ctx.stroke();}
+    label('w='+w+' kN/m',xp(L/2),beamY-32,'#00C9FF');
+    // Point load
+    drawArrowV(xp(a),beamY-52,beamY-8,'#F5A623','P='+P+'kN','right');
+    drawArrowV(xp(0),beamY+46,beamY+8,'#6B8DAF','Ay='+Ay.toFixed(1),'right');
+    drawArrowV(xp(L),beamY+46,beamY+8,'#6B8DAF','By='+By.toFixed(1),'right');
+    for(let i=0;i<=N;i++){
+      const x=i/N*L;
+      const v=Ay-w*x-(x>a?P:0);
+      const m=Ay*x-w*x*x/2-(x>a?P*(x-a):0);
+      Vpts.push([x,v]);Mpts.push([x,m]);
+    }
+  }
+
+  // draw SFD
+  function drawDiagram(pts,y0,col,fillCol){
+    if(!pts.length)return;
+    const vals=pts.map(p=>p[1]);
+    const maxV=Math.max(...vals.map(Math.abs),0.1);
+    const sc=38/maxV;
+    ctx.beginPath();ctx.moveTo(xp(pts[0][0]),y0-pts[0][1]*sc);
+    pts.forEach(p=>ctx.lineTo(xp(p[0]),y0-p[1]*sc));
+    ctx.lineTo(xp(pts[pts.length-1][0]),y0);
+    ctx.lineTo(xp(pts[0][0]),y0);
+    ctx.closePath();ctx.fillStyle=fillCol;ctx.fill();
+    ctx.beginPath();ctx.moveTo(xp(pts[0][0]),y0-pts[0][1]*sc);
+    pts.forEach(p=>ctx.lineTo(xp(p[0]),y0-p[1]*sc));
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash([]);ctx.stroke();
+    // label max/min
+    let maxI=0,minI=0;
+    vals.forEach((v,i)=>{if(v>vals[maxI])maxI=i;if(v<vals[minI])minI=i;});
+    const mx=pts[maxI],mn=pts[minI];
+    ctx.font='500 9px JetBrains Mono';ctx.fillStyle=col;ctx.textAlign='center';
+    if(Math.abs(mx[1])>0.5) ctx.fillText(mx[1].toFixed(1),xp(mx[0]),y0-mx[1]*sc-5);
+    if(Math.abs(mn[1])>0.5&&minI!==maxI) ctx.fillText(mn[1].toFixed(1),xp(mn[0]),y0-mn[1]*sc+12);
+  }
+
+  drawDiagram(Vpts,sfdY,'#00C9FF','rgba(0,201,255,0.08)');
+  drawDiagram(Mpts,bmdY,'#A78BFA','rgba(167,139,250,0.08)');
+}
+
+window.addEventListener('load',()=>{buildControls();drawLive();});
+window.addEventListener('resize',()=>{drawLive();});
+
+/* ── PRACTICE ── */
+let pCorrect=new Set();
+function chk(n,ans,iid,fid){
+  const v=parseFloat(document.getElementById(iid).value);
+  const fb=document.getElementById(fid);
+  fb.className='fb';
+  if(isNaN(v)){fb.className='fb err';fb.textContent='⚠ Enter a number.';return;}
+  const tol=Math.max(Math.abs(ans)*0.03,0.5);
+  if(Math.abs(v-ans)<=tol){fb.className='fb ok';fb.textContent=`✓ Correct! Answer: ${ans}`;pCorrect.add(n);}
+  else{fb.className='fb err';fb.textContent=`✗ Got ${v}. Try the hint.`;pCorrect.delete(n);}
+  document.getElementById('pProg').style.width=(pCorrect.size/7*100)+'%';
+  document.getElementById('pCount').textContent=pCorrect.size+' / 7';
+}
+function tHint(id){document.getElementById(id).classList.toggle('show');}
+
+let p6Ans=null,p7Ans=null;
+function selVisual(el,qid,idx){
+  document.querySelectorAll('#'+qid+'opts .visual-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  if(qid==='p6'){p6Ans=idx; checkVisualP(6,p6Ans,2,'f6');}
+  if(qid==='p7'){p7Ans=idx; checkVisualP(7,p7Ans,1,'f7');}
+}
+function checkVisualP(n,ans,correct,fid){
+  const fb=document.getElementById(fid);
+  if(ans===correct){fb.className='fb ok';fb.textContent='✓ Correct!';pCorrect.add(n);}
+  else{fb.className='fb err';fb.textContent='✗ Not quite — try another option.';pCorrect.delete(n);}
+  document.getElementById('pProg').style.width=(pCorrect.size/7*100)+'%';
+  document.getElementById('pCount').textContent=pCorrect.size+' / 7';
+}
+
+/* ── EXAM ── */
+let examInt,timeLeft=1200;
+const eAns={q1:null,q2:null,q3:null,q4:null,q5:null,q6:null,q7:null,q8:null,q9:null,q10:null,q11:null,q12:null};
+const eCor={q1:1,q2:64,q3:1,q4:-12,q5:1,q6:170,q7:true,q8:120,q9:2,q10:1,q11:1,q12:0};
+const eTol={q2:1,q4:0.5,q6:1,q8:1};
+const eExpl={
+  q1:'dV/dx = −w means the slope of the SFD equals the negative of the distributed load intensity w(x) at that point.',
+  q2:'ΣM_B=0: Ay×10 = 80×(10−2) = 640 → Ay = 64 kN.',
+  q3:'When w=0, dV/dx=0 → V is constant (horizontal line) in that segment.',
+  q4:'V(6) = Ay − w·x = 24 − 6×6 = 24 − 36 = −12 kN.',
+  q5:'ΔM = ∫V dx = area under the SFD between two points (from dM/dx=V).',
+  q6:'M₂ = M₁ + V·Δx = 50 + 40×3 = 50 + 120 = 170 kN·m.',
+  q7:'TRUE. A concentrated couple M₀ causes a jump in BMD (M changes abruptly) but no jump in SFD (V is unaffected).',
+  q8:'|MA| = w·L²/2 = 15×16/2 = 120 kN·m.',
+  q9:'A triangular load w(x)∝x means dV/dx=−w(x) is linear → V(x) is parabolic (2nd degree).',
+  q10:'For a cantilever with UDL: V is linear, so dM/dx=V is linear → M is parabolic. Max at fixed end A, zero at free end B. Option B.',
+  q11:'Max M occurs where dM/dx = V = 0. Find where shear crosses zero (changes sign) using the SFD.',
+  q12:'For a cantilever with only a tip load P: no distributed load between A and B → w=0 → dV/dx=0 → V is constant throughout. Option A.'
+};
+
+function selMC(btn,q,idx){
+  if(document.getElementById('subBtn').disabled)return;
+  document.querySelectorAll('#'+q+'o .opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); eAns[q]=idx;
+}
+function selTF(btn,q,val){
+  if(document.getElementById('subBtn').disabled)return;
+  document.querySelectorAll('#'+q+'o .tf-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); eAns[q]=val;
+}
+function selEVisual(el,q,idx){
+  if(document.getElementById('subBtn').disabled)return;
+  document.querySelectorAll('#'+q+'o .visual-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel'); eAns[q]=idx;
+}
+
+function startExam(){
+  document.getElementById('examStart').style.display='none';
+  document.getElementById('examContent').style.display='block';
+  timeLeft=1200; updateTimer();
+  examInt=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft<=0){clearInterval(examInt);submitExam();}},1000);
+}
+function updateTimer(){
+  const m=Math.floor(timeLeft/60),s=timeLeft%60;
+  const el=document.getElementById('examTimer');
+  el.textContent=m+':'+(s<10?'0':'')+s;
+  el.className='timer'+(timeLeft<=60?' dng':timeLeft<=180?' warn':'');
+}
+
+function submitExam(){
+  clearInterval(examInt);
+  document.getElementById('subBtn').disabled=true;
+  document.querySelectorAll('.opt,.tf-btn').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.visual-opt').forEach(e=>e.classList.add('disabled'));
+  ['q2i','q4i','q6i','q8i'].forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=true;}});
+
+  // grab numeric answers
+  ['q2','q4','q6','q8'].forEach(q=>{
+    const el=document.getElementById(q+'i');
+    if(el) eAns[q]=parseFloat(el.value)||null;
+  });
+
+  const mcQs=['q1','q3','q5','q9','q11'];
+  const numQs=['q2','q4','q6','q8'];
+  const tfQs=['q7'];
+  const visQs=['q10','q12'];
+  let score=0;
+
+  mcQs.forEach(q=>{
+    const opts=document.querySelectorAll('#'+q+'o .opt');
+    if(opts[eCor[q]]) opts[eCor[q]].classList.add('right');
+    if(eAns[q]===eCor[q]){score++;if(opts[eAns[q]])opts[eAns[q]].classList.remove('sel');}
+    else if(eAns[q]!==null&&opts[eAns[q]]) opts[eAns[q]].classList.add('wrong');
+  });
+
+  tfQs.forEach(q=>{
+    const btns=document.querySelectorAll('#'+q+'o .tf-btn');
+    btns.forEach(b=>{if((b.textContent==='True')===eCor[q])b.classList.add('right');});
+    if(eAns[q]===eCor[q]){score++;}
+    else if(eAns[q]!==null){btns.forEach(b=>{if((b.textContent==='True')===eAns[q])b.classList.add('wrong');});}
+  });
+
+  numQs.forEach(q=>{
+    const v=eAns[q]; const c=eCor[q]; const t=eTol[q]||1;
+    const fb=document.getElementById(q+'fb');
+    if(v!==null&&!isNaN(v)&&Math.abs(v-c)<=t){score++;fb.className='eq-fb ok';fb.textContent=`✓ Correct — ${c}`;}
+    else{fb.className='eq-fb err';fb.textContent=`✗ Answer: ${c}`;}
+  });
+
+  visQs.forEach(q=>{
+    const opts=document.querySelectorAll('#'+q+'o .visual-opt');
+    if(opts[eCor[q]]) opts[eCor[q]].classList.add('right');
+    if(eAns[q]===eCor[q]){score++;if(opts[eAns[q]])opts[eAns[q]].classList.remove('sel');}
+    else if(eAns[q]!==null&&opts[eAns[q]]) opts[eAns[q]].classList.add('wrong');
+  });
+
+  const pct=Math.round(score/12*100);
+  const pass=pct>=70;
+  document.getElementById('examContent').style.display='none';
+  document.getElementById('resultPanel').classList.add('show');
+  document.getElementById('resScore').textContent=pct+'%';
+  document.getElementById('resScore').className='res-score '+(pass?'pass':'fail');
+  document.getElementById('resMsg').textContent=pass
+    ?`Well done — ${score}/12 correct. You passed! Strong grasp of the FBD→w(x)→V(x)→M(x) pipeline.`
+    :`You scored ${score}/12. Need 70% to pass. Focus on the transformation pipeline and sign conventions in Learn.`;
+
+  const allQs=['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12'];
+  const qLabels=['Q1 MC','Q2 Num','Q3 MC','Q4 Num','Q5 MC','Q6 Num','Q7 T/F','Q8 Num','Q9 MC','Q10 Visual','Q11 MC','Q12 Visual'];
+  let isRight={};
+  mcQs.forEach(q=>isRight[q]=eAns[q]===eCor[q]);
+  tfQs.forEach(q=>isRight[q]=eAns[q]===eCor[q]);
+  visQs.forEach(q=>isRight[q]=eAns[q]===eCor[q]);
+  numQs.forEach(q=>{const v=eAns[q];isRight[q]=v!==null&&!isNaN(v)&&Math.abs(v-eCor[q])<=(eTol[q]||1);});
+
+  let rev='<div style="height:1px;background:var(--border);margin:24px 0"></div><div style="font-family:var(--disp);font-size:17px;font-weight:700;margin-bottom:14px">Answer Review</div>';
+  allQs.forEach((q,i)=>{
+    const ok=isRight[q];
+    rev+=`<div class="card" style="margin-bottom:10px">
+      <h3 style="color:${ok?'var(--green)':'var(--red)'};margin-bottom:5px">${ok?'✓':'✗'} ${qLabels[i]}</h3>
+      <p style="font-size:13px;color:var(--sub)">${eExpl[q]}</p>
+    </div>`;
+  });
+  document.getElementById('ansRev').innerHTML=rev;
+}
+
+function resetExam(){
+  clearInterval(examInt);
+  Object.keys(eAns).forEach(k=>eAns[k]=null);
+  document.querySelectorAll('.opt,.tf-btn').forEach(b=>{b.disabled=false;b.className=b.classList.contains('tf-btn')?'tf-btn':'opt';});
+  document.querySelectorAll('.visual-opt').forEach(e=>e.classList.remove('sel','right','wrong','disabled'));
+  ['q2i','q4i','q6i','q8i'].forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=false;el.value='';}});
+  ['q2fb','q4fb','q6fb','q8fb'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='eq-fb';});
+  document.getElementById('subBtn').disabled=false;
+  document.getElementById('examContent').style.display='none';
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('examStart').style.display='block';
+  document.getElementById('ansRev').innerHTML='';
+}
+</script>
+</body>
+</html>

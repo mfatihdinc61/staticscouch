@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solving Systems of Linear Equations — Interactive Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --surface2: #EFEEE7;
+    --border: #E2E0D8;
+    --border2: #CCCAB8;
+    --text: #1A1917;
+    --text2: #5C5A54;
+    --text3: #8C8A84;
+    --accent: #2B5BE0;
+    --accent-light: #EEF2FD;
+    --accent2: #1A3DAA;
+    --green: #157A52;
+    --green-bg: #EBF6F0;
+    --green-border: #A8DDCA;
+    --red: #C0392B;
+    --red-bg: #FDECEA;
+    --red-border: #F5C6C2;
+    --amber: #A05C00;
+    --amber-bg: #FFF4E0;
+    --amber-border: #F5D89A;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06);
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); min-height: 100vh; }
+
+  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .header-inner { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 14px; padding: 16px 0; }
+  .header-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-icon svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .header-title { font-size: 16px; font-weight: 700; }
+  .header-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+  .tab-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .tab-bar-inner { max-width: 980px; margin: 0 auto; display: flex; }
+  .tab {
+    padding: 13px 20px; font-size: 14px; font-weight: 500;
+    border: none; background: transparent; color: var(--text3);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all .15s; display: flex; align-items: center; gap: 7px;
+  }
+  .tab:hover:not(.active) { color: var(--text2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .main { max-width: 980px; margin: 0 auto; padding: 28px 32px 56px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-title { font-size: 21px; font-weight: 700; margin-bottom: 6px; }
+  .section-sub { font-size: 14px; color: var(--text2); margin-bottom: 22px; line-height: 1.65; max-width: 720px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card p { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 8px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  .eq-block {
+    font-family: var(--mono); font-size: 14px; background: var(--surface2);
+    border-radius: var(--radius-sm); padding: 12px 16px; margin: 10px 0;
+    line-height: 1.8; color: var(--text);
+  }
+  .eq-block .step-label { color: var(--accent); font-weight: 600; font-family: 'Inter', sans-serif; font-size: 12px; display: block; margin-bottom: 4px; }
+
+  .method-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 10px; margin-bottom: 16px; }
+  .method-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; border-left: 3px solid var(--accent); box-shadow: var(--shadow); }
+  .method-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .method-card p { font-size: 12px; color: var(--text2); line-height: 1.55; margin: 0; }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .step-list li::before {
+    content: counter(steps); background: var(--accent); color: #fff;
+    border-radius: 50%; min-width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 2px;
+  }
+
+  /* ===== Practice / Exam shared ===== */
+  .level-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .level-tab {
+    padding: 8px 16px; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--border2); border-radius: 20px;
+    background: var(--surface); color: var(--text2); cursor: pointer; transition: all .15s;
+  }
+  .level-tab:hover:not(.active) { background: var(--surface2); }
+  .level-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .problem-layout { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .eq-panel { flex: 1; min-width: 280px; }
+  .answer-panel { flex: 1; min-width: 280px; }
+
+  .system-display {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 22px; box-shadow: var(--shadow);
+  }
+  .system-brace { font-family: var(--mono); font-size: 17px; line-height: 2.1; color: var(--text); }
+  .system-brace .eq-row { display: block; }
+
+  .answer-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); }
+  .var-input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .var-input-row label { font-family: var(--mono); font-size: 15px; font-weight: 600; min-width: 24px; }
+  .var-input-row input {
+    flex: 1; padding: 9px 12px; font-size: 14px; font-family: var(--mono);
+    border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+  }
+  .var-input-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .btn-primary {
+    padding: 9px 18px; font-size: 13px; font-weight: 600;
+    border: none; border-radius: var(--radius-sm); background: var(--accent); color: #fff;
+    cursor: pointer; transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .87; }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-secondary {
+    padding: 9px 14px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text2);
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-secondary:hover { background: var(--surface2); }
+
+  .feedback { margin-top: 14px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; display: none; line-height: 1.5; }
+  .feedback.show { display: block; }
+  .feedback.ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .feedback.err { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .feedback.warn { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+
+  .scene-nav { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+  .scene-counter { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; }
+
+  .hint-toggle { font-size: 12px; color: var(--accent); cursor: pointer; margin-top: 10px; display: inline-block; text-decoration: underline; text-decoration-style: dotted; }
+  .hint-box { display: none; margin-top: 10px; padding: 12px 14px; background: var(--accent-light); border-radius: var(--radius-sm); font-size: 13px; color: var(--accent2); line-height: 1.6; }
+  .hint-box.show { display: block; }
+
+  .solution-steps { display: none; margin-top: 14px; }
+  .solution-steps.show { display: block; }
+  .solution-step { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 8px; font-family: var(--mono); font-size: 13px; line-height: 1.7; }
+  .solution-step .step-tag { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: var(--accent); display: block; margin-bottom: 3px; }
+
+  /* ===== Exam ===== */
+  .exam-progress { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .progress-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1.5px solid var(--border2); background: var(--surface); color: var(--text3);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .15s;
+  }
+  .progress-dot:hover { border-color: var(--accent); }
+  .progress-dot.current { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .progress-dot.answered { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .progress-dot.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .progress-dot.wrong { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+  .exam-q-label { font-size: 12px; color: var(--text3); font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .02em; }
+
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; text-align: center; margin-top: 20px; display: none; box-shadow: var(--shadow); }
+  .score-card.show { display: block; }
+  .score-big { font-size: 52px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .score-denom { font-size: 20px; font-weight: 400; color: var(--text3); }
+  .score-pct { font-size: 14px; color: var(--text3); margin-top: 6px; font-weight: 500; }
+  .score-msg { font-size: 15px; font-weight: 500; margin-top: 14px; }
+
+  .exam-result-list { margin-top: 22px; text-align: left; }
+  .result-row { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; border: 1px solid var(--border); }
+  .result-row.ok { background: var(--green-bg); border-color: var(--green-border); }
+  .result-row.err { background: var(--red-bg); border-color: var(--red-border); }
+  .result-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .result-detail { color: var(--text2); font-size: 12px; margin-top: 3px; font-family: var(--mono); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--accent-light); color: var(--accent2); margin-left: 8px; }
+
+  @media (max-width: 640px) {
+    .app-header, .tab-bar { padding: 0 16px; }
+    .main { padding: 20px 16px 44px; }
+    .method-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><line x1="4" y1="19" x2="20" y2="19"/><line x1="4" y1="19" x2="4" y2="5"/><polyline points="4 13 9 8 13 12 20 5"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Solving Systems of Linear Equations</div>
+      <div class="header-sub">Interactive course for up to 4 unknowns</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tab active" id="tab-learn" type="button">
+      <svg class="tab-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      Course Material
+    </button>
+    <button class="tab" id="tab-practice" type="button">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Practice
+    </button>
+    <button class="tab" id="tab-exam" type="button">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Exam
+    </button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ===== LEARN ===== -->
+<div id="panel-learn" class="panel active">
+  <div class="section-title">Solving Systems of Linear Equations</div>
+  <div class="section-sub">Learn the standard methods for solving systems with 2, 3, or 4 unknowns — substitution, elimination, and Gaussian elimination (matrix method).</div>
+
+  <div class="card">
+    <div class="card-title">What is a system of linear equations?</div>
+    <p>A system of linear equations is a collection of equations that share the same set of unknowns (variables), where every term is either a constant or a constant times one variable — no squares, products of variables, or other nonlinear terms. Solving the system means finding the values of every unknown that satisfy <strong>all</strong> equations simultaneously.</p>
+    <div class="eq-block">
+      <span class="step-label">Example (2 unknowns)</span>
+      2x + 3y = 12<br>4x − y = 10
+    </div>
+    <p>A system with <em>n</em> unknowns generally needs <em>n</em> independent equations to have exactly one solution.</p>
+  </div>
+
+  <div class="card-title" style="margin-bottom:10px">Three standard methods</div>
+  <div class="method-grid">
+    <div class="method-card"><h4>Substitution</h4><p>Solve one equation for one variable, then substitute that expression into the other equations. Best for small systems (2 unknowns) or when one equation is already simple.</p></div>
+    <div class="method-card"><h4>Elimination</h4><p>Add or subtract multiples of equations to cancel out one variable at a time, reducing the system step by step. Works well for 2–3 unknowns.</p></div>
+    <div class="method-card"><h4>Gaussian Elimination (Matrix Method)</h4><p>Write the system as an augmented matrix and use row operations to reach row-echelon form, then back-substitute. Scales cleanly to 3 or 4 unknowns.</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Worked example — Substitution (2 unknowns)</div>
+    <div class="eq-block">
+      <span class="step-label">System</span>
+      2x + 3y = 12 &nbsp;&nbsp;(1)<br>4x − y = 10 &nbsp;&nbsp;(2)
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 1 — solve (2) for y</span>
+      y = 4x − 10
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 2 — substitute into (1)</span>
+      2x + 3(4x − 10) = 12<br>2x + 12x − 30 = 12<br>14x = 42<br>x = 3
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 3 — back-substitute</span>
+      y = 4(3) − 10 = 2
+    </div>
+    <p><strong>Solution:</strong> x = 3, y = 2</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Worked example — Elimination (2 unknowns)</div>
+    <div class="eq-block">
+      <span class="step-label">System</span>
+      x + y = 10 &nbsp;&nbsp;(1)<br>x − y = 2 &nbsp;&nbsp;(2)
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 1 — add (1) and (2) to eliminate y</span>
+      2x = 12<br>x = 6
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 2 — substitute back into (1)</span>
+      6 + y = 10<br>y = 4
+    </div>
+    <p><strong>Solution:</strong> x = 6, y = 4</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Worked example — Gaussian Elimination (3 unknowns)</div>
+    <div class="eq-block">
+      <span class="step-label">System</span>
+      x + y + z = 6 &nbsp;&nbsp;(1)<br>2y + 5z = −4 &nbsp;&nbsp;(2)<br>2x + 5y − z = 27 &nbsp;&nbsp;(3)
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 1 — eliminate x from (3) using (1): (3) − 2×(1)</span>
+      2x + 5y − z − 2(x + y + z) = 27 − 2(6)<br>3y − 3z = 15
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 2 — now solve the 2×2 system in y, z</span>
+      2y + 5z = −4<br>3y − 3z = 15 &nbsp;&rarr;&nbsp; y − z = 5
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 3 — substitute y = z + 5 into 2y + 5z = −4</span>
+      2(z + 5) + 5z = −4<br>7z = −14<br>z = −2, &nbsp; y = 3
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 4 — back-substitute into (1)</span>
+      x + 3 + (−2) = 6 &nbsp;&rarr;&nbsp; x = 5
+    </div>
+    <p><strong>Solution:</strong> x = 5, y = 3, z = −2</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Worked example — Gaussian Elimination (4 unknowns)<span class="badge">extends the same idea</span></div>
+    <p>With 4 unknowns the process is identical to the 3-unknown case — eliminate one variable at a time until you're down to a single equation, then back-substitute. There's just one more round of elimination.</p>
+    <div class="eq-block">
+      <span class="step-label">System</span>
+      x + y + z + w = 10 &nbsp;&nbsp;(1)<br>
+      2x − y + z − w = −2 &nbsp;&nbsp;(2)<br>
+      x + 2y − z + 2w = 15 &nbsp;&nbsp;(3)<br>
+      3x + y + 2z − w = 7 &nbsp;&nbsp;(4)
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 1 — eliminate x from (2), (3), (4) using (1)</span>
+      (2) − 2×(1): &nbsp; −3y − z − 3w = −22 &nbsp;&nbsp;(2′)<br>
+      (3) − 1×(1): &nbsp; y − 2z + w = 5 &nbsp;&nbsp;(3′)<br>
+      (4) − 3×(1): &nbsp; −2y − z − 4w = −23 &nbsp;&nbsp;(4′)
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 2 — now a 3×3 system in y, z, w. Eliminate y from (2′) and (4′) using (3′)</span>
+      (2′) + 3×(3′): &nbsp; −7z = −7 &nbsp;&nbsp;(2″)<br>
+      (4′) + 2×(3′): &nbsp; −5z − 2w = −13 &nbsp;&nbsp;(4″)
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 3 — (2″) already isolates z directly</span>
+      −7z = −7 &nbsp;&rarr;&nbsp; z = 1
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 4 — substitute z = 1 into (4″) to get w</span>
+      −5(1) − 2w = −13<br>−2w = −8 &nbsp;&rarr;&nbsp; w = 4
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 5 — back-substitute z = 1, w = 4 into (3′) to get y</span>
+      y − 2(1) + 4 = 5 &nbsp;&rarr;&nbsp; y = 3
+    </div>
+    <div class="eq-block">
+      <span class="step-label">Step 6 — back-substitute y = 3, z = 1, w = 4 into (1) to get x</span>
+      x + 3 + 1 + 4 = 10 &nbsp;&rarr;&nbsp; x = 2
+    </div>
+    <p><strong>Solution:</strong> x = 2, y = 3, z = 1, w = 4</p>
+    <p>Notice the pattern: each elimination round shrinks the system by one equation and one unknown — 4 equations &rarr; 3 &rarr; 2 &rarr; 1 — and then back-substitution rebuilds the answers in reverse order. This is exactly why Gaussian elimination, rather than substitution, is the practical choice once you have 3 or more unknowns: substitution's expressions get unwieldy fast, while elimination just adds one more clean round.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">The matrix (augmented) form</div>
+    <p>Any linear system can be written compactly as an augmented matrix — coefficients on the left, constants on the right of a vertical bar. Gaussian elimination uses three row operations (swap two rows, scale a row, add a multiple of one row to another) to reach a triangular form, then solves by back-substitution. This same process extends directly to 4 unknowns with no new ideas — just more rows.</p>
+    <div class="eq-block">
+      <span class="step-label">The 3-unknown example above, as an augmented matrix</span>
+      [ 1&nbsp; 1&nbsp; 1&nbsp; | &nbsp;6 ]<br>
+      [ 0&nbsp; 2&nbsp; 5&nbsp; | −4 ]<br>
+      [ 2&nbsp; 5 −1&nbsp; | 27 ]
+    </div>
+    <div class="eq-block">
+      <span class="step-label">The 4-unknown example above, as an augmented matrix</span>
+      [ 1&nbsp; &nbsp;1&nbsp; &nbsp;1&nbsp; &nbsp;1&nbsp; | &nbsp;10 ]<br>
+      [ 2 −1&nbsp; &nbsp;1 −1&nbsp; | −2 ]<br>
+      [ 1&nbsp; &nbsp;2 −1&nbsp; &nbsp;2&nbsp; | &nbsp;15 ]<br>
+      [ 3&nbsp; &nbsp;1&nbsp; &nbsp;2 −1&nbsp; | &nbsp;7 ]
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="card-title">Checking your answer</div>
+    <ol class="step-list">
+      <li>Take your computed values for every unknown.</li>
+      <li>Substitute them back into <strong>each</strong> original equation — not just the last one you used.</li>
+      <li>If every equation balances, your solution is correct. If even one doesn't, recheck your steps.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ===== PRACTICE ===== -->
+<div id="panel-practice" class="panel">
+  <div class="section-title">Practice — Solve the System</div>
+  <div class="section-sub">Choose how many unknowns to practice with, solve the system using any method, then enter your answer to check it. Use the hint or full solution if you get stuck.</div>
+
+  <div class="level-tabs" id="practice-level-tabs">
+    <button class="level-tab active" data-level="2" type="button">2 Unknowns</button>
+    <button class="level-tab" data-level="3" type="button">3 Unknowns</button>
+    <button class="level-tab" data-level="4" type="button">4 Unknowns</button>
+  </div>
+
+  <div class="problem-layout">
+    <div class="eq-panel">
+      <div class="exam-q-label" id="p-problem-label">Problem 1 of 3</div>
+      <div class="system-display">
+        <div class="system-brace" id="p-system"></div>
+      </div>
+      <div class="scene-nav">
+        <button class="btn-secondary" id="p-prev" type="button">&larr; Prev</button>
+        <button class="btn-primary" id="p-next" type="button">Next &rarr;</button>
+        <span class="scene-counter" id="p-counter">1 / 3</span>
+      </div>
+      <span class="hint-toggle" id="p-hint-toggle">Show a hint</span>
+      <div class="hint-box" id="p-hint-box"></div>
+    </div>
+
+    <div class="answer-panel">
+      <div class="answer-form">
+        <div class="card-title">Your answer</div>
+        <div id="p-inputs"></div>
+        <div class="btn-row">
+          <button class="btn-primary" id="p-check" type="button">Check Answer</button>
+          <button class="btn-secondary" id="p-solution-toggle" type="button">Show Solution Steps</button>
+        </div>
+        <div class="feedback" id="p-feedback"></div>
+        <div class="solution-steps" id="p-solution-steps"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXAM ===== -->
+<div id="panel-exam" class="panel">
+  <div class="section-title">Exam — Solve 10 Systems</div>
+  <div class="section-sub">10 systems mixing 2, 3, and 4 unknowns. Enter your answer for each, then submit at the end for grading.</div>
+
+  <div class="exam-progress" id="exam-progress"></div>
+
+  <div class="problem-layout">
+    <div class="eq-panel">
+      <div class="exam-q-label" id="e-problem-label">Question 1 of 10</div>
+      <div class="system-display">
+        <div class="system-brace" id="e-system"></div>
+      </div>
+      <div class="scene-nav">
+        <button class="btn-secondary" id="e-prev" type="button">&larr; Prev</button>
+        <button class="btn-secondary" id="e-next" type="button">Next &rarr;</button>
+      </div>
+    </div>
+
+    <div class="answer-panel">
+      <div class="answer-form">
+        <div class="card-title">Your answer</div>
+        <div id="e-inputs"></div>
+        <div class="feedback" id="e-q-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="btn-row">
+    <button class="btn-primary" id="exam-submit-btn" type="button">Submit Exam</button>
+  </div>
+
+  <div class="score-card" id="score-card">
+    <div><span class="score-big" id="score-num">0</span><span class="score-denom" id="score-denom"> / 10</span></div>
+    <div class="score-pct" id="score-pct"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="exam-result-list" id="exam-result-list"></div>
+    <div class="btn-row" style="justify-content:center;margin-top:16px">
+      <button class="btn-primary" id="exam-retake-btn" type="button">Retake Exam</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+(function(){
+"use strict";
+
+var VAR_NAMES = ['x','y','z','w'];
+
+/* ---------- Gaussian elimination solver (with partial pivoting) ---------- */
+function gaussSolve(A, b){
+  var n = A.length;
+  var M = A.map(function(row,i){ return row.concat([b[i]]); });
+  for (var col = 0; col < n; col++) {
+    var pivot = col;
+    for (var r = col; r < n; r++) if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) pivot = r;
+    if (Math.abs(M[pivot][col]) < 1e-9) return null;
+    var tmp = M[col]; M[col] = M[pivot]; M[pivot] = tmp;
+    for (var r2 = 0; r2 < n; r2++) {
+      if (r2 === col) continue;
+      var factor = M[r2][col] / M[col][col];
+      for (var c = col; c <= n; c++) M[r2][c] -= factor * M[col][c];
+    }
+  }
+  return M.map(function(row,i){ return row[n] / row[i]; });
+}
+
+function formatTerm(coef, varName, isFirst){
+  if (coef === 0) return '';
+  var sign = coef > 0 ? (isFirst ? '' : ' + ') : (isFirst ? '\u2212' : ' \u2212 ');
+  var absCoef = Math.abs(coef);
+  var coefStr = absCoef === 1 ? '' : String(absCoef);
+  return sign + coefStr + varName;
+}
+function formatEquation(row, n, bVal){
+  var terms = [];
+  for (var i = 0; i < n; i++) {
+    var t = formatTerm(row[i], VAR_NAMES[i], terms.length === 0);
+    if (t !== '') terms.push(t);
+  }
+  if (terms.length === 0) terms.push('0');
+  var bStr = bVal < 0 ? '\u2212' + Math.abs(bVal) : String(bVal);
+  return terms.join('') + ' = ' + bStr;
+}
+
+/* ---------- Problem bank (every system verified to have the stated integer solution) ---------- */
+function withB(A, x){
+  var b = A.map(function(row){ return row.reduce(function(s,a,i){ return s + a*x[i]; }, 0); });
+  return { A: A, b: b, x: x, n: A.length };
+}
+
+var PRACTICE = {
+  2: [
+    withB([[2,3],[4,-1]], [3,2]),
+    withB([[1,1],[1,-1]], [6,4]),
+    withB([[5,-2],[3,1]], [4,3])
+  ],
+  3: [
+    withB([[1,1,1],[0,2,5],[2,5,-1]], [5,3,-2]),
+    withB([[2,1,-1],[3,-1,2],[1,2,1]], [2,1,3]),
+    withB([[1,1,1],[2,3,-1],[1,-1,2]], [3,2,-2])
+  ],
+  4: [
+    withB([[1,1,1,1],[2,-1,1,0],[0,3,-2,1],[1,0,0,2]], [1,2,3,4]),
+    withB([[2,1,0,1],[1,3,1,0],[0,1,2,1],[1,0,1,3]], [2,-1,1,3])
+  ]
+};
+
+var EXAM = [
+  withB([[3,2],[1,4]], [2,4]),
+  withB([[1,2],[3,-1]], [4,1]),
+  withB([[1,2,3],[2,-1,1],[3,0,-1]], [3,-1,2]),
+  withB([[4,1],[2,-3]], [2,5]),
+  withB([[1,1,1],[1,-1,2],[2,1,-1]], [4,1,-1]),
+  withB([[1,2,0,1],[0,1,3,1],[2,0,1,1],[1,1,1,2]], [2,1,-1,3]),
+  withB([[2,0,1],[1,3,-1],[0,1,2]], [3,1,-1]),
+  withB([[2,5],[3,-1]], [5,2]),
+  withB([[1,0,1,2],[2,1,0,1],[0,2,1,1],[1,1,2,0]], [1,2,-1,3]),
+  withB([[3,-1,2],[1,2,1],[2,1,-1]], [2,3,1])
+];
+
+/* ---------- Verify the entire problem bank solves correctly (defensive self-check) ---------- */
+function selfCheckBank(){
+  var problems = [].concat(PRACTICE[2], PRACTICE[3], PRACTICE[4], EXAM);
+  var allOk = true;
+  problems.forEach(function(p){
+    var computed = gaussSolve(p.A, p.b);
+    if (!computed) { allOk = false; return; }
+    var ok = p.x.every(function(v,i){ return Math.abs(computed[i] - v) < 1e-6; });
+    if (!ok) allOk = false;
+  });
+  return allOk;
+}
+if (!selfCheckBank()) { console.error('Problem bank self-check FAILED'); }
+
+/* ---------- Tab switching ---------- */
+function showTab(id){
+  ['learn','practice','exam'].forEach(function(t){
+    document.getElementById('panel-'+t).classList.toggle('active', t === id);
+    document.getElementById('tab-'+t).classList.toggle('active', t === id);
+  });
+}
+document.getElementById('tab-learn').addEventListener('click', function(){ showTab('learn'); });
+document.getElementById('tab-practice').addEventListener('click', function(){ showTab('practice'); });
+document.getElementById('tab-exam').addEventListener('click', function(){ showTab('exam'); });
+
+/* ---------- Practice controller ---------- */
+var pLevel = 2;
+var pIdx = 0;
+
+function renderSystem(containerId, problem){
+  var n = problem.n;
+  var html = '';
+  for (var i = 0; i < n; i++) {
+    html += '<span class="eq-row">' + formatEquation(problem.A[i], n, problem.b[i]) + '</span>';
+  }
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function renderInputs(containerId, n, idPrefix){
+  var html = '';
+  for (var i = 0; i < n; i++) {
+    html += '<div class="var-input-row"><label for="'+idPrefix+'-in-'+i+'">'+VAR_NAMES[i]+' =</label>'
+      + '<input type="number" step="any" id="'+idPrefix+'-in-'+i+'" placeholder="enter value"></div>';
+  }
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function renderPractice(){
+  var problem = PRACTICE[pLevel][pIdx];
+  document.getElementById('p-problem-label').textContent = 'Problem ' + (pIdx+1) + ' of ' + PRACTICE[pLevel].length;
+  document.getElementById('p-counter').textContent = (pIdx+1) + ' / ' + PRACTICE[pLevel].length;
+  renderSystem('p-system', problem);
+  renderInputs('p-inputs', problem.n, 'p');
+  document.getElementById('p-feedback').className = 'feedback';
+  document.getElementById('p-hint-box').className = 'hint-box';
+  document.getElementById('p-hint-box').textContent = hintText(problem);
+  document.getElementById('p-solution-steps').className = 'solution-steps';
+  document.getElementById('p-solution-steps').innerHTML = '';
+  document.getElementById('p-solution-toggle').textContent = 'Show Solution Steps';
+}
+
+function hintText(problem){
+  var n = problem.n;
+  if (n === 2) return 'Try solving one equation for one variable, then substitute into the other. Or eliminate one variable by adding/subtracting a scaled multiple of one equation from the other.';
+  if (n === 3) return 'Use elimination to remove one variable from two of the equations, reducing to a 2-unknown system, then back-substitute.';
+  return 'With 4 unknowns, Gaussian elimination (matrix method) is usually fastest: eliminate one variable at a time, row by row, then back-substitute starting from the last row.';
+}
+
+function buildSolutionSteps(problem){
+  var n = problem.n;
+  var computed = gaussSolve(problem.A, problem.b);
+  var html = '<div class="card-title" style="margin-top:4px">Solution</div>';
+  for (var i = 0; i < n; i++) {
+    html += '<div class="solution-step"><span class="step-tag">' + VAR_NAMES[i] + '</span>' + VAR_NAMES[i] + ' = ' + round4(computed[i]) + '</div>';
+  }
+  return html;
+}
+function round4(v){
+  var r = Math.round(v * 10000) / 10000;
+  return r;
+}
+
+function readInputs(idPrefix, n){
+  var vals = [];
+  for (var i = 0; i < n; i++) {
+    var el = document.getElementById(idPrefix+'-in-'+i);
+    var v = parseFloat(el.value);
+    vals.push(v);
+  }
+  return vals;
+}
+
+function checkAnswer(userVals, trueVals, tol){
+  tol = tol || 0.01;
+  if (userVals.some(function(v){ return isNaN(v); })) return { ok:false, reason:'incomplete' };
+  var ok = userVals.every(function(v,i){ return Math.abs(v - trueVals[i]) <= tol; });
+  return { ok: ok, reason: ok ? 'correct' : 'wrong' };
+}
+
+document.querySelectorAll('#practice-level-tabs .level-tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    pLevel = parseInt(btn.getAttribute('data-level'), 10);
+    pIdx = 0;
+    document.querySelectorAll('#practice-level-tabs .level-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderPractice();
+  });
+});
+
+document.getElementById('p-next').addEventListener('click', function(){
+  pIdx = (pIdx + 1) % PRACTICE[pLevel].length;
+  renderPractice();
+});
+document.getElementById('p-prev').addEventListener('click', function(){
+  pIdx = (pIdx - 1 + PRACTICE[pLevel].length) % PRACTICE[pLevel].length;
+  renderPractice();
+});
+
+document.getElementById('p-hint-toggle').addEventListener('click', function(){
+  var box = document.getElementById('p-hint-box');
+  box.classList.toggle('show');
+});
+
+document.getElementById('p-solution-toggle').addEventListener('click', function(){
+  var box = document.getElementById('p-solution-steps');
+  var problem = PRACTICE[pLevel][pIdx];
+  if (!box.classList.contains('show')) {
+    box.innerHTML = buildSolutionSteps(problem);
+    box.classList.add('show');
+    document.getElementById('p-solution-toggle').textContent = 'Hide Solution Steps';
+  } else {
+    box.classList.remove('show');
+    document.getElementById('p-solution-toggle').textContent = 'Show Solution Steps';
+  }
+});
+
+document.getElementById('p-check').addEventListener('click', function(){
+  var problem = PRACTICE[pLevel][pIdx];
+  var userVals = readInputs('p', problem.n);
+  var result = checkAnswer(userVals, problem.x);
+  var fb = document.getElementById('p-feedback');
+  if (result.reason === 'incomplete') {
+    fb.textContent = 'Please fill in a value for every variable.';
+    fb.className = 'feedback show warn';
+  } else if (result.ok) {
+    fb.textContent = 'Correct! ' + VAR_NAMES.slice(0,problem.n).map(function(v,i){ return v+' = '+problem.x[i]; }).join(', ') + '.';
+    fb.className = 'feedback show ok';
+  } else {
+    fb.textContent = 'Not quite — check your work and try again. (Tip: substitute your values back into each original equation to see which one fails.)';
+    fb.className = 'feedback show err';
+  }
+});
+
+/* ---------- Exam controller ---------- */
+var eIdx = 0;
+var eSaved = {};
+var eSubmitted = false;
+var eResults = [];
+
+function buildExamProgress(){
+  var html = '';
+  EXAM.forEach(function(p,i){ html += '<div class="progress-dot" id="edot'+i+'" data-idx="'+i+'">'+(i+1)+'</div>'; });
+  document.getElementById('exam-progress').innerHTML = html;
+  document.querySelectorAll('#exam-progress .progress-dot').forEach(function(dot){
+    dot.addEventListener('click', function(){
+      saveCurrentExamAnswer();
+      eIdx = parseInt(dot.getAttribute('data-idx'), 10);
+      renderExam();
+    });
+  });
+}
+
+function updateExamProgress(){
+  EXAM.forEach(function(p,i){
+    var dot = document.getElementById('edot'+i);
+    if (!dot) return;
+    dot.className = 'progress-dot';
+    if (eSubmitted) {
+      dot.className += eResults[i] ? ' correct' : ' wrong';
+    } else {
+      if (i === eIdx) dot.className += ' current';
+      else if (eSaved[i] && eSaved[i].some(function(v){ return !isNaN(v); })) dot.className += ' answered';
+    }
+  });
+}
+
+function saveCurrentExamAnswer(){
+  var problem = EXAM[eIdx];
+  eSaved[eIdx] = readInputs('e', problem.n);
+}
+
+function renderExam(){
+  var problem = EXAM[eIdx];
+  document.getElementById('e-problem-label').textContent = 'Question ' + (eIdx+1) + ' of ' + EXAM.length;
+  renderSystem('e-system', problem);
+  renderInputs('e-inputs', problem.n, 'e');
+  if (eSaved[eIdx]) {
+    for (var i = 0; i < problem.n; i++) {
+      if (!isNaN(eSaved[eIdx][i])) document.getElementById('e-in-'+i).value = eSaved[eIdx][i];
+    }
+  }
+  document.getElementById('e-q-feedback').className = 'feedback';
+  updateExamProgress();
+}
+
+document.getElementById('e-next').addEventListener('click', function(){
+  saveCurrentExamAnswer();
+  eIdx = Math.min(eIdx + 1, EXAM.length - 1);
+  renderExam();
+});
+document.getElementById('e-prev').addEventListener('click', function(){
+  saveCurrentExamAnswer();
+  eIdx = Math.max(eIdx - 1, 0);
+  renderExam();
+});
+
+document.getElementById('exam-submit-btn').addEventListener('click', function(){
+  if (eSubmitted) return;
+  saveCurrentExamAnswer();
+  var incomplete = [];
+  EXAM.forEach(function(p,i){
+    var vals = eSaved[i];
+    if (!vals || vals.some(function(v){ return isNaN(v); }) || vals.length < p.n) incomplete.push(i+1);
+  });
+  if (incomplete.length > 0) {
+    alert('Please fill in every variable for question(s): ' + incomplete.join(', '));
+    return;
+  }
+
+  eSubmitted = true;
+  eResults = [];
+  var score = 0;
+  var resultHtml = '';
+  EXAM.forEach(function(p,i){
+    var result = checkAnswer(eSaved[i], p.x);
+    eResults.push(result.ok);
+    if (result.ok) score++;
+    var detail = VAR_NAMES.slice(0,p.n).map(function(v,j){ return v+' = '+p.x[j]; }).join(', ');
+    resultHtml += '<div class="result-row ' + (result.ok ? 'ok' : 'err') + '">'
+      + '<span class="result-icon">' + (result.ok ? '\u2713' : '\u2717') + '</span>'
+      + '<div><strong>Q' + (i+1) + '</strong> (' + p.n + ' unknowns)'
+      + (result.ok ? '' : '<div class="result-detail">Correct answer: ' + detail + '</div>')
+      + '</div></div>';
+  });
+
+  updateExamProgress();
+  var pct = Math.round(score / EXAM.length * 100);
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-denom').textContent = ' / ' + EXAM.length;
+  document.getElementById('score-pct').textContent = pct + '% \u2014 ' + (pct>=90?'Outstanding':pct>=70?'Good':pct>=50?'Needs improvement':'Keep studying');
+  document.getElementById('score-msg').textContent = pct>=90
+    ? 'Excellent! You have a strong grasp of solving linear systems.'
+    : pct>=70
+    ? 'Good work — review the ones you missed and try again.'
+    : pct>=50
+    ? 'Keep practicing — revisit the course material and worked examples.'
+    : 'Review the methods carefully, then retake the exam.';
+  document.getElementById('exam-result-list').innerHTML = resultHtml;
+  document.getElementById('score-card').classList.add('show');
+  document.getElementById('exam-submit-btn').style.display = 'none';
+});
+
+document.getElementById('exam-retake-btn').addEventListener('click', function(){
+  eSubmitted = false;
+  eResults = [];
+  eSaved = {};
+  eIdx = 0;
+  document.getElementById('score-card').classList.remove('show');
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  buildExamProgress();
+  renderExam();
+});
+
+/* ---------- Init ---------- */
+renderPractice();
+buildExamProgress();
+renderExam();
+
+})();
+</script>
+</body>
+</html>

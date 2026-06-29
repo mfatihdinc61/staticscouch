@@ -1,0 +1,631 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0ece4;font-family:sans-serif;color:#1a1a1a}
+.wrap{padding:1.25rem 1rem;max-width:720px;margin:0 auto}
+.tabs{display:flex;gap:4px;background:#e0dbd0;border-radius:8px;padding:4px;margin-bottom:1.5rem}
+.tab{flex:1;padding:8px 12px;border:none;background:transparent;color:#666;font-size:14px;font-weight:500;border-radius:6px;cursor:pointer;transition:all .18s}
+.tab.active{background:#fff;color:#1a1a1a;border:0.5px solid #ccc;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.panel{display:none}.panel.active{display:block}
+.section-intro{font-size:14px;color:#444;line-height:1.7;margin-bottom:1.25rem;padding:.875rem 1rem;background:#dce8f5;border-radius:12px;border-left:3px solid #4a8fcc}
+.support-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:1.25rem}
+.sc{background:#fff;border:1px solid #d5cfc5;border-radius:12px;padding:1rem}
+.sc-head{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.sc-label{font-size:14px;font-weight:500;color:#1a1a1a}
+.tbadge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;margin-top:3px;display:inline-block}
+.bpin{background:#dce8f5;color:#185FA5}
+.broll{background:#e2f0d6;color:#3a7010}
+.bfix{background:#ede6f7;color:#5a2da0}
+.blink{background:#fef3dc;color:#854F0B}
+.sc p{font-size:12px;color:#555;line-height:1.55;margin-bottom:.6rem}
+.unk-row{display:flex;align-items:center;gap:6px;margin-top:.4rem}
+.unk-badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
+.u1{background:#e2f0d6;color:#3a7010}
+.u2{background:#fef3dc;color:#854F0B}
+.u3{background:#ede6f7;color:#5a2da0}
+.unk-text{font-size:12px;color:#777}
+.determ-box{padding:1rem;background:#e8e4dc;border-radius:12px;border:1px solid #ccc;margin-top:.75rem;font-size:13px;color:#444;line-height:1.6}
+.determ-box strong{color:#1a1a1a;font-weight:500}
+.sh{font-size:15px;font-weight:500;color:#1a1a1a;margin:1.25rem 0 .75rem}
+.sum-table{width:100%;border-collapse:collapse;font-size:13px}
+.sum-table th{text-align:left;padding:7px 10px;color:#555;font-weight:500;border-bottom:1px solid #ccc;background:#f5f0e8}
+.sum-table td{padding:7px 10px;border-bottom:1px solid #ddd;color:#1a1a1a}
+.sum-table tr:last-child td{border-bottom:none}
+.config-box{background:#fff;border:1px solid #d5cfc5;border-radius:12px;padding:1rem}
+.config-sel{font-size:13px;padding:5px 9px;border-radius:6px;border:1px solid #ccc;background:#f8f5f0;color:#1a1a1a}
+.beam-status{font-size:13px;padding:6px 12px;border-radius:8px;text-align:center;font-weight:500;margin-top:.5rem}
+.q-block{background:#fff;border:1px solid #d5cfc5;border-radius:12px;padding:1.125rem;margin-bottom:1rem}
+.q-visual{margin-bottom:.75rem;background:#f5f0e8;border-radius:8px;padding:.5rem}
+.q-num{font-size:11px;font-weight:500;color:#888;letter-spacing:.05em;text-transform:uppercase;margin-bottom:3px}
+.q-text{font-size:14px;font-weight:500;color:#1a1a1a;line-height:1.5;margin-bottom:.65rem}
+.opts{display:flex;flex-direction:column;gap:5px}
+.opt{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:13px;color:#444;background:#f8f5f0;transition:all .14s;line-height:1.4;text-align:left;width:100%}
+.opt:hover:not([disabled]){border-color:#999;color:#1a1a1a;background:#eee}
+.opt .ok{font-weight:600;min-width:16px;color:#999;font-size:12px}
+.opt.correct{background:#e2f0d6;border-color:#5a9a20;color:#2a6010}
+.opt.correct .ok{color:#2a6010}
+.opt.wrong{background:#fde8e8;border-color:#d04040;color:#a02020}
+.opt.wrong .ok{color:#a02020}
+.opt.sc2{background:#e2f0d6;border-color:#5a9a20;color:#2a6010;opacity:.7}
+.opt[disabled]{pointer-events:none}
+.opt.eopt-sel{background:#dce8f5;border-color:#3a7ab5;color:#185FA5}
+.opt.eopt-sel .ok{color:#185FA5}
+.fb{margin-top:.5rem;font-size:12px;padding:5px 9px;border-radius:6px;line-height:1.5}
+.fb.ok{background:#e2f0d6;color:#2a6010}
+.fb.err{background:#fde8e8;color:#a02020}
+.exam-sub{display:block;width:100%;margin-top:1.25rem;padding:10px;background:#fff;border:1px solid #aaa;border-radius:6px;font-size:14px;font-weight:500;color:#1a1a1a;cursor:pointer;transition:background .14s}
+.exam-sub:hover{background:#f0ece4}
+.score-card{background:#fff;border:1px solid #d5cfc5;border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1.25rem}
+.score-big{font-size:44px;font-weight:500;color:#1a1a1a}
+.score-sub{font-size:14px;color:#555;margin-top:3px}
+.sbadge{display:inline-block;margin-top:.65rem;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:500}
+.gA{background:#e2f0d6;color:#2a6010}
+.gB{background:#dce8f5;color:#185FA5}
+.gC{background:#fef3dc;color:#854F0B}
+.gD{background:#fde8e8;color:#a02020}
+.retry-btn{margin-top:.75rem;padding:7px 18px;border:1px solid #aaa;border-radius:6px;background:transparent;color:#1a1a1a;font-size:13px;cursor:pointer}
+.retry-btn:hover{background:#f0ece4}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('learn')">Learn</button>
+  <button class="tab" onclick="switchTab('practice')">Practice</button>
+  <button class="tab" onclick="switchTab('exam')">Exam</button>
+</div>
+
+<!-- LEARN -->
+<div id="panel-learn" class="panel active">
+  <div class="section-intro">In a 2D coplanar force system, support reactions are the forces and moments that supports exert on a structure to maintain equilibrium. Each support type restricts certain degrees of freedom and introduces a corresponding number of unknown reaction components.</div>
+
+  <div class="support-grid">
+    <div class="sc">
+      <div class="sc-head">
+        <svg width="72" height="62" viewBox="0 0 72 62">
+          <!-- ground -->
+          <line x1="8" y1="52" x2="64" y2="52" stroke="#555" stroke-width="1.5"/>
+          <line x1="8" y1="58" x2="16" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="16" y1="58" x2="24" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="24" y1="58" x2="32" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="32" y1="58" x2="40" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="40" y1="58" x2="48" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="48" y1="58" x2="56" y2="52" stroke="#888" stroke-width="1"/>
+          <!-- wheels -->
+          <circle cx="22" cy="44" r="6" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>
+          <circle cx="36" cy="44" r="6" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>
+          <circle cx="50" cy="44" r="6" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>
+          <!-- triangle -->
+          <polygon points="36,10 20,38 52,38" fill="#e2f0d6" stroke="#3a7010" stroke-width="1.5"/>
+          <!-- reaction arrow -->
+          <line x1="36" y1="10" x2="36" y2="2" stroke="#3a7010" stroke-width="2"/>
+          <polygon points="36,0 32,6 40,6" fill="#3a7010"/>
+          <text x="40" y="7" font-size="9" fill="#3a7010" font-family="sans-serif">R</text>
+        </svg>
+        <div>
+          <div class="sc-label">Roller support</div>
+          <span class="tbadge broll">1 unknown</span>
+        </div>
+      </div>
+      <p>Prevents translation perpendicular to the rolling surface only. Free to slide along the surface and free to rotate.</p>
+      <div class="unk-row"><span class="unk-badge u1">1 rxn</span><span class="unk-text">1 force (⊥ to surface)</span></div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-head">
+        <svg width="72" height="62" viewBox="0 0 72 62">
+          <!-- ground -->
+          <line x1="8" y1="52" x2="64" y2="52" stroke="#555" stroke-width="1.5"/>
+          <line x1="8" y1="58" x2="16" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="16" y1="58" x2="24" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="24" y1="58" x2="32" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="32" y1="58" x2="40" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="40" y1="58" x2="48" y2="52" stroke="#888" stroke-width="1"/>
+          <line x1="48" y1="58" x2="56" y2="52" stroke="#888" stroke-width="1"/>
+          <!-- triangle tip ends ABOVE ground line, leaving gap -->
+          <polygon points="36,8 18,44 54,44" fill="#dce8f5" stroke="#185FA5" stroke-width="1.5"/>
+          <!-- pin dot inside triangle near tip -->
+          <circle cx="36" cy="38" r="4" fill="#fff" stroke="#185FA5" stroke-width="1.8"/>
+          <!-- reaction arrows -->
+          <line x1="36" y1="8" x2="36" y2="0" stroke="#185FA5" stroke-width="1.8"/>
+          <polygon points="36,-2 32,4 40,4" fill="#185FA5"/>
+          <line x1="36" y1="8" x2="24" y2="8" stroke="#185FA5" stroke-width="1.8"/>
+          <polygon points="22,8 27,5 27,11" fill="#185FA5"/>
+          <text x="38" y="5" font-size="9" fill="#185FA5" font-family="sans-serif">Ry</text>
+          <text x="6" y="12" font-size="9" fill="#185FA5" font-family="sans-serif">Rx</text>
+        </svg>
+        <div>
+          <div class="sc-label">Pin / hinge support</div>
+          <span class="tbadge bpin">2 unknowns</span>
+        </div>
+      </div>
+      <p>Prevents translation in all directions but permits free rotation about the pin. Introduces both horizontal and vertical reaction forces.</p>
+      <div class="unk-row"><span class="unk-badge u2">2 rxns</span><span class="unk-text">H force + V force</span></div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-head">
+        <svg width="72" height="62" viewBox="0 0 72 62">
+          <!-- wall with hatching -->
+          <rect x="2" y="6" width="16" height="50" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.2"/>
+          <line x1="2" y1="12" x2="18" y2="12" stroke="#5a2da0" stroke-width="0.7"/>
+          <line x1="2" y1="19" x2="18" y2="19" stroke="#5a2da0" stroke-width="0.7"/>
+          <line x1="2" y1="26" x2="18" y2="26" stroke="#5a2da0" stroke-width="0.7"/>
+          <line x1="2" y1="33" x2="18" y2="33" stroke="#5a2da0" stroke-width="0.7"/>
+          <line x1="2" y1="40" x2="18" y2="40" stroke="#5a2da0" stroke-width="0.7"/>
+          <line x1="2" y1="47" x2="18" y2="47" stroke="#5a2da0" stroke-width="0.7"/>
+          <!-- beam (clearly separate, starts at x=18) -->
+          <rect x="18" y="26" width="46" height="12" rx="3" fill="#b0c8e8" stroke="#2a508a" stroke-width="1.5"/>
+          <!-- reaction arrows -->
+          <line x1="42" y1="26" x2="42" y2="14" stroke="#5a2da0" stroke-width="1.5"/>
+          <polygon points="42,12 39,17 45,17" fill="#5a2da0"/>
+          <line x1="42" y1="26" x2="56" y2="26" stroke="#5a2da0" stroke-width="1.5"/>
+          <polygon points="58,26 53,23 53,29" fill="#5a2da0"/>
+          <path d="M28,22 A8,8 0 0,1 28,40" fill="none" stroke="#5a2da0" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="28,40 24,36 30,35" fill="#5a2da0"/>
+          <text x="44" y="11" font-size="8" fill="#5a2da0" font-family="sans-serif">Ry</text>
+          <text x="58" y="29" font-size="8" fill="#5a2da0" font-family="sans-serif">Rx</text>
+          <text x="12" y="34" font-size="8" fill="#5a2da0" font-family="sans-serif">M</text>
+        </svg>
+        <div>
+          <div class="sc-label">Fixed / cantilever</div>
+          <span class="tbadge bfix">3 unknowns</span>
+        </div>
+      </div>
+      <p>Prevents all translation and rotation. Fully constrains the structure. Introduces horizontal force, vertical force, and a reaction moment.</p>
+      <div class="unk-row"><span class="unk-badge u3">3 rxns</span><span class="unk-text">H + V forces + moment</span></div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-head">
+        <svg width="72" height="62" viewBox="0 0 72 62">
+          <!-- ground left -->
+          <line x1="0" y1="54" x2="24" y2="54" stroke="#555" stroke-width="1.5"/>
+          <line x1="2" y1="60" x2="10" y2="54" stroke="#888" stroke-width="1"/>
+          <line x1="10" y1="60" x2="18" y2="54" stroke="#888" stroke-width="1"/>
+          <line x1="18" y1="60" x2="24" y2="54" stroke="#888" stroke-width="1"/>
+          <!-- link rod -->
+          <line x1="14" y1="50" x2="58" y2="16" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>
+          <!-- end pins -->
+          <circle cx="14" cy="50" r="5.5" fill="#fef3dc" stroke="#854F0B" stroke-width="1.8"/>
+          <circle cx="58" cy="16" r="5.5" fill="#fef3dc" stroke="#854F0B" stroke-width="1.8"/>
+          <!-- axial reaction arrow -->
+          <line x1="36" y1="33" x2="22" y2="44" stroke="#854F0B" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <polygon points="20,46 20,40 25,44" fill="#854F0B"/>
+          <text x="10" y="30" font-size="9" fill="#854F0B" font-family="sans-serif">F axial</text>
+        </svg>
+        <div>
+          <div class="sc-label">Link / two-force member</div>
+          <span class="tbadge blink">1 unknown</span>
+        </div>
+      </div>
+      <p>Transmits force only along its own axis. Cannot carry perpendicular load or moment. Allows rotation at both ends.</p>
+      <div class="unk-row"><span class="unk-badge u1">1 rxn</span><span class="unk-text">axial force along the link</span></div>
+    </div>
+  </div>
+
+  <div class="sh">Quick-reference summary</div>
+  <table class="sum-table">
+    <thead><tr><th>Support</th><th>Unknowns</th><th>Reactions</th><th>Rotation?</th></tr></thead>
+    <tbody>
+      <tr><td>Roller</td><td><span class="unk-badge u1">1</span></td><td>⊥ force</td><td>Yes</td></tr>
+      <tr><td>Link / cable</td><td><span class="unk-badge u1">1</span></td><td>Axial force</td><td>Yes</td></tr>
+      <tr><td>Pin / hinge</td><td><span class="unk-badge u2">2</span></td><td>H + V forces</td><td>Yes</td></tr>
+      <tr><td>Fixed / cantilever</td><td><span class="unk-badge u3">3</span></td><td>H + V + moment</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <div class="determ-box" style="margin-top:1rem">
+    <strong>Determinacy rule:</strong> A 2D system has 3 equilibrium equations (ΣFx=0, ΣFy=0, ΣM=0). When total unknowns = 3, the structure is <strong>statically determinate</strong>. Fewer → unstable. More → statically indeterminate.
+  </div>
+
+  <div class="sh">Interactive beam configurator</div>
+  <div class="config-box">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;align-items:center">
+      <span style="font-size:13px;color:#555">Left:</span>
+      <select id="left-sup" onchange="updateBeam()" class="config-sel">
+        <option value="pin">Pin</option><option value="roller">Roller</option><option value="fixed">Fixed</option>
+      </select>
+      <span style="font-size:13px;color:#555;margin-left:8px">Right:</span>
+      <select id="right-sup" onchange="updateBeam()" class="config-sel">
+        <option value="roller">Roller</option><option value="pin">Pin</option><option value="fixed">Fixed</option><option value="none">None (free)</option>
+      </select>
+    </div>
+    <svg id="beam-svg" width="100%" viewBox="0 0 560 110" style="display:block;background:#f5f0e8;border-radius:8px"></svg>
+    <div id="beam-status" class="beam-status"></div>
+  </div>
+</div>
+
+<!-- PRACTICE -->
+<div id="panel-practice" class="panel">
+  <div id="prac-container"></div>
+</div>
+
+<!-- EXAM -->
+<div id="panel-exam" class="panel">
+  <div id="exam-container"></div>
+</div>
+</div>
+
+<script>
+function switchTab(id){
+  ['learn','practice','exam'].forEach((n,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('active',n===id);
+    document.getElementById('panel-'+n).classList.toggle('active',n===id);
+  });
+}
+
+/* ── BEAM CONFIGURATOR ── */
+function unkCount(t){return{pin:2,roller:1,fixed:3,none:0}[t]||0;}
+
+function drawBeamSvg(L,R){
+  const lx=90,rx=470,cy=55;
+  let s='';
+
+  // LEFT SUPPORT
+  if(L==='fixed'){
+    s+=`<rect x="20" y="${cy-28}" width="18" height="56" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.5"/>`;
+    for(let d=0;d<56;d+=9)s+=`<line x1="20" y1="${cy-28+d}" x2="38" y2="${cy-28+d}" stroke="#9a72d0" stroke-width="0.7"/>`;
+    // beam starts at wall edge, no overlap
+  } else if(L==='pin'){
+    s+=`<polygon points="${lx},${cy-22} ${lx-18},${cy+4} ${lx+18},${cy+4}" fill="#dce8f5" stroke="#185FA5" stroke-width="1.5"/>`;
+    s+=`<circle cx="${lx}" cy="${cy-2}" r="5" fill="#fff" stroke="#185FA5" stroke-width="1.8"/>`;
+    s+=`<line x1="${lx-26}" y1="${cy+18}" x2="${lx+26}" y2="${cy+18}" stroke="#555" stroke-width="1.5"/>`;
+    for(let d=0;d<10;d+=1)s+=`<line x1="${lx-26+d*6}" y1="${cy+24}" x2="${lx-20+d*6}" y2="${cy+18}" stroke="#888" stroke-width="1"/>`;
+  } else if(L==='roller'){
+    s+=`<polygon points="${lx},${cy-22} ${lx-18},${cy+4} ${lx+18},${cy+4}" fill="#e2f0d6" stroke="#3a7010" stroke-width="1.5"/>`;
+    s+=`<circle cx="${lx-9}" cy="${cy+12}" r="7" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>`;
+    s+=`<circle cx="${lx+9}" cy="${cy+12}" r="7" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>`;
+    s+=`<line x1="${lx-26}" y1="${cy+22}" x2="${lx+26}" y2="${cy+22}" stroke="#555" stroke-width="1.5"/>`;
+    for(let d=0;d<10;d+=1)s+=`<line x1="${lx-26+d*6}" y1="${cy+28}" x2="${lx-20+d*6}" y2="${cy+22}" stroke="#888" stroke-width="1"/>`;
+  }
+
+  // RIGHT SUPPORT
+  if(R==='fixed'){
+    s+=`<rect x="${rx}" y="${cy-28}" width="18" height="56" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.5"/>`;
+    for(let d=0;d<56;d+=9)s+=`<line x1="${rx}" y1="${cy-28+d}" x2="${rx+18}" y2="${cy-28+d}" stroke="#9a72d0" stroke-width="0.7"/>`;
+  } else if(R==='pin'){
+    s+=`<polygon points="${rx},${cy-22} ${rx-18},${cy+4} ${rx+18},${cy+4}" fill="#dce8f5" stroke="#185FA5" stroke-width="1.5"/>`;
+    s+=`<circle cx="${rx}" cy="${cy-2}" r="5" fill="#fff" stroke="#185FA5" stroke-width="1.8"/>`;
+    s+=`<line x1="${rx-26}" y1="${cy+18}" x2="${rx+26}" y2="${cy+18}" stroke="#555" stroke-width="1.5"/>`;
+    for(let d=0;d<10;d+=1)s+=`<line x1="${rx-26+d*6}" y1="${cy+24}" x2="${rx-20+d*6}" y2="${cy+18}" stroke="#888" stroke-width="1"/>`;
+  } else if(R==='roller'){
+    s+=`<polygon points="${rx},${cy-22} ${rx-18},${cy+4} ${rx+18},${cy+4}" fill="#e2f0d6" stroke="#3a7010" stroke-width="1.5"/>`;
+    s+=`<circle cx="${rx-9}" cy="${cy+12}" r="7" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>`;
+    s+=`<circle cx="${rx+9}" cy="${cy+12}" r="7" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>`;
+    s+=`<line x1="${rx-26}" y1="${cy+22}" x2="${rx+26}" y2="${cy+22}" stroke="#555" stroke-width="1.5"/>`;
+    for(let d=0;d<10;d+=1)s+=`<line x1="${rx-26+d*6}" y1="${cy+28}" x2="${rx-20+d*6}" y2="${cy+22}" stroke="#888" stroke-width="1"/>`;
+  }
+
+  // BEAM — drawn ON TOP, starts after left support edge, ends before right
+  const bx1 = L==='fixed' ? 38 : lx;
+  const bx2 = (R==='fixed'||R==='none') ? rx : rx;
+  s+=`<rect x="${bx1}" y="${cy-10}" width="${bx2-bx1}" height="20" rx="4" fill="#b0c8e8" stroke="#2a508a" stroke-width="2"/>`;
+
+  return s;
+}
+
+function updateBeam(){
+  const L=document.getElementById('left-sup').value;
+  const R=document.getElementById('right-sup').value;
+  document.getElementById('beam-svg').innerHTML=drawBeamSvg(L,R);
+  const tot=unkCount(L)+unkCount(R);
+  const el=document.getElementById('beam-status');
+  if(tot<3){el.style.cssText='background:#fde8e8;color:#a02020;font-size:13px;padding:6px 12px;border-radius:8px;text-align:center;font-weight:500;margin-top:.5rem';el.textContent=`${tot} unknowns — unstable (< 3 equations)`;}
+  else if(tot===3){el.style.cssText='background:#e2f0d6;color:#2a6010;font-size:13px;padding:6px 12px;border-radius:8px;text-align:center;font-weight:500;margin-top:.5rem';el.textContent=`${tot} unknowns — statically determinate`;}
+  else{el.style.cssText='background:#fef3dc;color:#854F0B;font-size:13px;padding:6px 12px;border-radius:8px;text-align:center;font-weight:500;margin-top:.5rem';el.textContent=`${tot} unknowns — statically indeterminate (${tot-3}° redundant)`;}
+}
+updateBeam();
+
+/* ── SVG HELPERS ── */
+function mkRoller(w=240,h=90){
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">
+    <line x1="40" y1="34" x2="${w-40}" y2="34" stroke="#2a508a" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="${w/2},12 ${w/2-18},34 ${w/2+18},34" fill="#e2f0d6" stroke="#3a7010" stroke-width="1.5"/>
+    <circle cx="${w/2-10}" cy="44" r="8" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>
+    <circle cx="${w/2}" cy="44" r="8" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>
+    <circle cx="${w/2+10}" cy="44" r="8" fill="#c8e6b0" stroke="#3a7010" stroke-width="1.5"/>
+    <line x1="${w/2-28}" y1="56" x2="${w/2+28}" y2="56" stroke="#555" stroke-width="1.5"/>
+    <line x1="${w/2-28}" y1="62" x2="${w/2-20}" y2="56" stroke="#888" stroke-width="1"/>
+    <line x1="${w/2-16}" y1="62" x2="${w/2-8}" y2="56" stroke="#888" stroke-width="1"/>
+    <line x1="${w/2-4}" y1="62" x2="${w/2+4}" y2="56" stroke="#888" stroke-width="1"/>
+    <line x1="${w/2+8}" y1="62" x2="${w/2+16}" y2="56" stroke="#888" stroke-width="1"/>
+    <line x1="${w/2+20}" y1="62" x2="${w/2+28}" y2="56" stroke="#888" stroke-width="1"/>
+    <line x1="${w/2}" y1="12" x2="${w/2}" y2="3" stroke="#3a7010" stroke-width="2"/>
+    <polygon points="${w/2},0 ${w/2-4},5 ${w/2+4},5" fill="#3a7010"/>
+    <text x="${w/2+6}" y="8" font-size="10" fill="#3a7010" font-family="sans-serif">R</text>
+  </svg>`;
+}
+
+function mkPin(w=240,h=80){
+  const cx=w/2;
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">
+    <line x1="40" y1="30" x2="${w-40}" y2="30" stroke="#2a508a" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="${cx},8 ${cx-22},44 ${cx+22},44" fill="#dce8f5" stroke="#185FA5" stroke-width="1.5"/>
+    <circle cx="${cx}" cy="36" r="5" fill="#fff" stroke="#185FA5" stroke-width="1.8"/>
+    <line x1="${cx-34}" y1="54" x2="${cx+34}" y2="54" stroke="#555" stroke-width="1.5"/>
+    <line x1="${cx-34}" y1="60" x2="${cx-26}" y2="54" stroke="#888" stroke-width="1"/>
+    <line x1="${cx-20}" y1="60" x2="${cx-12}" y2="54" stroke="#888" stroke-width="1"/>
+    <line x1="${cx-6}" y1="60" x2="${cx+2}" y2="54" stroke="#888" stroke-width="1"/>
+    <line x1="${cx+8}" y1="60" x2="${cx+16}" y2="54" stroke="#888" stroke-width="1"/>
+    <line x1="${cx+22}" y1="60" x2="${cx+30}" y2="54" stroke="#888" stroke-width="1"/>
+    <line x1="${cx}" y1="8" x2="${cx}" y2="0" stroke="#185FA5" stroke-width="1.8"/>
+    <polygon points="${cx},-2 ${cx-4},4 ${cx+4},4" fill="#185FA5"/>
+    <line x1="${cx}" y1="8" x2="${cx-14}" y2="8" stroke="#185FA5" stroke-width="1.8"/>
+    <polygon points="${cx-17},8 ${cx-11},5 ${cx-11},11" fill="#185FA5"/>
+    <text x="${cx+3}" y="5" font-size="9" fill="#185FA5" font-family="sans-serif">Ry</text>
+    <text x="${cx-34}" y="12" font-size="9" fill="#185FA5" font-family="sans-serif">Rx</text>
+  </svg>`;
+}
+
+function mkFixed(w=240,h=80){
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">
+    <rect x="10" y="14" width="20" height="52" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.5"/>
+    <line x1="10" y1="20" x2="30" y2="20" stroke="#9a72d0" stroke-width="0.8"/>
+    <line x1="10" y1="27" x2="30" y2="27" stroke="#9a72d0" stroke-width="0.8"/>
+    <line x1="10" y1="34" x2="30" y2="34" stroke="#9a72d0" stroke-width="0.8"/>
+    <line x1="10" y1="41" x2="30" y2="41" stroke="#9a72d0" stroke-width="0.8"/>
+    <line x1="10" y1="48" x2="30" y2="48" stroke="#9a72d0" stroke-width="0.8"/>
+    <line x1="10" y1="55" x2="30" y2="55" stroke="#9a72d0" stroke-width="0.8"/>
+    <line x1="10" y1="62" x2="30" y2="62" stroke="#9a72d0" stroke-width="0.8"/>
+    <rect x="30" y="30" width="${w-50}" height="20" rx="4" fill="#b0c8e8" stroke="#2a508a" stroke-width="2"/>
+    <line x1="${w/2+20}" y1="30" x2="${w/2+20}" y2="16" stroke="#5a2da0" stroke-width="1.8"/>
+    <polygon points="${w/2+20},13 ${w/2+16},19 ${w/2+24},19" fill="#5a2da0"/>
+    <line x1="${w/2+20}" y1="40" x2="${w-30}" y2="40" stroke="#5a2da0" stroke-width="1.8"/>
+    <polygon points="${w-27},40 ${w-33},37 ${w-33},43" fill="#5a2da0"/>
+    <path d="M50,28 A14,14 0 0,1 50,52" fill="none" stroke="#5a2da0" stroke-width="1.8" stroke-linecap="round"/>
+    <polygon points="50,52 45,47 52,46" fill="#5a2da0"/>
+    <text x="${w/2+22}" y="12" font-size="9" fill="#5a2da0" font-family="sans-serif">Ry</text>
+    <text x="${w-26}" y="38" font-size="9" fill="#5a2da0" font-family="sans-serif">Rx</text>
+    <text x="33" y="44" font-size="9" fill="#5a2da0" font-family="sans-serif">M</text>
+  </svg>`;
+}
+
+function mkLink(w=240,h=90){
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">
+    <line x1="30" y1="22" x2="70" y2="22" stroke="#555" stroke-width="1.5"/>
+    <line x1="26" y1="28" x2="34" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="34" y1="28" x2="42" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="42" y1="28" x2="50" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="50" y1="28" x2="58" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="58" y1="28" x2="66" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="56" y1="17" x2="${w-40}" y2="70" stroke="#8B6914" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="56" cy="17" r="7" fill="#fef3dc" stroke="#854F0B" stroke-width="2"/>
+    <circle cx="${w-40}" cy="70" r="7" fill="#fef3dc" stroke="#854F0B" stroke-width="2"/>
+    <line x1="${w/2-4}" y1="42" x2="${w/2-18}" y2="30" stroke="#854F0B" stroke-width="1.8" stroke-dasharray="3 2"/>
+    <polygon points="${w/2-21},28 ${w/2-20},34 ${w/2-15},30" fill="#854F0B"/>
+    <text x="${w/2-38}" y="26" font-size="10" fill="#854F0B" font-family="sans-serif">F axial</text>
+  </svg>`;
+}
+
+function mkBeam(leftT,rightT,w=300,h=80){
+  const lx=70,rx=w-70,cy=40;
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">`;
+
+  // LEFT
+  if(leftT==='fixed'){
+    s+=`<rect x="10" y="${cy-22}" width="18" height="44" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.5"/>`;
+    for(let d=0;d<44;d+=8)s+=`<line x1="10" y1="${cy-22+d}" x2="28" y2="${cy-22+d}" stroke="#9a72d0" stroke-width="0.7"/>`;
+    // beam starts at wall edge
+    s+=`<rect x="28" y="${cy-8}" width="${rx-28}" height="16" rx="3" fill="#b0c8e8" stroke="#2a508a" stroke-width="2"/>`;
+  } else {
+    const col=leftT==='pin'?'#185FA5':'#3a7010';
+    const fill=leftT==='pin'?'#dce8f5':'#e2f0d6';
+    s+=`<polygon points="${lx},${cy-20} ${lx-16},${cy+6} ${lx+16},${cy+6}" fill="${fill}" stroke="${col}" stroke-width="1.5"/>`;
+    if(leftT==='roller'){
+      s+=`<circle cx="${lx-8}" cy="${cy+14}" r="7" fill="#c8e6b0" stroke="${col}" stroke-width="1.4"/>`;
+      s+=`<circle cx="${lx+8}" cy="${cy+14}" r="7" fill="#c8e6b0" stroke="${col}" stroke-width="1.4"/>`;
+    } else {
+      s+=`<circle cx="${lx}" cy="${cy}" r="4.5" fill="#fff" stroke="${col}" stroke-width="1.8"/>`;
+    }
+    // beam (drawn after, centered above support base)
+    s+=`<rect x="${lx}" y="${cy-8}" width="${rx-lx}" height="16" rx="3" fill="#b0c8e8" stroke="#2a508a" stroke-width="2"/>`;
+    const gY=leftT==='roller'?cy+26:cy+14;
+    s+=`<line x1="${lx-22}" y1="${gY}" x2="${lx+22}" y2="${gY}" stroke="#555" stroke-width="1.5"/>`;
+    for(let d=0;d<8;d++)s+=`<line x1="${lx-22+d*7}" y1="${gY+6}" x2="${lx-22+d*7+6}" y2="${gY}" stroke="#888" stroke-width="1"/>`;
+  }
+
+  // RIGHT
+  if(rightT==='none'){
+    // free end: beam already drawn for fixed-left case; for non-fixed left beam already drawn above; just skip
+    if(leftT!=='fixed'){
+      // beam was already drawn, so nothing extra needed
+    }
+  } else if(rightT==='fixed'){
+    s+=`<rect x="${rx}" y="${cy-22}" width="18" height="44" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.5"/>`;
+    for(let d=0;d<44;d+=8)s+=`<line x1="${rx}" y1="${cy-22+d}" x2="${rx+18}" y2="${cy-22+d}" stroke="#9a72d0" stroke-width="0.7"/>`;
+    if(leftT!=='fixed'){
+      // need to redraw beam stopping at wall
+      s+=`<rect x="${lx}" y="${cy-8}" width="${rx-lx}" height="16" rx="3" fill="#b0c8e8" stroke="#2a508a" stroke-width="2"/>`;
+    }
+  } else {
+    const col=rightT==='pin'?'#185FA5':'#3a7010';
+    const fill=rightT==='pin'?'#dce8f5':'#e2f0d6';
+    s+=`<polygon points="${rx},${cy-20} ${rx-16},${cy+6} ${rx+16},${cy+6}" fill="${fill}" stroke="${col}" stroke-width="1.5"/>`;
+    if(rightT==='roller'){
+      s+=`<circle cx="${rx-8}" cy="${cy+14}" r="7" fill="#c8e6b0" stroke="${col}" stroke-width="1.4"/>`;
+      s+=`<circle cx="${rx+8}" cy="${cy+14}" r="7" fill="#c8e6b0" stroke="${col}" stroke-width="1.4"/>`;
+    } else {
+      s+=`<circle cx="${rx}" cy="${cy}" r="4.5" fill="#fff" stroke="${col}" stroke-width="1.8"/>`;
+    }
+    const gY=rightT==='roller'?cy+26:cy+14;
+    s+=`<line x1="${rx-22}" y1="${gY}" x2="${rx+22}" y2="${gY}" stroke="#555" stroke-width="1.5"/>`;
+    for(let d=0;d<8;d++)s+=`<line x1="${rx-22+d*7}" y1="${gY+6}" x2="${rx-22+d*7+6}" y2="${gY}" stroke="#888" stroke-width="1"/>`;
+  }
+
+  s+=`</svg>`;
+  return s;
+}
+
+function mkCantilever(w=300,h=80){
+  // fixed left wall, beam to the right, free right end
+  const cy=40;
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">`;
+  s+=`<rect x="10" y="${cy-26}" width="22" height="52" rx="2" fill="#ede6f7" stroke="#5a2da0" stroke-width="1.5"/>`;
+  for(let d=0;d<52;d+=8)s+=`<line x1="10" y1="${cy-26+d}" x2="32" y2="${cy-26+d}" stroke="#9a72d0" stroke-width="0.8"/>`;
+  s+=`<rect x="32" y="${cy-10}" width="${w-52}" height="20" rx="4" fill="#b0c8e8" stroke="#2a508a" stroke-width="2.5"/>`;
+  // reactions
+  s+=`<line x1="${w/2}" y1="${cy-10}" x2="${w/2}" y2="${cy-24}" stroke="#5a2da0" stroke-width="1.8"/>`;
+  s+=`<polygon points="${w/2},${cy-27} ${w/2-4},${cy-21} ${w/2+4},${cy-21}" fill="#5a2da0"/>`;
+  s+=`<line x1="${w/2}" y1="${cy}" x2="${w/2+18}" y2="${cy}" stroke="#5a2da0" stroke-width="1.8"/>`;
+  s+=`<polygon points="${w/2+21},${cy} ${w/2+15},${cy-4} ${w/2+15},${cy+4}" fill="#5a2da0"/>`;
+  s+=`<path d="M44,${cy-8} A10,10 0 0,1 44,${cy+8}" fill="none" stroke="#5a2da0" stroke-width="1.8" stroke-linecap="round"/>`;
+  s+=`<polygon points="44,${cy+8} 40,${cy+4} 46,${cy+3}" fill="#5a2da0"/>`;
+  s+=`<text x="${w/2+2}" y="${cy-28}" font-size="9" fill="#5a2da0" font-family="sans-serif">Ry</text>`;
+  s+=`<text x="${w/2+23}" y="${cy+4}" font-size="9" fill="#5a2da0" font-family="sans-serif">Rx</text>`;
+  s+=`<text x="33" y="${cy+4}" font-size="9" fill="#5a2da0" font-family="sans-serif">M</text>`;
+  s+=`</svg>`;
+  return s;
+}
+
+function mkDOF(blocked,free,w=260,base=30){
+  const items=[...blocked.map(b=>[b,true]),...free.map(f=>[f,false])];
+  const h=base+items.length*22+10;
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">`;
+  items.forEach(([lbl,isB],i)=>{
+    const y=base+i*22;
+    const col=isB?'#a02020':'#2a6010';
+    const bg=isB?'#fde8e8':'#e2f0d6';
+    s+=`<circle cx="16" cy="${y+2}" r="8" fill="${bg}" stroke="${col}" stroke-width="1.2"/>`;
+    s+=`<text x="16" y="${y+6}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="sans-serif">${isB?'✕':'✓'}</text>`;
+    s+=`<text x="30" y="${y+6}" font-size="11" fill="#333" font-family="sans-serif">${lbl}</text>`;
+  });
+  s+=`</svg>`;
+  return s;
+}
+
+function mkEquil(w=280,h=60){
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;margin:0 auto">
+    <rect x="10" y="10" width="${w-20}" height="40" rx="6" fill="#e8e0d4" stroke="#888" stroke-width="1.5"/>
+    <text x="${w/2}" y="28" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a1a" font-family="sans-serif">ΣFx = 0</text>
+    <text x="${w/2}" y="43" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a1a" font-family="sans-serif">ΣFy = 0    ΣM = 0</text>
+    <text x="${w/2}" y="7" text-anchor="middle" font-size="9" fill="#666" font-family="sans-serif">3 equilibrium equations (2D)</text>
+  </svg>`;
+}
+
+/* ── QUESTIONS ── */
+const PQS=[
+  {vis:mkRoller(),q:"A roller support is shown. How many unknown reaction components does it introduce?",opts:["0","1","2","3"],ans:1,exp:"The roller blocks only one direction (⊥ to its surface), giving exactly 1 unknown reaction force."},
+  {vis:mkBeam('pin','roller'),q:"A beam rests on a pin at the left and a roller at the right. What is the total number of unknown reactions?",opts:["2","3","4","5"],ans:1,exp:"Pin → 2 unknowns + roller → 1 unknown = 3 total, matching the 3 equilibrium equations."},
+  {vis:mkFixed(),q:"The fixed support shown has which set of reaction components?",opts:["Ry only","Rx and Ry","Rx, Ry, and a moment M","Moment M only"],ans:2,exp:"A fixed support blocks H translation, V translation, and rotation — yielding Rx, Ry, and M."},
+  {vis:mkDOF(['Horizontal translation','Vertical translation'],['Rotation']),q:"Based on the DOF diagram, which support type matches these restrictions?",opts:["Roller","Fixed support","Pin / hinge","Link member"],ans:2,exp:"Blocking H and V translation but allowing rotation is the defining characteristic of a pin/hinge support."},
+  {vis:mkBeam('roller','roller'),q:"A beam is supported by two rollers. Why is this configuration unstable?",opts:["Too many unknowns","Only 2 unknowns — cannot satisfy ΣFx=0","Rollers prevent rotation","Rollers add a moment equation"],ans:1,exp:"Two rollers give only 2 vertical reactions. ΣFx=0 cannot be enforced — any horizontal load makes the beam slide."},
+  {vis:mkLink(),q:"The link member shown is inclined. In what direction does its reaction force act?",opts:["Vertically","Horizontally","Along the link axis","Perpendicular to the link"],ans:2,exp:"A two-force member transmits force only along its own axis — the reaction must be along the link."},
+  {vis:mkCantilever(),q:"A cantilever beam is fixed at one end (left) and free at the other. How many unknowns does it have?",opts:["1","2","3","4"],ans:2,exp:"One fixed support → Rx + Ry + M = 3 unknowns, equalling the 3 equilibrium equations. Statically determinate."},
+  {vis:mkEquil(),q:"The three equilibrium equations for a 2D system are shown. A beam with one pin and one fixed support has how many total unknowns?",opts:["3 — determinate","4 — indeterminate 1st degree","5 — indeterminate 2nd degree","2 — unstable"],ans:2,exp:"Pin → 2, fixed → 3 = 5 total unknowns vs 3 equations. Indeterminate to the 2nd degree."},
+  {vis:mkDOF(['Perpendicular translation'],['Parallel translation','Rotation']),q:"The DOF diagram shows these restrictions. Which support type is this?",opts:["Pin / hinge","Fixed support","Roller","Link"],ans:2,exp:"Blocking only one translational direction while allowing the other and rotation is exactly the roller support."},
+  {vis:mkBeam('pin','pin'),q:"A beam is supported by two pins. What is its determinacy status?",opts:["Unstable (2 unknowns)","Determinate (3 unknowns)","Indeterminate — 4 unknowns","Indeterminate — 5 unknowns"],ans:2,exp:"Two pins = 2+2 = 4 unknowns for only 3 equations → statically indeterminate to the 1st degree."},
+];
+
+const EQS=[
+  {vis:mkEquil(),q:"How many equilibrium equations are available for a 2D coplanar force system?",opts:["1","2","3","6"],ans:2},
+  {vis:mkRoller(),q:"A roller support restricts movement in:",opts:["All directions","Only perpendicular to its surface","Only horizontal","No directions"],ans:1},
+  {vis:mkPin(),q:"How many unknown reactions does a pin support introduce?",opts:["1","2","3","4"],ans:1},
+  {vis:mkFixed(),q:"Which reaction component is present in a fixed support but NOT in a pin support?",opts:["Horizontal force","Vertical force","Reaction moment","Axial force"],ans:2},
+  {vis:mkBeam('pin','pin'),q:"A beam on two pin supports has how many total unknown reactions?",opts:["2","3","4","5"],ans:2},
+  {vis:mkEquil(),q:"A structure is statically determinate when:",opts:["Unknowns < equations","Unknowns = equations","Unknowns > equations","There are no supports"],ans:1},
+  {vis:mkDOF([],['Rotation','Translation along surface']),q:"Which support type allows both rotation AND translation along its surface?",opts:["Fixed","Pin","Roller","None — all block rotation"],ans:2},
+  {vis:mkLink(),q:"A link inclined at 60° produces a reaction that is:",opts:["Horizontal only","Vertical only","Along the link at 60°","Perpendicular to the link"],ans:2},
+  {vis:mkCantilever(),q:"A propped cantilever (fixed + roller) is:",opts:["Statically determinate","Statically indeterminate","Unstable","A mechanism"],ans:1},
+  {vis:mkBeam('fixed','pin'),q:"A structure with one fixed and one pin support has 5 unknowns and 3 equations. It is indeterminate to the __ degree.",opts:["1st","2nd","3rd","5th"],ans:1},
+];
+
+function buildQ(q,i,total,mode){
+  const keys=['A','B','C','D'];
+  const id=`${mode}-${i}`;
+  const div=document.createElement('div');
+  div.className='q-block';
+  div.innerHTML=`<div class="q-num">Question ${i+1} of ${total}</div>
+    <div class="q-visual">${q.vis}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="opts" id="opts-${id}"></div>
+    <div id="fb-${id}"></div>`;
+  const oc=div.querySelector(`#opts-${id}`);
+  q.opts.forEach((o,j)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="ok">${keys[j]}</span><span>${o}</span>`;
+    if(mode==='p'){
+      btn.onclick=()=>{
+        oc.querySelectorAll('.opt').forEach(b=>b.setAttribute('disabled',''));
+        btn.classList.add(j===q.ans?'correct':'wrong');
+        if(j!==q.ans)oc.querySelectorAll('.opt')[q.ans].classList.add('sc2');
+        div.querySelector(`#fb-${id}`).innerHTML=`<div class="fb ${j===q.ans?'ok':'err'}">${j===q.ans?'Correct! ':'Incorrect. '}${q.exp}</div>`;
+      };
+    } else {
+      btn.onclick=()=>{
+        oc.querySelectorAll('.opt').forEach(b=>{b.classList.remove('eopt-sel');});
+        btn.classList.add('eopt-sel');
+        window._ea=window._ea||{};
+        window._ea[i]=j;
+      };
+    }
+    oc.appendChild(btn);
+  });
+  return div;
+}
+
+function renderPractice(){
+  const c=document.getElementById('prac-container');
+  c.innerHTML='';
+  PQS.forEach((q,i)=>c.appendChild(buildQ(q,i,PQS.length,'p')));
+}
+
+function renderExam(){
+  window._ea={};
+  const c=document.getElementById('exam-container');
+  c.innerHTML='';
+  EQS.forEach((q,i)=>c.appendChild(buildQ(q,i,EQS.length,'e')));
+  const sub=document.createElement('button');
+  sub.className='exam-sub';
+  sub.textContent='Submit exam';
+  sub.onclick=submitExam;
+  c.appendChild(sub);
+}
+
+function submitExam(){
+  const ans=window._ea||{};
+  // submit even if some are unanswered (treat unanswered as wrong)
+  let score=0;
+  const keys=['A','B','C','D'];
+  EQS.forEach((_,i)=>{if(ans[i]===EQS[i].ans)score++;});
+  const pct=Math.round(score/EQS.length*100);
+  let grade,gc;
+  if(pct>=90){grade='Excellent';gc='gA';}else if(pct>=70){grade='Good';gc='gB';}else if(pct>=50){grade='Needs review';gc='gC';}else{grade='Study more';gc='gD';}
+  const c=document.getElementById('exam-container');
+  let rev='';
+  EQS.forEach((q,i)=>{
+    const chosen=ans[i];
+    const correct=q.ans;
+    const ok=chosen===correct;
+    const unanswered=chosen===undefined;
+    rev+=`<div class="q-block">
+      <div class="q-num">Question ${i+1}</div>
+      <div class="q-visual">${q.vis}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.opts.map((o,j)=>{
+        let cls='opt';
+        if(j===correct)cls+=' sc2';
+        if(!unanswered&&j===chosen&&!ok)cls+=' wrong';
+        if(!unanswered&&j===chosen&&ok)cls+=' correct';
+        return `<button class="${cls}" disabled><span class="ok">${keys[j]}</span><span>${o}</span></button>`;
+      }).join('')}</div>
+      <div class="fb ${ok?'ok':'err'}">${unanswered?'Not answered. Correct: '+keys[correct]:ok?'Correct':'Your answer: '+keys[chosen]+'. Correct: '+keys[correct]}</div>
+    </div>`;
+  });
+  c.innerHTML=`<div class="score-card">
+    <div class="score-big">${score}/${EQS.length}</div>
+    <div class="score-sub">${pct}% — ${grade}</div>
+    <div class="sbadge ${gc}">${grade}</div><br>
+    <button class="retry-btn" onclick="renderExam()">Retake exam</button>
+  </div>${rev}`;
+}
+
+renderPractice();
+renderExam();
+</script>
+</body>
+</html>

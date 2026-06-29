@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Statics AI Tutor</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #eef3f9;
+      color: #102040;
+    }
+
+    .topbar {
+      background: #071b3d;
+      color: white;
+      padding: 18px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    .logo span {
+      color: #6db7ff;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255,255,255,.92), rgba(255,255,255,.94)),
+        repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(30,60,114,.07) 24px),
+        repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(30,60,114,.07) 24px);
+      padding: 65px 10%;
+      text-align: center;
+      border-bottom: 1px solid #d8e2ef;
+    }
+
+    .hero:before {
+      content: "∑F = 0   ∑M = 0   w(x) → V(x) → M(x)";
+      position: absolute;
+      top: 25px;
+      left: 40px;
+      color: rgba(7,27,61,.08);
+      font-size: 38px;
+      font-weight: 900;
+    }
+
+    .hero:after {
+      content: "⌁";
+      position: absolute;
+      right: 70px;
+      bottom: 15px;
+      font-size: 160px;
+      color: rgba(42,82,152,.08);
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 18px;
+      color: #071b3d;
+    }
+
+    .hero p {
+      max-width: 900px;
+      margin: auto;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .section {
+      padding: 38px 8%;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 28px;
+      margin-bottom: 22px;
+      color: #071b3d;
+    }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .topic-card {
+      background: white;
+      padding: 22px;
+      border-radius: 18px;
+      text-decoration: none;
+      color: #102040;
+      box-shadow: 0 8px 24px rgba(16,32,64,0.08);
+      border: 1px solid #d9e5f2;
+      transition: 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topic-card:after {
+      content: "";
+      position: absolute;
+      right: -35px;
+      bottom: -35px;
+      width: 100px;
+      height: 100px;
+      background: rgba(42,82,152,.08);
+      border-radius: 50%;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 32px rgba(16,32,64,0.15);
+      border-color: #2a5298;
+    }
+
+    .topic-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #2a5298;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .topic-icon {
+      font-size: 38px;
+      color: #2a5298;
+      margin: 16px 0;
+      font-weight: bold;
+    }
+
+    .question-area {
+      display: grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 8px 24px rgba(16,32,64,0.08);
+      border: 1px solid #d9e5f2;
+    }
+
+    .question-img {
+      width: 100%;
+      max-height: 430px;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid #d9e5f2;
+      background: #fff;
+    }
+
+    .question-label {
+      font-size: 22px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+      color: #071b3d;
+    }
+
+    .number-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .number-pill {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid #b8c8dc;
+      background: white;
+      color: #071b3d;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0;
+    }
+
+    .number-pill.active {
+      background: #071b3d;
+      color: white;
+    }
+
+    .upload-box {
+      border: 2px dashed #9bb4d4;
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      background: #f8fbff;
+      margin: 18px 0;
+    }
+
+    .submit-btn {
+      background: #071b3d;
+      color: white;
+      border: none;
+      padding: 13px 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      background: #123b78;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 27, 61, .86);
+      color: white;
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+    }
+
+    .spinner {
+      width: 58px;
+      height: 58px;
+      border: 6px solid rgba(255,255,255,.25);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 22px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media(max-width: 900px) {
+      .question-area {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="logo">⚙ STATICS <span>AI TUTOR</span></div>
+  <div>Practice. Understand. Improve.</div>
+</div>
+
+<div class="hero">
+  <h1>Master Statics with AI Guidance</h1>
+  <p>
+    After teaching Statics as a tutor for a good amount of time, I noticed that
+    the main issues with failure are mostly related to not fully grasping one or
+    more of the following subjects.
+    <br><br>
+    Either you can practice them by clicking on them, or you may attempt to solve
+    the following Statics questions, upload your solution, and get AI feedback
+    telling you which subject areas you need to improve.
+  </p>
+</div>
+
+<div class="section">
+  <h2 class="section-title">🎯 Practice Core Statics Skills</h2>
+
+  <div class="topic-grid">
+    {% for topic in topics %}
+    <a class="topic-card" href="{{ url_for('topic', filename=topic.file) }}">
+      <span class="topic-number">{{ topic.id }}</span>
+      <div class="topic-icon">{{ topic.icon }}</div>
+      <h3>{{ topic.title }}</h3>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title">📐 Try a Full Statics Question</h2>
+
+  <div class="question-area">
+    <div class="card">
+      <div id="questionLabel" class="question-label">
+        Question {{ questions[0].number }} of {{ questions|length }}
+      </div>
+
+      <img id="questionImage" class="question-img"
+           src="{{ url_for('static', filename='questions/' + questions[0].question) }}">
+
+      <div class="number-row">
+        {% for q in questions %}
+        <button type="button"
+                class="number-pill {% if loop.first %}active{% endif %}"
+                onclick="selectQuestion({{ loop.index0 }})">
+          {{ q.number }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Upload Your Solution</h2>
+      <p>Upload a photo, screenshot, or PDF of your work.</p>
+
+      <form id="gradeForm" action="{{ url_for('grade_solution') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" id="questionFile" name="question_file" value="{{ questions[0].question }}">
+        <input type="hidden" id="officialSolutionFile" name="official_solution_file" value="{{ questions[0].solution }}">
+        <input type="hidden" id="questionNumber" name="question_number" value="{{ questions[0].number }}">
+
+        <div class="upload-box">
+          <p>📤 Choose your solution file</p>
+          <input type="file" name="solution" accept="image/*,.pdf" required>
+        </div>
+
+        <button class="submit-btn" type="submit">Get AI Feedback</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="spinner"></div>
+  <h2>Your solution is being graded now.</h2>
+  <p>Please wait while the AI checks your work.</p>
+</div>
+
+<script>
+  const questions = {{ questions | tojson }};
+  let currentIndex = 0;
+
+  function selectQuestion(index) {
+    currentIndex = index;
+
+    document.getElementById("questionImage").src =
+      "/static/questions/" + questions[currentIndex].question;
+
+    document.getElementById("questionLabel").textContent =
+      "Question " + questions[currentIndex].number + " of " + questions.length;
+
+    document.getElementById("questionFile").value =
+      questions[currentIndex].question;
+
+    document.getElementById("officialSolutionFile").value =
+      questions[currentIndex].solution;
+
+    document.getElementById("questionNumber").value =
+      questions[currentIndex].number;
+
+    document.querySelectorAll(".number-pill").forEach((btn, i) => {
+      btn.classList.toggle("active", i === currentIndex);
+    });
+  }
+
+  document.getElementById("gradeForm").addEventListener("submit", function () {
+    document.getElementById("loadingOverlay").style.display = "flex";
+  });
+</script>
+
+</body>
+</html>

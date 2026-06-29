@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Decomposition Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
+
+<style>
+  /* ── Design tokens ── */
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1e2530;
+    --border:    #30363d;
+    --border-hi: #484f58;
+    --text:      #e6edf3;
+    --text2:     #8b949e;
+    --text3:     #484f58;
+    --accent:    #58a6ff;
+    --accent2:   #1f6feb;
+    --ok:        #3fb950;
+    --bad:       #f85149;
+    --warn:      #d29922;
+
+    /* vector diagram palette */
+    --vec-r:     #f47067;   /* main vector  */
+    --vec-x:     #57abff;   /* x component  */
+    --vec-y:     #3fb950;   /* y component  */
+    --vec-z:     #e3b341;   /* z component  */
+    --axis:      #8b949e;
+    --dashed:    #484f58;
+
+    --radius:    10px;
+    --radius-sm: 6px;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+    --shadow:    0 4px 24px rgba(0,0,0,.45);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.25rem;
+  }
+  .header-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .45rem;
+  }
+  header h1 {
+    font-size: 1.45rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+  }
+  header p {
+    font-size: .85rem;
+    color: var(--text2);
+    margin-top: .35rem;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: .75rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text2);
+    font-family: var(--font-mono);
+    font-size: .8rem;
+    font-weight: 500;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.tab-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: none;
+  }
+
+  /* ── Card body ── */
+  .card-body { padding: 1.5rem; }
+
+  /* ── Meta row ── */
+  .meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: .78rem;
+  }
+  .meta-row .q-counter {
+    font-family: var(--font-mono);
+    color: var(--text2);
+  }
+  .progress-bar-wrap {
+    flex: 1;
+    max-width: 160px;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-left: 1rem;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .3s;
+  }
+  .score-badge {
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .2rem .65rem;
+    color: var(--text2);
+    margin-left: .75rem;
+  }
+
+  /* ── Diagram ── */
+  .diagram-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .5rem;
+    margin-bottom: 1.25rem;
+  }
+  .diagram-wrap svg { display: block; }
+
+  /* SVG text classes */
+  svg .t  { font-family: var(--font-mono); font-size: 13px; fill: var(--axis); }
+  svg .ts { font-family: var(--font-mono); font-size: 11px; fill: var(--text); }
+
+  /* ── Prompt ── */
+  .prompt-text {
+    font-size: .9rem;
+    color: var(--text);
+    margin-bottom: .75rem;
+    line-height: 1.5;
+  }
+  .note-text {
+    font-size: .75rem;
+    color: var(--text2);
+    margin-bottom: .75rem;
+    line-height: 1.5;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Given chips ── */
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.1rem; }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .3rem .75rem;
+    color: var(--accent);
+  }
+
+  /* ── Inputs ── */
+  .inputs { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.1rem; }
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: .88rem;
+    color: var(--text);
+    width: 2rem;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  input[type="number"] {
+    width: 120px;
+    padding: .45rem .65rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: .88rem;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type="number"]:focus { border-color: var(--accent); }
+  input[type="number"]:disabled { opacity: .5; cursor: not-allowed; }
+  .unit { font-size: .75rem; color: var(--text3); }
+  .fb-ok  { color: var(--ok);  font-size: 1.1rem; line-height: 1; }
+  .fb-bad { color: var(--bad); font-size: 1.1rem; line-height: 1; }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: .84rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  button:hover { background: var(--border); border-color: var(--border-hi); }
+  button.primary {
+    background: var(--accent2);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  button.primary:hover { background: var(--accent); }
+  button i { font-size: 1rem; line-height: 1; }
+
+  /* ── Hint ── */
+  .hint-box {
+    margin-top: 1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warn);
+    border-radius: var(--radius-sm);
+    padding: .85rem 1rem;
+  }
+  .hint-box .formula {
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    color: var(--text);
+    line-height: 1.9;
+  }
+  .hint-box .ask-claude {
+    display: inline-block;
+    margin-top: .6rem;
+    font-size: .75rem;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .hint-box .ask-claude:hover { text-decoration: underline; }
+
+  /* ── Feedback ── */
+  .feedback {
+    margin-top: .9rem;
+    font-size: .83rem;
+    padding: .65rem .9rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .feedback.ok  { background: rgba(63,185,80,.08); border-color: rgba(63,185,80,.3);  color: var(--ok);  }
+  .feedback.bad { background: rgba(248,81,73,.08); border-color: rgba(248,81,73,.3);  color: var(--text); }
+  .feedback .correct-vals { color: var(--text2); margin-top: .25rem; font-family: var(--font-mono); font-size: .78rem; }
+
+  /* ── Complete screen ── */
+  .complete {
+    text-align: center;
+    padding: 2.5rem 1rem;
+  }
+  .complete .big-score {
+    font-family: var(--font-mono);
+    font-size: 3rem;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: .4rem;
+  }
+  .complete p { color: var(--text2); font-size: .9rem; margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Physics · Mathematics</div>
+  <h1>Vector Axial Decomposition</h1>
+  <p>Practice decomposing vectors into x, y, and z components — with interactive diagrams and instant feedback.</p>
+</header>
+
+<div class="card">
+  <div class="tab-bar">
+    <button id="tab-2d" class="tab-btn" onclick="switchSection('2d')">2D components</button>
+    <button id="tab-3d" class="tab-btn" onclick="switchSection('3d')">3D components</button>
+  </div>
+  <div class="card-body">
+    <div id="app"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function toRad(d){ return d*Math.PI/180; }
+  function toDeg(r){ return r*180/Math.PI; }
+  function r1(n){ return Math.round(n*10)/10; }
+  function r0(n){ return Math.round(n); }
+  function fmt1(n){ return (Math.round(n*10)/10).toFixed(1); }
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+  function randInt(min,max){ return Math.floor(rand(min,max+1)); }
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      const tmp=a[i];a[i]=a[j];a[j]=tmp;
+    }
+    return a;
+  }
+
+  function makeQuestion2D(type){
+    let r,theta,x,y;
+    if(type==='toXY'){
+      r=r1(rand(8,22)); theta=randInt(15,70);
+      x=r1(r*Math.cos(toRad(theta))); y=r1(r*Math.sin(toRad(theta)));
+    } else {
+      x=r1(rand(4,18)); y=r1(rand(4,18));
+      r=r1(Math.sqrt(x*x+y*y)); theta=r0(toDeg(Math.atan2(y,x)));
+    }
+    const full={r,theta,x,y};
+    const given=type==='toXY'?['r','theta']:['x','y'];
+    const ask=type==='toXY'?['x','y']:['r','theta'];
+    return {dim:2,mode:type,full,given,ask};
+  }
+  function build2DSet(){
+    return shuffle(['toXY','toXY','toXY','toXY','toRT','toRT','toRT','toRT']).map(makeQuestion2D);
+  }
+
+  function makeQuestion3D(type){
+    let r,theta,alpha,x,y,z;
+    if(type==='toXYZ'){
+      r=r1(rand(10,24)); theta=randInt(15,65); alpha=randInt(15,65);
+      x=r1(r*Math.cos(toRad(theta))*Math.cos(toRad(alpha)));
+      y=r1(r*Math.cos(toRad(theta))*Math.sin(toRad(alpha)));
+      z=r1(r*Math.sin(toRad(theta)));
+    } else {
+      x=r1(rand(4,16)); y=r1(rand(4,16)); z=r1(rand(4,16));
+      r=r1(Math.sqrt(x*x+y*y+z*z));
+      theta=r0(toDeg(Math.asin(z/r)));
+      alpha=r0(toDeg(Math.atan2(y,x)));
+    }
+    const full={r,theta,alpha,x,y,z};
+    const given=type==='toXYZ'?['r','theta','alpha']:['x','y','z'];
+    const ask=type==='toXYZ'?['x','y','z']:['r','theta','alpha'];
+    return {dim:3,mode:type,full,given,ask};
+  }
+  function build3DSet(){
+    return shuffle(['toXYZ','toXYZ','toRTA','toRTA']).map(makeQuestion3D);
+  }
+
+  const state={
+    section:'2d',
+    data:{
+      '2d':{qs:build2DSet(),idx:0,score:0},
+      '3d':{qs:build3DSet(),idx:0,score:0}
+    },
+    answered:false, hint:false, lastResults:{}
+  };
+  function currentSet(){ return state.data[state.section]; }
+
+  window.switchSection=function(sec){ state.section=sec; state.answered=false; state.hint=false; render(); };
+  window.toggleHint=function(){ state.hint=!state.hint; render(); };
+  window.checkAnswer=function(){
+    const s=currentSet(), q=s.qs[s.idx];
+    let allCorrect=true; const results={};
+    q.ask.forEach(function(field){
+      const val=parseFloat(document.getElementById('inp-'+field).value);
+      const correct=q.full[field];
+      const isAngle=(field==='theta'||field==='alpha');
+      const tol=isAngle?2:Math.max(0.4,Math.abs(correct)*0.04);
+      const ok=!isNaN(val)&&Math.abs(val-correct)<=tol;
+      results[field]=ok; if(!ok) allCorrect=false;
+    });
+    state.answered=true; state.lastResults=results;
+    if(allCorrect) s.score++;
+    render();
+  };
+  window.nextQuestion=function(){ const s=currentSet(); s.idx++; state.answered=false; state.hint=false; render(); };
+  window.restartSection=function(){
+    const sec=state.section;
+    state.data[sec]={qs:sec==='2d'?build2DSet():build3DSet(),idx:0,score:0};
+    state.answered=false; state.hint=false; render();
+  };
+
+  function fieldLabel(f){ return f==='theta'?'θ':f==='alpha'?'α':f; }
+  function fieldValue(q,f){
+    const v=q.full[f];
+    return (f==='theta'||f==='alpha')?Math.round(v)+'°':fmt1(v);
+  }
+
+  function svgArc(cx,cy,radius,fromDeg,toDegVal){
+    const steps=16; let d='';
+    for(let i=0;i<=steps;i++){
+      const t=fromDeg+(toDegVal-fromDeg)*(i/steps);
+      const x=cx+radius*Math.cos(toRad(t));
+      const y=cy-radius*Math.sin(toRad(t));
+      d+=(i===0?'M ':'L ')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+    }
+    return d.trim();
+  }
+
+  function dirArc(cx,cy,radius,d1,d2,steps){
+    function norm(v){ const m=Math.hypot(v.x,v.y)||1; return {x:v.x/m,y:v.y/m}; }
+    const n1=norm(d1), n2=norm(d2); let d='';
+    for(let i=0;i<=steps;i++){
+      const t=i/steps;
+      let vx=n1.x+(n2.x-n1.x)*t, vy=n1.y+(n2.y-n1.y)*t;
+      const m=Math.hypot(vx,vy)||1; vx/=m; vy/=m;
+      const x=cx+vx*radius, y=cy+vy*radius;
+      d+=(i===0?'M ':'L ')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+    }
+    return d.trim();
+  }
+
+  function draw2D(q,revealed){
+    const ox=130, oy=290;
+    const scale=180/Math.max(q.full.r,0.1);
+    const Px=ox+q.full.x*scale, Py=oy-q.full.y*scale;
+    const xAxisEnd=ox+460, yAxisTop=oy-240;
+    const arcR=46;
+    const arc=svgArc(ox,oy,arcR,0,q.full.theta);
+    const showX=q.given.indexOf('x')>=0||revealed;
+    const showY=q.given.indexOf('y')>=0||revealed;
+    const showR=q.given.indexOf('r')>=0||revealed;
+    const showT=q.given.indexOf('theta')>=0||revealed;
+    const xLab=showX?('x = '+fmt1(q.full.x)):'x = ?';
+    const yLab=showY?('y = '+fmt1(q.full.y)):'y = ?';
+    const rLab=showR?('r = '+fmt1(q.full.r)):'r = ?';
+    const tLab=showT?('θ = '+Math.round(q.full.theta)+'°'):'θ = ?';
+    const midX=(ox+Px)/2, midY=(oy+Py)/2;
+    const tx=ox+(arcR+20)*Math.cos(toRad(q.full.theta/2));
+    const ty=oy-(arcR+20)*Math.sin(toRad(q.full.theta/2));
+
+    /* grid lines */
+    let gridLines='';
+    for(let i=1;i<=5;i++){
+      const gx=ox+i*80; const gy=oy-i*40;
+      gridLines+=`<line x1="${gx}" y1="${oy-200}" x2="${gx}" y2="${oy}" stroke="#1e2530" stroke-width="1"/>`;
+      gridLines+=`<line x1="${ox}" y1="${gy}" x2="${ox+400}" y2="${gy}" stroke="#1e2530" stroke-width="1"/>`;
+    }
+
+    return `<svg width="100%" viewBox="0 0 640 320" role="img" style="background:#0d1117;border-radius:6px;">
+      <title>2D vector decomposition diagram</title>
+      ${gridLines}
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <!-- axes -->
+      <line x1="${ox}" y1="${oy}" x2="${xAxisEnd}" y2="${oy}" stroke="#484f58" stroke-width="1.2" marker-end="url(#arr2)"/>
+      <line x1="${ox}" y1="${oy}" x2="${ox}" y2="${yAxisTop}" stroke="#484f58" stroke-width="1.2" marker-end="url(#arr2)"/>
+      <text class="t" x="${xAxisEnd-12}" y="${oy+18}">x</text>
+      <text class="t" x="${ox-16}" y="${yAxisTop+5}">y</text>
+      <!-- dashed components -->
+      <line x1="${Px.toFixed(1)}" y1="${oy}" x2="${Px.toFixed(1)}" y2="${Py.toFixed(1)}" stroke="#57abff" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>
+      <line x1="${ox}" y1="${Py.toFixed(1)}" x2="${Px.toFixed(1)}" y2="${Py.toFixed(1)}" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>
+      <!-- angle arc -->
+      <path d="${arc}" fill="none" stroke="#8b949e" stroke-width="1.1"/>
+      <!-- x component arrow -->
+      <line x1="${ox}" y1="${oy}" x2="${Px.toFixed(1)}" y2="${oy}" stroke="#57abff" stroke-width="2" marker-end="url(#arr2)" opacity=".9"/>
+      <!-- y component arrow -->
+      <line x1="${ox}" y1="${oy}" x2="${ox}" y2="${Py.toFixed(1)}" stroke="#3fb950" stroke-width="2" marker-end="url(#arr2)" opacity=".9"/>
+      <!-- main vector -->
+      <line x1="${ox}" y1="${oy}" x2="${Px.toFixed(1)}" y2="${Py.toFixed(1)}" stroke="#f47067" stroke-width="2.5" marker-end="url(#arr2)"/>
+      <!-- labels -->
+      <text class="ts" x="${tx.toFixed(1)}" y="${ty.toFixed(1)}">${tLab}</text>
+      <text class="ts" x="${(midX+8).toFixed(1)}" y="${(midY-10).toFixed(1)}">${rLab}</text>
+      <text class="ts" x="${((ox+Px)/2-2).toFixed(1)}" y="${(oy+18).toFixed(1)}" fill="#57abff">${xLab}</text>
+      <text class="ts" x="${(ox-8).toFixed(1)}" y="${((oy+Py)/2+4).toFixed(1)}" text-anchor="end" fill="#3fb950">${yLab}</text>
+    </svg>`;
+  }
+
+  function draw3D(q,revealed){
+    const ox=320, oy=280;
+    const scale=155/Math.max(q.full.r,0.1);
+    const xDir={x:-0.866,y:0.5}, yDir={x:0.940,y:0.342}, zDir={x:0,y:-1};
+    function proj(x,y,z){
+      return {
+        x:ox+x*scale*xDir.x+y*scale*yDir.x+z*scale*zDir.x,
+        y:oy+x*scale*xDir.y+y*scale*yDir.y+z*scale*zDir.y
+      };
+    }
+    const AXIS=210;
+    const xEnd={x:ox+AXIS*xDir.x,y:oy+AXIS*xDir.y};
+    const yEnd={x:ox+AXIS*yDir.x,y:oy+AXIS*yDir.y};
+    const zEnd={x:ox+AXIS*zDir.x,y:oy+AXIS*zDir.y};
+    const A=proj(q.full.x,0,0);
+    const B=proj(q.full.x,q.full.y,0);
+    const P=proj(q.full.x,q.full.y,q.full.z);
+    const thetaArc=dirArc(ox,oy,42,{x:B.x-ox,y:B.y-oy},{x:P.x-ox,y:P.y-oy},14);
+    const alphaArc=dirArc(ox,oy,26,xDir,{x:B.x-ox,y:B.y-oy},14);
+    const showX=q.given.indexOf('x')>=0||revealed;
+    const showY=q.given.indexOf('y')>=0||revealed;
+    const showZ=q.given.indexOf('z')>=0||revealed;
+    const showR=q.given.indexOf('r')>=0||revealed;
+    const showT=q.given.indexOf('theta')>=0||revealed;
+    const showA=q.given.indexOf('alpha')>=0||revealed;
+    const xLab=showX?('x='+fmt1(q.full.x)):'x=?';
+    const yLab=showY?('y='+fmt1(q.full.y)):'y=?';
+    const zLab=showZ?('z='+fmt1(q.full.z)):'z=?';
+    const rLab=showR?('r='+fmt1(q.full.r)):'r=?';
+    const tLab=showT?('θ='+Math.round(q.full.theta)+'°'):'θ=?';
+    const aLab=showA?('α='+Math.round(q.full.alpha)+'°'):'α=?';
+    const midOA={x:(ox+A.x)/2,y:(oy+A.y)/2};
+    const midAB={x:(A.x+B.x)/2,y:(A.y+B.y)/2};
+    const midBP={x:(B.x+P.x)/2,y:(B.y+P.y)/2};
+    const midOP={x:(ox+P.x)/2,y:(oy+P.y)/2};
+
+    return `<svg width="100%" viewBox="0 0 680 480" role="img" style="background:#0d1117;border-radius:6px;">
+      <title>3D vector decomposition diagram</title>
+      <defs>
+        <marker id="arr3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <!-- axes -->
+      <line x1="${ox}" y1="${oy}" x2="${xEnd.x.toFixed(1)}" y2="${xEnd.y.toFixed(1)}" stroke="#57abff" stroke-width="1.3" marker-end="url(#arr3)" opacity=".6"/>
+      <line x1="${ox}" y1="${oy}" x2="${yEnd.x.toFixed(1)}" y2="${yEnd.y.toFixed(1)}" stroke="#3fb950" stroke-width="1.3" marker-end="url(#arr3)" opacity=".6"/>
+      <line x1="${ox}" y1="${oy}" x2="${zEnd.x.toFixed(1)}" y2="${zEnd.y.toFixed(1)}" stroke="#e3b341" stroke-width="1.3" marker-end="url(#arr3)" opacity=".6"/>
+      <text class="t" x="${(xEnd.x-8).toFixed(1)}" y="${(xEnd.y+16).toFixed(1)}" fill="#57abff">x</text>
+      <text class="t" x="${(yEnd.x+8).toFixed(1)}" y="${(yEnd.y+4).toFixed(1)}" fill="#3fb950">y</text>
+      <text class="t" x="${(zEnd.x-4).toFixed(1)}" y="${(zEnd.y-8).toFixed(1)}" fill="#e3b341">z</text>
+      <!-- component dashed lines -->
+      <line x1="${ox}" y1="${oy}" x2="${A.x.toFixed(1)}" y2="${A.y.toFixed(1)}" stroke="#57abff" stroke-width="1.8" stroke-dasharray="5 4"/>
+      <line x1="${A.x.toFixed(1)}" y1="${A.y.toFixed(1)}" x2="${B.x.toFixed(1)}" y2="${B.y.toFixed(1)}" stroke="#3fb950" stroke-width="1.8" stroke-dasharray="5 4"/>
+      <line x1="${B.x.toFixed(1)}" y1="${B.y.toFixed(1)}" x2="${P.x.toFixed(1)}" y2="${P.y.toFixed(1)}" stroke="#e3b341" stroke-width="1.8" stroke-dasharray="5 4"/>
+      <!-- xy projection -->
+      <line x1="${ox}" y1="${oy}" x2="${B.x.toFixed(1)}" y2="${B.y.toFixed(1)}" stroke="#484f58" stroke-width="1" stroke-dasharray="2 5"/>
+      <!-- angle arcs -->
+      <path d="${thetaArc}" fill="none" stroke="#e3b341" stroke-width="1.1" opacity=".8"/>
+      <path d="${alphaArc}" fill="none" stroke="#57abff" stroke-width="1.1" opacity=".8"/>
+      <!-- main vector -->
+      <line x1="${ox}" y1="${oy}" x2="${P.x.toFixed(1)}" y2="${P.y.toFixed(1)}" stroke="#f47067" stroke-width="2.8" marker-end="url(#arr3)"/>
+      <!-- labels -->
+      <text class="ts" x="${(midOA.x-6).toFixed(1)}" y="${(midOA.y+14).toFixed(1)}" fill="#57abff">${xLab}</text>
+      <text class="ts" x="${(midAB.x+8).toFixed(1)}" y="${(midAB.y+2).toFixed(1)}" fill="#3fb950">${yLab}</text>
+      <text class="ts" x="${(midBP.x+8).toFixed(1)}" y="${midBP.y.toFixed(1)}" fill="#e3b341">${zLab}</text>
+      <text class="ts" x="${(midOP.x+10).toFixed(1)}" y="${(midOP.y-6).toFixed(1)}" fill="#f47067">${rLab}</text>
+      <text class="ts" x="${ox+48}" y="${oy-16}" fill="#e3b341">${tLab}</text>
+      <text class="ts" x="${ox-22}" y="${oy+24}" fill="#57abff">${aLab}</text>
+    </svg>`;
+  }
+
+  function promptText(q){
+    if(q.dim===2) return q.mode==='toXY'
+      ? 'Given the magnitude <b>r</b> and angle <b>θ</b>, find the x and y components.'
+      : 'Given the <b>x</b> and <b>y</b> components, find the magnitude <b>r</b> and angle <b>θ</b>.';
+    return q.mode==='toXYZ'
+      ? 'Given <b>r</b>, <b>θ</b> and <b>α</b>, find the x, y and z components.'
+      : 'Given the <b>x</b>, <b>y</b> and <b>z</b> components, find <b>r</b>, <b>θ</b> and <b>α</b>.';
+  }
+
+  function renderChips(q){
+    return '<div class="chips">'+q.given.map(function(f){
+      return '<span class="chip">'+fieldLabel(f)+' = '+fieldValue(q,f)+'</span>';
+    }).join('')+'</div>';
+  }
+
+  function renderInputs(q){
+    return '<div class="inputs">'+q.ask.map(function(f){
+      const isAngle=(f==='theta'||f==='alpha');
+      const step=isAngle?'1':'0.1';
+      const unit=isAngle?'°':'units';
+      let fb='';
+      if(state.answered){
+        const ok=state.lastResults[f];
+        fb='<i class="ti '+(ok?'ti-check fb-ok':'ti-x fb-bad')+'" aria-hidden="true"></i>';
+      }
+      return '<div class="field-row"><span class="field-label">'+fieldLabel(f)+' =</span>'+
+        '<input type="number" step="'+step+'" id="inp-'+f+'"'+(state.answered?' disabled':'')+' />'+
+        '<span class="unit">'+unit+'</span>'+fb+'</div>';
+    }).join('')+'</div>';
+  }
+
+  function renderFeedback(q){
+    const allOk=q.ask.every(function(f){ return state.lastResults[f]; });
+    if(allOk){
+      return '<div class="feedback ok"><i class="ti ti-check"></i> All correct — great work!</div>';
+    }
+    const lines=q.ask.map(function(f){ return fieldLabel(f)+' = '+fieldValue(q,f); }).join(' · ');
+    return '<div class="feedback bad"><strong>Not quite.</strong><div class="correct-vals">Correct: '+lines+'</div></div>';
+  }
+
+  function renderHint(q){
+    let formula='';
+    if(q.dim===2){
+      formula=q.mode==='toXY'?
+        'x = r · cos θ<br>y = r · sin θ':
+        'r = √(x² + y²)<br>θ = tan⁻¹(y / x)';
+    } else {
+      formula=q.mode==='toXYZ'?
+        'x = r · cos θ · cos α<br>y = r · cos θ · sin α<br>z = r · sin θ':
+        'r = √(x² + y² + z²)<br>θ = sin⁻¹(z / r)<br>α = tan⁻¹(y / x)';
+    }
+    return '<div class="hint-box"><div class="formula">'+formula+'</div></div>';
+  }
+
+  function renderComplete(s){
+    const pct=Math.round(100*s.score/s.qs.length);
+    return '<div class="complete">'+
+      '<div class="big-score">'+pct+'%</div>'+
+      '<p>You scored '+s.score+' of '+s.qs.length+' questions correctly.</p>'+
+      '<button class="primary" onclick="restartSection()"><i class="ti ti-refresh"></i> Try again</button>'+
+      '</div>';
+  }
+
+  function render(){
+    document.getElementById('tab-2d').className='tab-btn'+(state.section==='2d'?' tab-active':'');
+    document.getElementById('tab-3d').className='tab-btn'+(state.section==='3d'?' tab-active':'');
+    const s=currentSet();
+    const app=document.getElementById('app');
+    if(s.idx>=s.qs.length){ app.innerHTML=renderComplete(s); return; }
+    const q=s.qs[s.idx];
+    const answeredCount=state.answered?s.idx+1:s.idx;
+    const pct=Math.round(100*s.idx/s.qs.length);
+
+    let html='';
+    /* meta row */
+    html+='<div class="meta-row">'+
+      '<span class="q-counter">Q '+(s.idx+1)+' / '+s.qs.length+'</span>'+
+      '<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:'+pct+'%"></div></div>'+
+      '<span class="score-badge">'+s.score+' / '+answeredCount+'</span>'+
+      '</div>';
+
+    if(q.dim===3){
+      html+='<p class="note-text">θ is from the x-y plane to the vector · α is from the x-axis to the vector\'s projection on x-y</p>';
+    }
+
+    html+='<div class="diagram-wrap">'+( q.dim===2 ? draw2D(q,state.answered) : draw3D(q,state.answered) )+'</div>';
+    html+='<p class="prompt-text">'+promptText(q)+'</p>';
+    html+=renderChips(q);
+    html+=renderInputs(q);
+
+    html+='<div class="btn-row">';
+    html+='<button onclick="toggleHint()"><i class="ti ti-bulb"></i>'+(state.hint?'Hide formula':'Show formula')+'</button>';
+    if(!state.answered){
+      html+='<button class="primary" onclick="checkAnswer()"><i class="ti ti-check"></i>Check answer</button>';
+    } else {
+      html+='<button class="primary" onclick="nextQuestion()">Next question<i class="ti ti-arrow-right"></i></button>';
+    }
+    html+='</div>';
+    if(state.hint) html+=renderHint(q);
+    if(state.answered) html+=renderFeedback(q);
+
+    app.innerHTML=html;
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
