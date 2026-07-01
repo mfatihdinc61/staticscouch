@@ -33,7 +33,6 @@ An AI-powered Statics practice platform that automatically grades handwritten en
 
 ### AI Feedback
 
-![Feedback Page](ss/ss1.png)
 ![Feedback Page](ss/ss2.png)
 
 
